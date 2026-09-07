@@ -3,7 +3,8 @@ import { __ } from '@wordpress/i18n';
 import * as Icon from '../../components/icons.jsx';
 import ScreenHead from '../../components/ScreenHead.jsx';
 import { Alert, Button } from '../../design-system';
-import { getBoot } from '../../lib/api.js';
+import { getBoot, getQuery } from '../../lib/api.js';
+import DeployProgress from './DeployProgress.jsx';
 
 /**
  * Sync with Astro — the merged Hatch runtime, hosted in this content area.
@@ -154,6 +155,32 @@ export default function SyncAstro() {
   const hatch = boot?.hatch || { available: false };
 
   /*
+   * A deploy in flight takes over the screen.
+   *
+   * PHP put these on the URL when it intercepted the hand-off to the broker
+   * (Uich_Hatch_Deploy::takeover_url) — it started the build server-side and
+   * sent the browser back here instead of off-site. Held in state rather than
+   * read live so dismissing a failed deploy does not immediately re-trigger it
+   * from the query string still sitting in the address bar.
+   */
+  const [ deploy, setDeploy ] = useState( () => {
+    const ticket = getQuery( 'uich_hatch_deploy' );
+    const provider = getQuery( 'uich_hatch_provider' );
+    return ticket && provider ? { ticket, provider } : null;
+  } );
+
+  const dismissDeploy = () => {
+    setDeploy( null );
+    // Drop the args so a reload does not resurrect a finished deploy.
+    try {
+      const u = new URL( window.location.href );
+      u.searchParams.delete( 'uich_hatch_deploy' );
+      u.searchParams.delete( 'uich_hatch_provider' );
+      window.history.replaceState( {}, '', u.toString() );
+    } catch ( _ ) { /* address bar is cosmetic here */ }
+  };
+
+  /*
    * What the user asked for — this drives the frame's src, and nothing else.
    *
    * It starts on the wizard until setup has been completed, then on the admin
@@ -217,6 +244,13 @@ export default function SyncAstro() {
     'Publish this site as a static Astro frontend on Cloudflare, Vercel or your own server, and keep editing it here.',
     'uichemy'
   );
+
+  // ── A deploy is running ─────────────────────────────────────────────────
+  if ( deploy ) {
+    return (
+      <DeployProgress ticket={ deploy.ticket } provider={ deploy.provider } onDismiss={ dismissDeploy } />
+    );
+  }
 
   // ── Nothing to frame ────────────────────────────────────────────────────
   // Each branch names the actual cause, because the fixes are different: one

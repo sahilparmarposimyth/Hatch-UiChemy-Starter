@@ -248,9 +248,13 @@ if ( ! class_exists( 'Uich_Hatch_Loader' ) ) {
 			// "Sync with Astro" screen loads.
 			require_once UICH_PATH . 'includes/hatch/class-uich-hatch-embed.php';
 			require_once UICH_PATH . 'includes/hatch/class-uich-hatch-bridge.php';
+			require_once UICH_PATH . 'includes/hatch/class-uich-hatch-deploy.php';
 
 			Uich_Hatch_Embed::boot();
 			Uich_Hatch_Bridge::boot();
+			// Registers a REST route, so it boots regardless of whether this
+			// particular request is the embedded one.
+			Uich_Hatch_Deploy::boot();
 		}
 
 		/**

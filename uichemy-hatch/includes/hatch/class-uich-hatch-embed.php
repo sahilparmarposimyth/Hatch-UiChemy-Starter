@@ -291,6 +291,24 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 				return self::keep_flag_on_redirect( $location );
 			}
 
+			/*
+			 * Before anything else: can this hop be avoided entirely? The deploy
+			 * is the case that can — its build log is pollable, so the browser
+			 * has no reason to visit the broker at all. takeover_url() starts the
+			 * pipeline server-side and hands back THIS dashboard instead.
+			 *
+			 * Still routed through break_out_of_frame(), even though the
+			 * replacement is same-site: the redirect is being answered inside the
+			 * frame, and loading the dashboard there would nest a dashboard
+			 * inside a dashboard. It has to land on the top window.
+			 */
+			if ( class_exists( 'Uich_Hatch_Deploy' ) ) {
+				$inline = Uich_Hatch_Deploy::takeover_url( $location );
+				if ( is_string( $inline ) && '' !== $inline ) {
+					return self::break_out_of_frame( $inline );
+				}
+			}
+
 			// Off-site, but explicitly cleared to render inside the frame.
 			// Leave the 302 alone so the flow never leaves this screen.
 			if ( in_array( $host, self::frameable_hosts(), true ) ) {

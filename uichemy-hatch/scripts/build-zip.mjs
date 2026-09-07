@@ -81,7 +81,15 @@ const excludeAnywhere = ( rel, base ) =>
   base.endsWith( '.log' ) ||
   base.endsWith( '.map' ) ||
   // `/*.md` in .distignore — root-level markdown only.
-  ( ! rel.includes( '/' ) && base.endsWith( '.md' ) );
+  ( ! rel.includes( '/' ) && base.endsWith( '.md' ) ) ||
+  /*
+   * Root-level zips — which is exactly where THIS script writes its output.
+   * Without this a second run stages the first run's archive inside the new
+   * one and the zip doubles every build; caught at 4.7 MB -> 9.25 MB. Mirrors
+   * `/*.zip` in .gitignore, and root-level only so a zip a plugin genuinely
+   * ships from a subdirectory still travels.
+   */
+  ( ! rel.includes( '/' ) && base.endsWith( '.zip' ) );
 
 // ── Steps ──────────────────────────────────────────────────────────────────
 
@@ -273,6 +281,32 @@ function guardBundles( dest ) {
   );
 }
 
+/**
+ * The archive must not contain an archive.
+ *
+ * The output defaults to the repo root, so a previous run's zip sits right where
+ * the staging walk can pick it up — which it did, embedding a 4.7 MB archive in
+ * the next one. The exclusion above fixes that; this makes sure a later edit to
+ * the exclusion list cannot quietly bring it back.
+ */
+function guardNoNestedArchive( dest ) {
+  const found = [];
+  const walk = ( rel ) => {
+    for ( const e of fs.readdirSync( path.join( dest, rel ), { withFileTypes: true } ) ) {
+      const r = rel ? `${ rel }/${ e.name }` : e.name;
+      if ( e.isDirectory() ) walk( r );
+      else if ( /\.(zip|tar|tgz|gz)$/i.test( e.name ) ) found.push( r );
+    }
+  };
+  walk( '' );
+  if ( found.length ) {
+    throw new Error(
+      `the archive contains archives, almost certainly this script's own output:\n  ${ found.join( '\n  ' ) }`
+    );
+  }
+  return true;
+}
+
 /** Prefer `zip`; fall back to bsdtar, which ships with Windows 10+ and macOS. */
 function archive( stageParent, folder ) {
   fs.rmSync( OUT, { force: true } );
@@ -312,6 +346,7 @@ try {
   guardPhpComplete( dest );
   guardSinglePluginHeader( dest );
   guardBundles( dest );
+  guardNoNestedArchive( dest );
 
   // Not fatal: the MCP adapter loads from vendor-prefixed/ and the loader guards
   // on is_readable(), so the plugin activates and everything else works — the

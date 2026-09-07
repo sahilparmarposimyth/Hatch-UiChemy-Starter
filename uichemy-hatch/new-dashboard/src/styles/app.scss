@@ -3838,6 +3838,76 @@
        scrollbar straight back. */
   }
 
+  /* ── Inline deploy progress ───────────────────────────────────────────────
+     The build log, polled from the broker and drawn here rather than on its
+     domain. See screens/dashboard/DeployProgress.jsx. */
+  .nd-deploy {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+  }
+
+  .nd-deploy__bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  /* The spinner is the only moving thing on the screen for ~90s, so it earns
+     its own rotation rather than borrowing a button's. */
+  .nd-deploy__spin {
+    display: inline-flex;
+    color: var(--ink-3);
+  }
+
+  .nd-deploy--busy .nd-deploy__spin { animation: nd-deploy-spin 1s linear infinite; }
+  .nd-deploy--ok   .nd-deploy__spin { color: var(--uc-success, #16a34a); animation: none; }
+  .nd-deploy--bad  .nd-deploy__spin { color: var(--uc-danger, #b91c1c); animation: none; }
+
+  @keyframes nd-deploy-spin { to { transform: rotate(360deg); } }
+
+  .nd-deploy__elapsed {
+    margin-inline-start: auto;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  /* Dark on purpose, in both themes: this is build output, and a terminal that
+     looks like a terminal is read faster than one dressed as a document. It is
+     the log's own surface, not the page's, so it does not fight the palette. */
+  .nd-deploy__log {
+    margin: 0;
+    padding: 12px 14px;
+    max-height: 380px;
+    overflow: auto;
+    border-radius: var(--r-card);
+    background: #0f0f11;
+    color: #ececee;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 12px;
+    line-height: 1.65;
+    /* Long npm/astro lines wrap instead of forcing a horizontal scrollbar. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+  }
+
+  .nd-deploy__err { margin: 0; }
+
+  .nd-deploy__foot {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+
   /* Build-missing hint. `code` inside an Alert, on its own line. */
   .nd-hatch__cmd {
     display: block;
