@@ -25,7 +25,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { mkdtemp, rm, writeFile, chmod } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { imgAllowedHosts } from './img-hosts.js';
@@ -41,6 +41,23 @@ const MAX_CONCURRENT_BUILDS = Math.max(
 	parseInt(process.env.HATCH_MAX_CONCURRENT_BUILDS || '3', 10) || 3
 );
 const BUILD_TIMEOUT_MS = 10 * 60 * 1000;
+
+/*
+ * How many times to try the clone before giving up.
+ *
+ * A real deploy failed with `Failed to connect to github.com port 443 after
+ * 134096 ms` — DNS resolved, the TCP connect simply never completed — on a run
+ * whose predecessor had cloned the same repo without trouble. Flaky egress, not
+ * misconfiguration, and with one attempt every deploy is a coin toss.
+ */
+const CLONE_ATTEMPTS = 3;
+
+/*
+ * Cap on ONE clone attempt. Generous for a 32 MB shallow clone on a slow box,
+ * short enough that three attempts plus backoff still leave most of
+ * BUILD_TIMEOUT_MS for the install and the Astro build.
+ */
+const CLONE_TIMEOUT_MS = 90 * 1000;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
 
@@ -112,10 +129,18 @@ function runCmd(cmd, args, opts = {}) {
 		};
 		proc.stdout.on('data', (c) => onLine(c, false));
 		proc.stderr.on('data', (c) => onLine(c, true));
+		/*
+		 * Per-command cap, defaulting to the whole-build one. The clone needs its
+		 * own: git exposes no connect timeout, so a blackholed TCP connect to
+		 * github.com sat for 134 SECONDS on a real deploy before curl gave up.
+		 * Under the 10-minute default, three retries of that would eat most of
+		 * the build budget and still be waiting.
+		 */
+		const limitMs = opts.timeoutMs || BUILD_TIMEOUT_MS;
 		const killer = setTimeout(() => {
 			proc.kill('SIGKILL');
-			reject(new Error(`Timeout after ${BUILD_TIMEOUT_MS / 1000}s: ${cmd} ${args.join(' ')}`));
-		}, BUILD_TIMEOUT_MS);
+			reject(new Error(`Timeout after ${limitMs / 1000}s: ${cmd} ${args.join(' ')}`));
+		}, limitMs);
 		proc.on('close', (code) => {
 			clearTimeout(killer);
 			if (code === 0) resolve({ stdout, stderr });
@@ -188,7 +213,34 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 		workDir = await mkdtemp(path.join(tmpdir(), 'hatch-cf-'));
 
 		progress(`🐙 Cloning ${redactRepoUrl(HATCH_REPO)} (branch ${HATCH_BRANCH})…`);
-		await runCmd('git', ['clone', '--depth', '1', '--branch', HATCH_BRANCH, HATCH_REPO, workDir], { onProgress: progress });
+		/*
+		 * Two different stalls, two different guards. http.lowSpeedLimit/Time
+		 * covers a transfer that starts and then crawls — git aborts once it sits
+		 * under 1 KB/s for 30s. It does NOT cover a connect that never completes,
+		 * which is the failure actually seen, because git exposes no connect
+		 * timeout at all. That is what timeoutMs is for.
+		 *
+		 * workDir is recreated between attempts: git leaves a partial tree behind
+		 * often enough, and `git clone` into a non-empty directory fails outright,
+		 * which would turn one flaky attempt into a guaranteed failure.
+		 */
+		for (let attempt = 1; ; attempt++) {
+			try {
+				await runCmd('git', [
+					'-c', 'http.lowSpeedLimit=1000',
+					'-c', 'http.lowSpeedTime=30',
+					'clone', '--depth', '1', '--single-branch',
+					'--branch', HATCH_BRANCH, HATCH_REPO, workDir,
+				], { onProgress: progress, timeoutMs: CLONE_TIMEOUT_MS });
+				break;
+			} catch (err) {
+				if (attempt >= CLONE_ATTEMPTS) throw err;
+				progress(`⚠️  Clone attempt ${attempt} of ${CLONE_ATTEMPTS} failed, retrying…`);
+				await rm(workDir, { recursive: true, force: true });
+				await mkdir(workDir, { recursive: true });
+				await new Promise((resolve) => setTimeout(resolve, attempt * 5000));
+			}
+		}
 
 		const astroDir = path.join(workDir, 'astro-starter');
 
