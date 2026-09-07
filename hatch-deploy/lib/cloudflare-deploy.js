@@ -210,7 +210,26 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 		await chmod(path.join(astroDir, '.env'), 0o600);
 
 		progress('📦 Installing dependencies (npm install)…');
-		await runCmd('npm', ['install', '--no-audit', '--no-fund', '--prefer-offline'], { cwd: astroDir, onProgress: progress });
+		/*
+		 * Retries matter more here than they look. A cold container has no npm
+		 * cache, so this pulls the whole Astro dependency tree over the network on
+		 * every deploy, and a single reset kills the build — the first real deploy
+		 * on Render died with `npm error code ECONNRESET / network aborted` partway
+		 * through. npm defaults to 2 retries with a short ceiling, which is not
+		 * enough on a small managed instance.
+		 *
+		 * --prefer-offline is dropped: there is no cache to prefer in a fresh
+		 * container, and it only obscures what the install is actually doing.
+		 */
+		await runCmd('npm', [
+			'install',
+			'--no-audit',
+			'--no-fund',
+			'--fetch-retries=5',
+			'--fetch-retry-mintimeout=20000',
+			'--fetch-retry-maxtimeout=120000',
+			'--fetch-timeout=600000',
+		], { cwd: astroDir, onProgress: progress });
 
 		progress('🏗️  Building Astro (HATCH_TARGET=cf)…');
 		// v0.49.2 — pass WP creds in subprocess env so Vite's `define` block

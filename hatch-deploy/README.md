@@ -31,7 +31,7 @@ build page render inside the dashboard rather than taking over the tab.
 
 | Need | Why |
 |---|---|
-| **Node ≥ 20** | `engines` in package.json |
+| **Node ≥ 22** | `engines` in package.json. Not 20: the starter's `astro ^7` declares `node: >=22.12.0`, so a Node 20 box installs fine and then fails every deploy with `EBADENGINE` |
 | **git** | `git clone --depth 1 --branch $HATCH_BRANCH $HATCH_REPO` |
 | **npm + registry access** | runs `npm install` and `npm run build` in `astro-starter/` per deploy |
 | **`npx` able to fetch packages** | pulls `vercel` and `wrangler@latest` at deploy time — they are **not** dependencies |
@@ -50,7 +50,7 @@ can do:
 sudo bash deploy/install.sh
 ```
 
-It checks Node ≥ 20, git, and — importantly — that the box can reach the npm
+It checks Node ≥ 22, git, and — importantly — that the box can reach the npm
 registry, because every deploy fetches `vercel` / `wrangler` through `npx`; a box
 without that egress clones and builds fine, then fails at upload. Then it creates
 a `hatch` service user, installs dependencies, writes a starter `.env` (mode 600,

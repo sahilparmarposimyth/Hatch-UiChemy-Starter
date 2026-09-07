@@ -28,11 +28,11 @@ die() { printf '\n\033[31m✗ %s\033[0m\n\n' "$*" >&2; exit 1; }
 say "Checking prerequisites"
 
 command -v git >/dev/null || die "git is missing. apt-get install -y git"
-command -v node >/dev/null || die "node is missing. Install Node 20+ (e.g. via nodesource) and re-run."
+command -v node >/dev/null || die "node is missing. Install Node 22+ (e.g. via nodesource) and re-run."
 command -v npm  >/dev/null || die "npm is missing."
 
 NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
-[ "$NODE_MAJOR" -ge 20 ] || die "Node $NODE_MAJOR found; the broker needs >= 20 (package.json engines)."
+[ "$NODE_MAJOR" -ge 22 ] || die "Node $NODE_MAJOR found. The broker itself runs on 20, but the Astro starter it builds needs >= 22.12 (astro ^7), so a 20 box installs and then fails every deploy with EBADENGINE."
 
 # Every deploy shells out to `npx vercel` / `npx wrangler@latest`, which are NOT
 # dependencies — they are fetched at build time. A box that cannot reach the npm

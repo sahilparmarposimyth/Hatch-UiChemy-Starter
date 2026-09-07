@@ -1,9 +1,14 @@
 # Hatch deploy broker.
 #
+# Node 22, not 20: the Astro starter this builds depends on astro ^7, which
+# declares `node: >=22.12.0`. On 20 every dependency install printed EBADENGINE
+# and the build then ran on an engine none of them support. sharp is N-API so
+# the bump does not affect it; 24 is avoided only because sharp 0.33 predates it.
+#
 # Debian slim, not Alpine: `sharp` ships prebuilt glibc binaries, and on musl it
 # has to compile from source (or silently fall back), which turns a 20-second
 # image build into a long one for no gain.
-FROM node:20-slim
+FROM node:22-slim
 
 # The broker is a build machine. It shells out at DEPLOY time, so these are
 # runtime dependencies, not build ones:
