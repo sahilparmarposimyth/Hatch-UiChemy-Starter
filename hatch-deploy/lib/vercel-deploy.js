@@ -58,6 +58,16 @@ const CLONE_ATTEMPTS = 3;
  * BUILD_TIMEOUT_MS for the install and the Astro build.
  */
 const CLONE_TIMEOUT_MS = 90 * 1000;
+
+/*
+ * How many times to try the dependency install.
+ *
+ * `npm error network aborted` with ECONNRESET is a socket torn down MID-STREAM,
+ * which npm treats as fatal — --fetch-retries governs request retries and never
+ * gets a look in, which is why adding it changed nothing. The retry has to wrap
+ * the whole command.
+ */
+const INSTALL_ATTEMPTS = 3;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
 
@@ -248,25 +258,52 @@ export async function deployToVercel({ ticket, vercelToken, onProgress }) {
 
 		progress('📦 Installing dependencies (npm install)…');
 		/*
-		 * Retries matter more here than they look. A cold container has no npm
-		 * cache, so this pulls the whole Astro dependency tree over the network on
-		 * every deploy, and a single reset kills the build — the first real deploy
-		 * on Render died with `npm error code ECONNRESET / network aborted` partway
-		 * through. npm defaults to 2 retries with a short ceiling, which is not
-		 * enough on a small managed instance.
+		 * A cold container has no npm cache, so this pulls the whole Astro
+		 * dependency tree over the network on every deploy — and on this instance
+		 * it kept dying with `npm error code ECONNRESET / npm error network
+		 * aborted`.
 		 *
-		 * --prefer-offline is dropped: there is no cache to prefer in a fresh
-		 * container, and it only obscures what the install is actually doing.
+		 * My first pass added --fetch-retries here and it changed nothing, for a
+		 * reason worth recording: `network aborted` is a socket torn down
+		 * MID-STREAM, and npm treats that as fatal. --fetch-retries governs
+		 * retrying a *request*, so it never got a look in. The retry has to wrap
+		 * the whole command, which is what the loop below does.
+		 *
+		 * --prefer-offline is dropped: there is no cache to prefer on the first
+		 * attempt, and it only obscures what the install is doing.
 		 */
-		await runCmd('npm', [
-			'install',
-			'--no-audit',
-			'--no-fund',
-			'--fetch-retries=5',
-			'--fetch-retry-mintimeout=20000',
-			'--fetch-retry-maxtimeout=120000',
-			'--fetch-timeout=600000',
-		], { cwd: astroDir, onProgress: progress });
+		for (let attempt = 1; ; attempt++) {
+			try {
+				await runCmd('npm', [
+					'install',
+					'--no-audit',
+					'--no-fund',
+					/*
+					 * Fewer parallel sockets. Concurrency is what provokes the
+					 * resets: npm opens a dozen tarball streams at once, and on
+					 * throttled egress one of them gets torn down and takes the
+					 * whole install with it.
+					 */
+					'--maxsockets=3',
+					'--fetch-retries=5',
+					'--fetch-retry-mintimeout=20000',
+					'--fetch-retry-maxtimeout=120000',
+					'--fetch-timeout=600000',
+				], { cwd: astroDir, onProgress: progress });
+				break;
+			} catch (err) {
+				if (attempt >= INSTALL_ATTEMPTS) throw err;
+				/*
+				 * Nothing is cleaned between attempts, deliberately. npm's cache
+				 * keeps every tarball it managed to finish, so attempt 2 has less
+				 * to fetch than attempt 1 and attempt 3 less again — the retries
+				 * compound instead of starting over. Wiping node_modules here
+				 * (or using `npm ci`, which does it for you) would throw that away.
+				 */
+				progress(`⚠️  npm install attempt ${attempt} of ${INSTALL_ATTEMPTS} failed — retrying, keeping what the cache already has…`);
+				await new Promise((resolve) => setTimeout(resolve, attempt * 10000));
+			}
+		}
 
 		progress('🏗️  Building Astro (HATCH_TARGET=vercel)…');
 		// v0.49.2 — pass WP creds in subprocess env so Vite's `define` block
