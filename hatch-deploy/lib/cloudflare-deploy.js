@@ -34,6 +34,35 @@ const BUILD_TIMEOUT_MS = 10 * 60 * 1000;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
 
+/**
+ * A repo URL that is safe to put in the build log.
+ *
+ * The clone URL is echoed into progress output, and that output is stored on the
+ * ticket, served by /status and rendered in the browser. A private HATCH_REPO is
+ * commonly authenticated by embedding credentials in the URL
+ * (`https://x-access-token:<token>@github.com/…`), which would therefore print
+ * the token in plaintext to anyone watching the build — including through the
+ * status API.
+ *
+ * Strips userinfo and leaves a marker so it is obvious credentials were used.
+ * scp-style SSH remotes (`git@github.com:owner/repo.git`) are not valid URLs and
+ * throw here; they carry no secret, so they pass through untouched.
+ *
+ * @param {string} u Repo URL, possibly containing credentials.
+ * @returns {string} The same URL with any username/password removed.
+ */
+function redactRepoUrl(u) {
+	try {
+		const url = new URL(String(u));
+		if (!url.username && !url.password) return String(u);
+		url.username = '';
+		url.password = '';
+		return url.toString().replace('://', '://***@');
+	} catch {
+		return String(u);
+	}
+}
+
 let activeBuilds = 0;
 const buildQueue = [];
 
@@ -148,7 +177,7 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 		progress('📁 Setting up build directory…');
 		workDir = await mkdtemp(path.join(tmpdir(), 'hatch-cf-'));
 
-		progress(`🐙 Cloning ${HATCH_REPO} (branch ${HATCH_BRANCH})…`);
+		progress(`🐙 Cloning ${redactRepoUrl(HATCH_REPO)} (branch ${HATCH_BRANCH})…`);
 		await runCmd('git', ['clone', '--depth', '1', '--branch', HATCH_BRANCH, HATCH_REPO, workDir], { onProgress: progress });
 
 		const astroDir = path.join(workDir, 'astro-starter');

@@ -126,12 +126,30 @@ HATCH_REPO=github-starter:sahilparmarposimyth/Hatch-UiChemy-Starter.git
 The host key must already be in the service user's `known_hosts` — the clone
 runs non-interactively and will hang or fail on the prompt otherwise.
 
-*Or a read-only fine-grained token over HTTPS — simpler, but it is a secret in
-an env var and it expires:*
+*Or a read-only fine-grained token over HTTPS. Simpler to set up, but it is a
+secret living in an env var, and it expires:*
 
 ```bash
 HATCH_REPO=https://x-access-token:<TOKEN>@github.com/sahilparmarposimyth/Hatch-UiChemy-Starter.git
 ```
+
+Get one at **GitHub → Settings → Developer settings → Personal access tokens →
+Fine-grained tokens → Generate new token**, then:
+
+- **Resource owner** — the account that owns the repo
+- **Repository access** — *Only select repositories* → the starter repo
+- **Permissions** — *Repository permissions → Contents: Read-only*. That is the
+  only scope a clone needs; anything more is a bigger blast radius for no gain
+- **Expiration** — it will need rotating, so put a reminder somewhere
+
+The value starts `github_pat_…` and is shown once.
+
+> The clone URL is written into the build log, which is stored on the ticket,
+> served by `/status` and rendered in the browser. A token embedded in
+> `HATCH_REPO` used to be printed there in plaintext. `redactRepoUrl()` in both
+> deploy libs now strips userinfo before logging, so it appears as
+> `https://***@github.com/…`. If you are running an older broker, do not put a
+> token in `HATCH_REPO` — use the deploy key instead.
 
 Making the repo public also works, but publishes the whole plugin source — a
 product decision, not a deployment one.
