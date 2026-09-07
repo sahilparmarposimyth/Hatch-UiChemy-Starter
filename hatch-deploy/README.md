@@ -135,7 +135,7 @@ All environment variables — nothing to edit in the source.
 | `HATCH_REPO` | `https://github.com/adityaarsharma/hatch.git` | repo the starter is cloned from |
 | `HATCH_BRANCH` | `main` | branch to clone |
 | `HATCH_MAX_CONCURRENT_BUILDS` | `3` | parallel builds; each is ~1 GB. Use `1` on a small instance |
-| `ALLOWED_IMG_ORIGINS` | *(empty)* | comma-separated allowlist for the `GET /img` proxy. Empty proxies nothing — closed by default |
+| `ALLOWED_IMG_ORIGINS` | *(empty)* | comma-separated allowlist for the `GET /img` resizer. **Empty means OPEN, not closed** — see the warning below. Set it |
 | `IMG_CACHE_MAX_BYTES` | `524288000` | image-cache ceiling, LRU-evicted. Lower it (e.g. `52428800`) on a container with modest ephemeral disk |
 | `HATCH_IMG_ALLOWED_HOSTS` | *(empty)* | Extra hosts the **deployed frontend's** `/img` proxy may fetch, on top of the built-in list in `lib/img-hosts.js`. Comma-separated, exact hostnames — the starter matches with `hosts.has(host)`, so `*.example.com` matches nothing. Written into the build's `.env` as `PUBLIC_IMG_ALLOWED_HOSTS` |
 | `HATCH_ROOT_DIR` | `astro-starter` | **leave alone** — see below |
@@ -147,6 +147,24 @@ upstream host before forwarding the resize here — and because `PUBLIC_` is
 Vite's `envPrefix`, it is inlined at build time and cannot be changed on the
 hosting provider afterwards. An empty second list is why every image on a
 UiChemy import returned `{"error":"url host not allowed"}`.
+
+> **Set `ALLOWED_IMG_ORIGINS`.** An earlier version of this file said an empty
+> value proxied nothing. That is backwards. `lib/img-proxy.js` does
+>
+> ```js
+> if (ALLOWED_ORIGINS.length === 0) return true; // open if not configured
+> ```
+>
+> so leaving it unset publishes an **open image proxy**: any caller can ask
+> `/img?url=…` for any URL and get the bytes back, resized. `http:` is
+> accepted alongside `https:` and there is no private-address filter, so on a
+> cloud host that includes `http://169.254.169.254/` — the metadata service.
+> It also makes the box a bandwidth amplifier and an IP launderer for whoever
+> finds it.
+>
+> Entries are compared as `scheme://host`, and also match as a domain suffix,
+> so `uichemy.com` covers `assets.uichemy.com`. Allow the image origins your
+> sites actually pull from and nothing else.
 
 `HATCH_ROOT_DIR` does *not* set the build directory, despite the name. It is only
 the `root-directory` value handed to Vercel's and Cloudflare's own import UIs on
