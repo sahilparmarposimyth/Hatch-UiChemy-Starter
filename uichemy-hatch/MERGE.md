@@ -137,6 +137,42 @@ the deploy finishes on `admin.php?page=hatch` full-screen rather than back insid
 the dashboard. Deliberate — a deploy is long-running and worth watching
 full-screen — but it does mean the user returns to this screen via the menu.
 
+### Keeping the deploy on this screen
+
+The broker's build page (the live terminal) *can* render in the content area, but
+only the broker can allow it. Measured, it answers:
+
+```
+x-frame-options: SAMEORIGIN
+```
+
+which instructs the browser to refuse the frame. No plugin-side code overrides a
+response header on another origin.
+
+The build is also **browser-driven** — the broker's own docblock has the browser
+load `/start`, the broker run the pipeline, then redirect the browser back to
+`hatch_deploy_callback`. So it cannot be replaced by polling: `/status?ticket=`
+returns only a terminal payload (`project_url`, `project_name`), never the log,
+and never visiting `/start` means the build never begins. Proxying the page
+through WordPress to dodge the header is possible in principle and a bad idea in
+practice — the log is streamed, its assets and its own fetches are cross-origin,
+it screen-scrapes a page we do not own, and it deliberately defeats a security
+header someone chose to set.
+
+What does work, without touching the deploy protocol at all:
+
+1. the broker stops sending `X-Frame-Options` for `/deploy/*` and sends
+   `Content-Security-Policy: frame-ancestors https://<the-wp-site>` instead —
+   scoped to the site that owns the ticket, not `*`, which it can do because it
+   already learns that origin at `/prepare` time;
+2. the site opts in via `UICH_HATCH_FRAMEABLE_HOSTS` or the
+   `uich_hatch_frameable_hosts` filter (see `Uich_Hatch_Embed::frameable_hosts()`).
+
+Then the round trip stays on this screen: the browser still loads `/start`, and
+the callback hop is same-origin so it comes back through the filters above and
+lands embedded. The allowlist ships **empty**, so until that header changes
+nothing about today's behaviour is altered.
+
 ## Plugin conflicts
 
 - **Standalone Hatch** — handled automatically. Both copies declare the same 57

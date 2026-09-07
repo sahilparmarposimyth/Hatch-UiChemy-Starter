@@ -291,7 +291,88 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 				return self::keep_flag_on_redirect( $location );
 			}
 
+			// Off-site, but explicitly cleared to render inside the frame.
+			// Leave the 302 alone so the flow never leaves this screen.
+			if ( in_array( $host, self::frameable_hosts(), true ) ) {
+				return $location;
+			}
+
 			return self::break_out_of_frame( $location );
+		}
+
+		/**
+		 * Off-site hosts allowed to stay INSIDE the frame.
+		 *
+		 * Empty by default, which is today's behaviour: every off-site hop
+		 * escapes to the top window. This exists for the one case where keeping
+		 * the flow on this screen is both wanted and safe — the Hatch deploy
+		 * broker, whose build page is the whole point of the deploy step.
+		 *
+		 * Framing it needs a change the plugin cannot make. The broker currently
+		 * answers with:
+		 *
+		 *     x-frame-options: SAMEORIGIN
+		 *
+		 * which tells the BROWSER to refuse the frame, and no plugin-side code
+		 * can override a response header on someone else's origin. Adding a host
+		 * here without that header changing simply reproduces "refused to
+		 * connect" inside the panel instead of breaking out — so this is opt-in,
+		 * per-site, and left off.
+		 *
+		 * To turn it on, the broker has to stop sending X-Frame-Options for its
+		 * deploy pages and send instead:
+		 *
+		 *     Content-Security-Policy: frame-ancestors https://<the-wp-site>
+		 *
+		 * scoped to the site that owns the ticket rather than `*` — the broker
+		 * already learns that origin at /prepare time, so it can. Then the site
+		 * opts in with either:
+		 *
+		 *     define( 'UICH_HATCH_FRAMEABLE_HOSTS', 'hatch.adityaarsharma.com' );
+		 *
+		 * or the filter, for several hosts / dynamic cases:
+		 *
+		 *     add_filter( 'uich_hatch_frameable_hosts', function ( $hosts ) {
+		 *         $hosts[] = 'hatch.adityaarsharma.com';
+		 *         return $hosts;
+		 *     } );
+		 *
+		 * Nothing else about the deploy protocol changes when it is on: the
+		 * browser still loads the broker's /start, the broker still redirects
+		 * back to `admin-post.php?action=hatch_deploy_callback`, and that hop is
+		 * same-origin so it comes back through the filters above and stays
+		 * embedded. The whole round trip just happens without leaving the screen.
+		 *
+		 * @return string[] Lower-case hostnames.
+		 */
+		private static function frameable_hosts() {
+			$hosts = array();
+
+			if ( defined( 'UICH_HATCH_FRAMEABLE_HOSTS' ) ) {
+				$hosts = explode( ',', (string) UICH_HATCH_FRAMEABLE_HOSTS );
+			}
+
+			/**
+			 * Filter the off-site hosts that may render inside the embedded
+			 * Hatch frame instead of taking over the top window.
+			 *
+			 * Only add a host that actually permits framing from this site (see
+			 * frameable_hosts() for the header it has to send) — otherwise the
+			 * browser refuses the frame and the panel shows its error page.
+			 *
+			 * @param string[] $hosts Hostnames, no scheme.
+			 */
+			$hosts = (array) apply_filters( 'uich_hatch_frameable_hosts', $hosts );
+
+			$clean = array();
+			foreach ( $hosts as $host ) {
+				$host = strtolower( trim( (string) $host ) );
+				if ( '' !== $host ) {
+					$clean[] = $host;
+				}
+			}
+
+			return array_values( array_unique( $clean ) );
 		}
 
 		/**
