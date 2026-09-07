@@ -1,0 +1,44 @@
+# Reverse proxy for the Hatch deploy broker.
+#
+# Copy to /etc/nginx/sites-available/hatch-deploy, symlink into sites-enabled,
+# swap the server_name, then:
+#   sudo nginx -t && sudo systemctl reload nginx
+#   sudo certbot --nginx -d deploy.example.com
+#
+# On RunCloud/Ploi/Forge do NOT use this file — those panels generate and
+# overwrite their own vhosts. Create a Web Application for the domain in the
+# panel and point it at 127.0.0.1:3000 there.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name deploy.example.com;
+
+    # certbot --nginx rewrites this block for TLS and adds the redirect.
+    # Until then the broker is reachable over plain HTTP, which is NOT safe to
+    # point WordPress at: /prepare carries an Application Password and a cloud
+    # provider token.
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # The build page streams its log in as it arrives. Buffering would hold
+        # it back and make a running build look frozen.
+        proxy_buffering off;
+
+        # /build returns as soon as the pipeline is queued, but leave headroom
+        # for a slow upstream rather than surfacing a 504 mid-deploy.
+        proxy_connect_timeout 15s;
+        proxy_read_timeout    120s;
+        proxy_send_timeout    120s;
+    }
+
+    # Nothing here is large; the API bodies are a few KB.
+    client_max_body_size 2m;
+}

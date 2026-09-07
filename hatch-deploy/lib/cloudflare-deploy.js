@@ -28,11 +28,50 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { imgAllowedHosts } from './img-hosts.js';
 
-const MAX_CONCURRENT_BUILDS = 3;
+/*
+ * Each concurrent build is its own `npm install` + `astro build`, which is
+ * roughly a gigabyte of RAM and a node_modules tree on disk. Three is right for
+ * a 4 GB VPS and will OOM a 512 MB container, so it is settable — a small
+ * managed instance should run 1.
+ */
+const MAX_CONCURRENT_BUILDS = Math.max(
+	1,
+	parseInt(process.env.HATCH_MAX_CONCURRENT_BUILDS || '3', 10) || 3
+);
 const BUILD_TIMEOUT_MS = 10 * 60 * 1000;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
+
+/**
+ * A repo URL that is safe to put in the build log.
+ *
+ * The clone URL is echoed into progress output, and that output is stored on the
+ * ticket, served by /status and rendered in the browser. A private HATCH_REPO is
+ * commonly authenticated by embedding credentials in the URL
+ * (`https://x-access-token:<token>@github.com/…`), which would therefore print
+ * the token in plaintext to anyone watching the build — including through the
+ * status API.
+ *
+ * Strips userinfo and leaves a marker so it is obvious credentials were used.
+ * scp-style SSH remotes (`git@github.com:owner/repo.git`) are not valid URLs and
+ * throw here; they carry no secret, so they pass through untouched.
+ *
+ * @param {string} u Repo URL, possibly containing credentials.
+ * @returns {string} The same URL with any username/password removed.
+ */
+function redactRepoUrl(u) {
+	try {
+		const url = new URL(String(u));
+		if (!url.username && !url.password) return String(u);
+		url.username = '';
+		url.password = '';
+		return url.toString().replace('://', '://***@');
+	} catch {
+		return String(u);
+	}
+}
 
 let activeBuilds = 0;
 const buildQueue = [];
@@ -148,7 +187,7 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 		progress('📁 Setting up build directory…');
 		workDir = await mkdtemp(path.join(tmpdir(), 'hatch-cf-'));
 
-		progress(`🐙 Cloning ${HATCH_REPO} (branch ${HATCH_BRANCH})…`);
+		progress(`🐙 Cloning ${redactRepoUrl(HATCH_REPO)} (branch ${HATCH_BRANCH})…`);
 		await runCmd('git', ['clone', '--depth', '1', '--branch', HATCH_BRANCH, HATCH_REPO, workDir], { onProgress: progress });
 
 		const astroDir = path.join(workDir, 'astro-starter');
@@ -160,6 +199,11 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 			`WP_API_PASS=${ticket.wp_pass}`,
 			`HATCH_WEBHOOK_SECRET=${ticket.webhook_secret}`,
 			`PUBLIC_SITE_URL=https://placeholder.workers.dev`,
+			// Hosts the deployed frontend's /img proxy may fetch from. Build-time
+			// only: PUBLIC_ is Vite's envPrefix, so this is inlined into the bundle
+			// and cannot be changed on the host afterwards. Empty here is what made
+			// every template-CDN image 400 with "url host not allowed".
+			`PUBLIC_IMG_ALLOWED_HOSTS=${imgAllowedHosts(ticket)}`,
 			``,
 		].join('\n');
 		await writeFile(path.join(astroDir, '.env'), envContent);
@@ -183,6 +227,7 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 				WP_API_USER:           ticket.wp_user,
 				WP_API_PASS:           ticket.wp_pass,
 				HATCH_WEBHOOK_SECRET:  ticket.webhook_secret,
+				PUBLIC_IMG_ALLOWED_HOSTS: imgAllowedHosts(ticket),
 			},
 			onProgress: progress,
 		});
