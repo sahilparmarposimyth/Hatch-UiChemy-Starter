@@ -212,6 +212,21 @@ class Hatch_Deploy_Broker {
 			15 * MINUTE_IN_SECONDS
 		);
 
+		/**
+		 * Fires once the broker has accepted the request and issued a ticket,
+		 * immediately before the browser is sent to the broker.
+		 *
+		 * The broker's reply describes what it can do — `frameable` says its
+		 * build page permits being embedded — and this is the only moment that
+		 * information exists, since the very next statement leaves the request.
+		 * A host embedding this admin uses it to decide whether the deploy can
+		 * stay inside its frame or has to take over the tab.
+		 *
+		 * @param array  $data     Decoded broker response. Always has `ticket`.
+		 * @param string $provider Provider key, e.g. 'vercel'.
+		 */
+		do_action( 'hatch_deploy_prepared', is_array( $data ) ? $data : array(), $provider );
+
 		// Send the browser to the broker's live-log page.
 		$start_url = self::base_url() . '/deploy/' . $provider . '/start?ticket=' . rawurlencode( (string) $data['ticket'] );
 		wp_redirect( $start_url );

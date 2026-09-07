@@ -303,42 +303,40 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 		/**
 		 * Off-site hosts allowed to stay INSIDE the frame.
 		 *
-		 * Empty by default, which is today's behaviour: every off-site hop
-		 * escapes to the top window. This exists for the one case where keeping
-		 * the flow on this screen is both wanted and safe — the Hatch deploy
-		 * broker, whose build page is the whole point of the deploy step.
+		 * Empty by default. Every off-site hop escapes to the top window unless
+		 * something puts its host on this list, because a page that forbids
+		 * framing renders the browser's "refused to connect" rather than
+		 * anything useful.
 		 *
-		 * Framing it needs a change the plugin cannot make. The broker currently
-		 * answers with:
+		 * The deploy broker is normally added here for the duration of one hop,
+		 * by Uich_Hatch_Bridge::on_deploy_prepared(), and only because the broker
+		 * said it would work: its /prepare reply carries `frameable`, which it
+		 * sends when its build page emits
 		 *
-		 *     x-frame-options: SAMEORIGIN
+		 *     Content-Security-Policy: frame-ancestors <this site>
 		 *
-		 * which tells the BROWSER to refuse the frame, and no plugin-side code
-		 * can override a response header on someone else's origin. Adding a host
-		 * here without that header changing simply reproduces "refused to
-		 * connect" inside the panel instead of breaking out — so this is opt-in,
-		 * per-site, and left off.
+		 * scoped to the site that owns the ticket, never `*`. A broker that
+		 * predates that simply omits the flag and the deploy keeps taking over
+		 * the tab, so there is no version to sniff and nothing to regress.
 		 *
-		 * To turn it on, the broker has to stop sending X-Frame-Options for its
-		 * deploy pages and send instead:
+		 * (`frame-ancestors` rather than removing the `X-Frame-Options:
+		 * SAMEORIGIN` the edge in front of the broker adds: per the CSP spec, a
+		 * response carrying frame-ancestors makes the browser ignore
+		 * X-Frame-Options outright. So it works with that header still there.)
 		 *
-		 *     Content-Security-Policy: frame-ancestors https://<the-wp-site>
+		 * The constant and the filter below stay for the cases negotiation
+		 * cannot cover — a self-hosted broker behind a proxy that strips the
+		 * header, or some other off-site step that turns out to be frameable:
 		 *
-		 * scoped to the site that owns the ticket rather than `*` — the broker
-		 * already learns that origin at /prepare time, so it can. Then the site
-		 * opts in with either:
-		 *
-		 *     define( 'UICH_HATCH_FRAMEABLE_HOSTS', 'hatch.adityaarsharma.com' );
-		 *
-		 * or the filter, for several hosts / dynamic cases:
+		 *     define( 'UICH_HATCH_FRAMEABLE_HOSTS', 'deploy.example.com' );
 		 *
 		 *     add_filter( 'uich_hatch_frameable_hosts', function ( $hosts ) {
-		 *         $hosts[] = 'hatch.adityaarsharma.com';
+		 *         $hosts[] = 'deploy.example.com';
 		 *         return $hosts;
 		 *     } );
 		 *
-		 * Nothing else about the deploy protocol changes when it is on: the
-		 * browser still loads the broker's /start, the broker still redirects
+		 * Nothing about the deploy protocol changes when a host is on the list:
+		 * the browser still loads the broker's /start, the broker still redirects
 		 * back to `admin-post.php?action=hatch_deploy_callback`, and that hop is
 		 * same-origin so it comes back through the filters above and stays
 		 * embedded. The whole round trip just happens without leaving the screen.

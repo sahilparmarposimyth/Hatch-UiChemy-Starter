@@ -44,6 +44,59 @@ if ( ! class_exists( 'Uich_Hatch_Bridge' ) ) {
 			// rewrite rules; without this the cron keeps firing every hour after
 			// the merged plugin has been switched off.
 			register_deactivation_hook( UICH_FILE, array( __CLASS__, 'on_host_deactivation' ) );
+
+			// Keeps the deploy inside the "Sync with Astro" frame when the
+			// broker says its build page can be embedded. See below.
+			add_action( 'hatch_deploy_prepared', array( __CLASS__, 'on_deploy_prepared' ), 10, 1 );
+		}
+
+		/**
+		 * Keep the deploy on this screen when the broker allows it.
+		 *
+		 * The deploy hands off to the broker's live-log page on another origin.
+		 * Uich_Hatch_Embed sends off-site hops to the top window by default,
+		 * because a page that forbids framing shows the browser's "refused to
+		 * connect" instead of anything useful — which is exactly what this page
+		 * did before the broker learned to permit it.
+		 *
+		 * So the broker now says so, and this listens rather than assumes. The
+		 * `frameable` flag on the /prepare reply is what a broker that emits
+		 * `Content-Security-Policy: frame-ancestors <this site>` sends; a broker
+		 * that predates it simply omits the key, this returns early, and the
+		 * deploy keeps taking over the tab as it does today. Version sniffing
+		 * would have had to guess; this cannot be wrong.
+		 *
+		 * Registered for THIS request only. The filter is added while
+		 * handle_start_deploy() is mid-flight, one statement before it redirects,
+		 * so it lives exactly as long as the hop it authorises.
+		 *
+		 * @param array $data Decoded broker /prepare response.
+		 * @return void
+		 */
+		public static function on_deploy_prepared( $data ) {
+			if ( empty( $data['frameable'] ) ) {
+				return;
+			}
+			if ( ! class_exists( 'Hatch_Deploy_Broker' ) || ! method_exists( 'Hatch_Deploy_Broker', 'base_url' ) ) {
+				return;
+			}
+
+			// Read from the broker client rather than hard-coding a hostname, so
+			// a site pointed at its own broker via HATCH_DEPLOY_BROKER_URL is
+			// covered too — and so this can never authorise a host the deploy is
+			// not actually about to visit.
+			$host = strtolower( (string) wp_parse_url( Hatch_Deploy_Broker::base_url(), PHP_URL_HOST ) );
+			if ( '' === $host ) {
+				return;
+			}
+
+			add_filter(
+				'uich_hatch_frameable_hosts',
+				static function ( $hosts ) use ( $host ) {
+					$hosts[] = $host;
+					return $hosts;
+				}
+			);
 		}
 
 		/**

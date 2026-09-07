@@ -139,15 +139,32 @@ full-screen — but it does mean the user returns to this screen via the menu.
 
 ### Keeping the deploy on this screen
 
-The broker's build page (the live terminal) *can* render in the content area, but
-only the broker can allow it. Measured, it answers:
+The broker's build page (the live terminal) renders in the content area, and both
+halves of that live in this monorepo — the broker is `hatch-deploy/server.js`.
+
+The edge in front of it adds `x-frame-options: SAMEORIGIN`, which instructs the
+browser to refuse the frame, and no plugin-side code can override a response
+header on another origin. But it does not need removing: per the CSP spec, a
+response carrying `frame-ancestors` makes the browser **ignore** X-Frame-Options
+altogether. So `allowFramingFrom()` in the broker sets
 
 ```
-x-frame-options: SAMEORIGIN
+Content-Security-Policy: frame-ancestors 'self' <the site that owns the ticket>
 ```
 
-which instructs the browser to refuse the frame. No plugin-side code overrides a
-response header on another origin.
+on `/deploy/:provider/start` and `/build` — scoped to the one origin the site
+handed over at `/prepare`, never `*`. No Cloudflare or proxy change needed.
+
+The two sides **negotiate** rather than assume. `/prepare` answers with
+`frameable: true`; Hatch fires a new `hatch_deploy_prepared` action with that
+reply one statement before it redirects, and
+`Uich_Hatch_Bridge::on_deploy_prepared()` puts the broker's host on the frameable
+list for that single hop. A broker that predates the flag omits it, the deploy
+takes over the tab exactly as before, and nothing regresses — there is no version
+to sniff.
+
+The expired/invalid-ticket replies stay deliberately unframeable: with no ticket
+there is no origin trustworthy enough to name.
 
 The build is also **browser-driven** — the broker's own docblock has the browser
 load `/start`, the broker run the pipeline, then redirect the browser back to
@@ -159,19 +176,14 @@ practice — the log is streamed, its assets and its own fetches are cross-origi
 it screen-scrapes a page we do not own, and it deliberately defeats a security
 header someone chose to set.
 
-What does work, without touching the deploy protocol at all:
+The round trip therefore stays on this screen: the browser still loads `/start`,
+and the callback hop is same-origin so it comes back through the filters above and
+lands embedded.
 
-1. the broker stops sending `X-Frame-Options` for `/deploy/*` and sends
-   `Content-Security-Policy: frame-ancestors https://<the-wp-site>` instead —
-   scoped to the site that owns the ticket, not `*`, which it can do because it
-   already learns that origin at `/prepare` time;
-2. the site opts in via `UICH_HATCH_FRAMEABLE_HOSTS` or the
-   `uich_hatch_frameable_hosts` filter (see `Uich_Hatch_Embed::frameable_hosts()`).
-
-Then the round trip stays on this screen: the browser still loads `/start`, and
-the callback hop is same-origin so it comes back through the filters above and
-lands embedded. The allowlist ships **empty**, so until that header changes
-nothing about today's behaviour is altered.
+> **Deploying the broker is a separate step.** Editing `hatch-deploy/server.js`
+> does not update the running service at `hatch.adityaarsharma.com`. Until that
+> deploys, `/prepare` omits `frameable`, and the deploy keeps opening in a tab —
+> which is the safe fallback, not a break.
 
 ## Plugin conflicts
 

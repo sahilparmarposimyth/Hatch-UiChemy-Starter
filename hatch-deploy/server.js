@@ -73,6 +73,44 @@ function readTicket(id) {
 	return t.data;
 }
 
+/**
+ * Let ONE origin embed this response in an iframe.
+ *
+ * UiChemy bundles Hatch and shows its screens inside its own dashboard, so the
+ * deploy flow lands in an iframe on the customer's wp-admin. This page used to
+ * refuse that outright — the edge in front of this service adds
+ * `X-Frame-Options: SAMEORIGIN` — and the panel rendered the browser's
+ * "refused to connect" instead of the build log.
+ *
+ * `frame-ancestors` is the fix rather than removing that header, because it does
+ * not need removing: per the CSP spec (and in Chrome, Firefox and Safari), when
+ * a response carries `frame-ancestors` the browser IGNORES X-Frame-Options
+ * entirely. So this works with the edge header still in place, and needs no
+ * dashboard or proxy change.
+ *
+ * Scoped to the one origin that owns the ticket, never `*`: the site handed us
+ * its own URL at /prepare, so we can be exact. The origin comes from a URL that
+ * was already validated by `new URL()` there; it is re-parsed and re-checked
+ * here anyway, and anything unexpected simply leaves the header unset, which
+ * fails closed to today's behaviour.
+ *
+ * @param {import('express').Response} res
+ * @param {string} wpUrl Site URL recorded on the ticket.
+ */
+function allowFramingFrom(res, wpUrl) {
+	let origin;
+	try {
+		origin = new URL(String(wpUrl || '')).origin;
+	} catch {
+		return;
+	}
+	// scheme://host[:port] and nothing else — no spaces, no control characters,
+	// so this can never smuggle a second directive or a second header.
+	if (!/^https?:\/\/[A-Za-z0-9.\-]+(:\d{1,5})?$/.test(origin)) return;
+
+	res.setHeader('Content-Security-Policy', `frame-ancestors 'self' ${origin}`);
+}
+
 function updateTicket(id, patch) {
 	const t = tickets.get(id);
 	if (!t) return false;
@@ -1977,7 +2015,11 @@ function makePrepareHandler(providerKey) {
 			return_url: b.return_url,
 			[cfg.tokenKey]: providerToken,
 		});
-		res.json({ ticket, expires_in: TICKET_TTL_MS / 1000 });
+		// `frameable` tells the caller this build can run inside its own iframe
+		// (see allowFramingFrom). Advertised rather than assumed: an older
+		// broker omits it, and the plugin then keeps taking over the top window
+		// exactly as before instead of framing a page that would be refused.
+		res.json({ ticket, expires_in: TICKET_TTL_MS / 1000, frameable: true });
 	};
 }
 
@@ -1991,6 +2033,7 @@ function makeStartHandler(providerKey) {
 				<p>Restart from your WordPress admin → Tools → Hatch → Setup wizard.</p>
 			`));
 		}
+		allowFramingFrom(res, ticket.wp_url);
 		return res.redirect(302, `/deploy/${providerKey}/build?ticket=${encodeURIComponent(ticketId)}`);
 	};
 }
@@ -2006,6 +2049,13 @@ function makeBuildHandler(providerKey) {
 		if (ticket.provider !== providerKey) {
 			return res.status(400).type('html').send(html('Wrong provider', `<h1>Ticket is for ${ticket.provider}, not ${providerKey}</h1>`));
 		}
+
+		// This is the page that renders the live build log, so this is the
+		// response whose framing actually has to be permitted. Set after the
+		// ticket checks above, because the origin comes off the ticket — the
+		// expired/invalid-ticket replies deliberately stay unframeable, since
+		// with no ticket there is no origin we can trust enough to name.
+		allowFramingFrom(res, ticket.wp_url);
 		const providerToken = String(ticket[cfg.tokenKey] || '');
 		if (!providerToken) {
 			return res.status(400).type('html').send(html('No token', `<h1>No ${cfg.label} token attached to ticket</h1><p>Restart from WordPress.</p>`));
