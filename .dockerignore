@@ -1,0 +1,23 @@
+# Build context for the root Dockerfile: the broker only.
+#
+# Without this, a root-context build ships the whole repo — astro-starter,
+# nextjs-starter, wp-plugin, docs, tests — to the daemon every time. Exclude
+# everything, then re-admit hatch-deploy/.
+#
+# Both negation forms are here on purpose. Re-including a directory that `*`
+# excluded is documented to bring its contents back, but the `/**` form is the
+# unambiguous one and costs nothing. If the COPY ever fails with "not found",
+# this pair is the first thing to look at.
+#
+# Later rules win, so the two secrets and node_modules are struck out AFTER the
+# negation — order matters here.
+*
+!hatch-deploy
+!hatch-deploy/**
+
+hatch-deploy/node_modules
+hatch-deploy/node_modules/**
+hatch-deploy/.env
+hatch-deploy/.env.*
+hatch-deploy/npm-debug.log*
+hatch-deploy/.img-cache
