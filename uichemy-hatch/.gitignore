@@ -15,3 +15,6 @@ skills-lock.json
 # copy here is never actually consumed by the release process, only diff noise.
 # Run `npm run build` in new-dashboard/ to regenerate it locally.
 /new-dashboard/build/
+
+# Plugin zips produced by scripts/build-zip.mjs.
+/*.zip
