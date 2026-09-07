@@ -1,5 +1,8 @@
 # Render blueprint for the Hatch deploy broker.
 #
+# This lives at the REPO ROOT because that is the only place Render looks for a
+# blueprint. The service itself is in hatch-deploy/ — see rootDir below.
+#
 #   render.com → New → Blueprint → point at this repo
 #
 # `rootDir` matters: the broker is one directory inside a monorepo, and the

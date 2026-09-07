@@ -84,7 +84,7 @@ present at *runtime* (it clones on every deploy) and buildpacks do not reliably
 keep it in the runtime image. The Dockerfile makes it explicit and identical on
 both platforms.
 
-**Render** — `render.yaml` in this directory is a ready blueprint
+**Render** — `render.yaml` at the repo root is a ready blueprint
 (*New → Blueprint*). Or by hand: New → Web Service, Docker runtime, **Root
 Directory `hatch-deploy`**, health check `/health`.
 
@@ -119,7 +119,7 @@ Serverless is not an option — see the note at the end of this file.
 | | |
 |---|---|
 | `Dockerfile` | container image: Debian slim (glibc, for `sharp`), plus `git` |
-| `render.yaml` | Render blueprint |
+| `../render.yaml` | Render blueprint — at the REPO ROOT, the only place Render reads one from |
 | `deploy/install.sh` | the installer above |
 | `deploy/hatch-deploy.service` | systemd unit — restart-always, `PrivateTmp`, `LimitCORE=0` so the in-memory credentials cannot reach a core dump |
 | `deploy/nginx.conf.example` | reverse proxy, `proxy_buffering off` so the streaming build log is not held back |
