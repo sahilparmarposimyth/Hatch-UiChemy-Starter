@@ -134,8 +134,17 @@ All environment variables — nothing to edit in the source.
 | `HATCH_DEPLOY_BASE` | `https://hatch.adityaarsharma.com` | this instance's own public URL |
 | `HATCH_REPO` | `https://github.com/adityaarsharma/hatch.git` | repo the starter is cloned from |
 | `HATCH_BRANCH` | `main` | branch to clone |
-| `HATCH_ROOT_DIR` | — | build scratch directory |
 | `HATCH_MAX_CONCURRENT_BUILDS` | `3` | parallel builds; each is ~1 GB. Use `1` on a small instance |
+| `ALLOWED_IMG_ORIGINS` | *(empty)* | comma-separated allowlist for the `GET /img` proxy. Empty proxies nothing — closed by default |
+| `IMG_CACHE_MAX_BYTES` | `524288000` | image-cache ceiling, LRU-evicted. Lower it (e.g. `52428800`) on a container with modest ephemeral disk |
+| `HATCH_ROOT_DIR` | `astro-starter` | **leave alone** — see below |
+
+`HATCH_ROOT_DIR` does *not* set the build directory, despite the name. It is only
+the `root-directory` value handed to Vercel's and Cloudflare's own import UIs on
+the landing pages (`server.js` ~2261). The directory actually built is hardcoded
+as `path.join( workDir, 'astro-starter' )` in both deploy libs, which ignores
+this variable — so changing it desynchronises those links from the real build
+without moving the build.
 
 Example, pointing at the UiChemy starter mirror:
 

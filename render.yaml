@@ -1,18 +1,28 @@
 # Render blueprint for the Hatch deploy broker.
 #
 # This lives at the REPO ROOT because that is the only place Render looks for a
-# blueprint. The service itself is in hatch-deploy/ — see rootDir below.
+# blueprint. The service itself is in hatch-deploy/ — see the paths below.
 #
 #   render.com → New → Blueprint → point at this repo
 #
-# `rootDir` matters: the broker is one directory inside a monorepo, and the
-# Dockerfile paths are relative to it.
+# The broker is one directory inside a monorepo, and BOTH paths below are
+# resolved from the REPOSITORY ROOT — not from each other, and not from a
+# `rootDir`. Getting that wrong fails the build immediately with
+#
+#     failed to read dockerfile: open Dockerfile: no such file or directory
+#
+# `dockerContext` is what makes the Dockerfile's own `COPY . .` copy the broker
+# rather than the entire monorepo, and it is why hatch-deploy/.dockerignore is
+# the one that applies (Docker reads .dockerignore from the context root).
+#
+# No `rootDir` here on purpose: with these two set it adds nothing and only
+# invites confusion about which path is relative to what.
 services:
   - type: web
     name: hatch-deploy
     runtime: docker
-    rootDir: hatch-deploy
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./hatch-deploy/Dockerfile
+    dockerContext: ./hatch-deploy
     healthCheckPath: /health
 
     # NOT the free/starter tier. Each concurrent build is an `npm install` plus
