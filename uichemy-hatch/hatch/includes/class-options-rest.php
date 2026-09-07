@@ -200,6 +200,33 @@ class Hatch_Options_Rest {
 	 * direct PHP filesystem access and just works.
 	 */
 	public static function route_self_update() {
+		/*
+		 * Merged build: refuse. This route copy_dir()s a standalone Hatch
+		 * release from GitHub on top of HATCH_PLUGIN_DIR, which here is the
+		 * host plugin's `hatch/` subdirectory rather than a plugin of its own.
+		 * Letting it run would silently un-merge the product:
+		 *
+		 *   - it restores the WordPress plugin header this copy deliberately
+		 *     does not have, which makes the host plugin un-activatable on the
+		 *     next install (see the docblock at the top of hatch.php);
+		 *   - it overwrites the UICH_HATCH_MERGED-guarded edits, so Hatch
+		 *     registers a second top-level menu again and its first-run
+		 *     redirect starts fighting the host's onboarding;
+		 *   - it replaces guarded constants with bare define() calls, which
+		 *     then warn on every request because the loader has already
+		 *     defined them.
+		 *
+		 * The host plugin owns updates for everything it bundles — updating it
+		 * updates this runtime with it.
+		 */
+		if ( defined( 'UICH_HATCH_MERGED' ) && UICH_HATCH_MERGED ) {
+			return new WP_Error(
+				'hatch_merged_no_self_update',
+				__( 'Hatch is bundled inside another plugin here, so it cannot update itself. Update the host plugin instead.', 'hatch' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/misc.php';
 

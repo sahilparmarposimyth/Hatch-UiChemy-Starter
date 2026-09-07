@@ -24,16 +24,49 @@ It follows the pattern this codebase already uses for `uichemy-composer/`
 (`includes/composer/class-uich-composer-loader.php`) — a bundled runtime
 re-pointed by constants rather than rewritten.
 
-## The three edits inside `hatch/`
+## The four edits inside `hatch/`
 
-Everything else moved across verbatim. All three are guarded by
-`UICH_HATCH_MERGED`, so `hatch/` still runs unchanged as its own plugin.
+Everything else moved across verbatim.
 
 | File | Change | Why |
 |---|---|---|
+| `hatch.php` | **plugin header removed** | see below — with it, the plugin could not be activated at all |
 | `hatch.php` | 4 path constants became `defined() \|\| define()` | lets a host pre-point them |
 | `admin/dashboard.php` | `hatch_register_admin_menu()` registers a **hidden submenu** instead of a top-level menu | one product, one sidebar entry |
 | `admin/setup-wizard.php` | first-run redirect stands down | the host owns post-activation landing |
+| `includes/class-options-rest.php` | `/self-update` refuses | it would overwrite `hatch/` with a standalone release and un-merge the product |
+
+All but the header removal are guarded by `UICH_HATCH_MERGED` and are inert
+outside this plugin. The header removal is unconditional, so `hatch/` is no
+longer independently activatable — deliberate, since standalone Hatch still
+lives at `wp-plugin/`.
+
+`POST /hatch/v1/self-update` downloads a Hatch release and `copy_dir()`s it over
+`HATCH_PLUGIN_DIR`. Unmerged that is an in-place upgrade; merged, that directory
+is this plugin's `hatch/` subfolder, so it would restore the plugin header (see
+below), revert the other edits, and turn the guarded constants back into bare
+`define()` calls that then warn on every request. Updating this plugin updates
+the bundled runtime with it.
+
+### Why the plugin header had to go
+
+Shipping `hatch/hatch.php` with a `Plugin Name` header made the plugin
+**impossible to activate**. WordPress picks the file to offer an "Activate" link
+for via `Plugin_Upgrader::plugin_info()` → `get_plugins( '/uichemy-hatch' )`.
+Scoped to a folder, `get_plugins()` scans that folder's top level *and one
+subdirectory deep*, so it saw both `uichemy.php` and `hatch/hatch.php`. It sorts
+by plugin name, `"Hatch — Headless WordPress"` sorts ahead of `"UiChemy + Hatch…"`,
+so the bundled file won:
+
+```
+plugins.php?action=activate&plugin=uichemy-hatch%2Fhatch%2Fhatch.php
+→ "The plugin does not have a valid header."
+```
+
+`activate_plugin()` validates against the *unscoped* `get_plugins()`, which only
+ever scans two levels from the plugins root — so a path three levels down is
+absent and validation fails. With no `Plugin Name` line, `get_plugins()` skips
+the file entirely and `uichemy.php` is the only candidate.
 
 ## Two decisions worth knowing
 

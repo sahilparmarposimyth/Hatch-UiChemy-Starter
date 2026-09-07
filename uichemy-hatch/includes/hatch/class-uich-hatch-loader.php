@@ -3,9 +3,17 @@
  * Hatch loader — boots the merged Hatch runtime.
  *
  * The former Hatch plugin now lives inside this one, under `hatch/`. Its PHP
- * was moved across VERBATIM apart from three surgical edits, all of them
- * guarded by UICH_HATCH_MERGED so the folder still runs as its own plugin:
+ * was moved across VERBATIM apart from four surgical edits:
  *
+ *   hatch/hatch.php            — its WordPress PLUGIN HEADER was removed. Not
+ *                                cosmetic: with it present, the installer's
+ *                                "Activate" link pointed at the bundled file
+ *                                instead of at this plugin and activation failed
+ *                                with "The plugin does not have a valid header."
+ *                                The full explanation is in that file's docblock;
+ *                                do not restore the header. uichemy-composer/,
+ *                                the other runtime merged into this plugin, has
+ *                                no plugin header for the same reason.
  *   hatch/hatch.php            — the four path constants became guarded
  *                                `defined() || define()` (see the comment there
  *                                for why HATCH_PLUGIN_FILE is NOT re-pointed).
@@ -14,6 +22,20 @@
  *   hatch/admin/setup-wizard.php — the first-run redirect stands down, because
  *                                this plugin owns where an admin lands after
  *                                activation.
+ *   hatch/includes/class-options-rest.php — the `/self-update` REST route
+ *                                refuses. It copy_dir()s a standalone Hatch
+ *                                release over HATCH_PLUGIN_DIR, which here
+ *                                would restore the plugin header and overwrite
+ *                                every edit listed above — silently un-merging
+ *                                the product. This plugin owns updates for what
+ *                                it bundles.
+ *
+ * All but the header removal are guarded by UICH_HATCH_MERGED, so they are inert when the
+ * code runs outside this plugin. The header removal is not conditional — a file
+ * either advertises itself to WordPress or it does not — so `hatch/` is no
+ * longer independently activatable. That is deliberate: the standalone Hatch
+ * plugin still lives at wp-plugin/ in the Hatch repository, and this copy exists
+ * only to be required from here.
  *
  * Everything else reaches the filesystem and the browser through HATCH_PLUGIN_DIR
  * / HATCH_PLUGIN_URL, and both are derived from `__FILE__` inside `hatch/`, so
@@ -100,7 +122,7 @@ if ( ! class_exists( 'Uich_Hatch_Loader' ) ) {
 
 			/*
 			 * Marks the runtime as running MERGED rather than as its own plugin.
-			 * Read by the three guarded edits listed in the file docblock. Defined
+			 * Read by the guarded edits listed in the file docblock. Defined
 			 * BEFORE the constants and the require below, because hatch.php runs
 			 * its top-level `add_action()` calls the moment it is required and the
 			 * menu edit is consulted from one of them.

@@ -1,19 +1,42 @@
 <?php
 /**
- * Plugin Name:       Hatch — Headless WordPress
- * Plugin URI:        https://github.com/adityaarsharma/hatch
- * Description:       Turn WordPress into a headless CMS with an Astro frontend. One-click deploy to Cloudflare / Vercel / VPS, security hardening, image proxy, REST bridge, and a React admin.
- * Version:           0.7.6.1
- * Requires at least: 6.4
- * Tested up to:      6.9
- * Requires PHP:      7.4
- * Author:            Aditya Sharma
- * Author URI:        https://adityaarsharma.com
- * License:           AGPL-3.0-or-later
- * License URI:       https://www.gnu.org/licenses/agpl-3.0.html
- * Text Domain:       hatch
- * Domain Path:       /languages
- * Update URI:        https://github.com/adityaarsharma/hatch
+ * Hatch — headless WordPress runtime, bundled inside UiChemy.
+ *
+ * Turns WordPress into a headless CMS with an Astro frontend: one-click deploy
+ * to Cloudflare / Vercel / VPS, security hardening, image proxy, REST bridge
+ * and a React admin. Hatch 0.7.6.1, AGPL-3.0-or-later, by Aditya Sharma
+ * (https://github.com/adityaarsharma/hatch). Strings load under the 'hatch'
+ * text domain, which hatch.php registers from its own `init` hook.
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │ THIS FILE MUST NOT CARRY A WORDPRESS PLUGIN HEADER. Do not "restore"    │
+ * │ the block that used to be here.                                         │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * It used to, and that broke installation outright. WordPress's plugin
+ * installer picks the file to offer an "Activate" link for via
+ * Plugin_Upgrader::plugin_info(), which calls get_plugins( '/uichemy-hatch' ).
+ * Scoped to a folder like that, get_plugins() scans the folder's top level AND
+ * one subdirectory deep — so it found BOTH uichemy.php and this file. It then
+ * sorts its results by plugin name, and "Hatch — Headless WordPress" sorts
+ * ahead of "UiChemy + Hatch …", so this file won the pick.
+ *
+ * The Activate link therefore pointed at `uichemy-hatch/hatch/hatch.php`, three
+ * levels below the plugins root. activate_plugin() validates against the
+ * UNSCOPED get_plugins(), which only ever scans two levels, so the path was
+ * absent and activation died on:
+ *
+ *     "The plugin does not have a valid header."
+ *
+ * With no `Plugin Name` line, get_plugins() skips this file (it `continue`s on
+ * an empty Name), uichemy.php is the only candidate, and the Activate link
+ * lands on the real plugin file. The same reason uichemy-composer/ — the other
+ * runtime merged into this plugin — has no plugin header either.
+ *
+ * The trade: this folder is no longer independently activatable as a plugin.
+ * That is fine, and deliberate. The standalone Hatch plugin still lives at
+ * wp-plugin/ in the Hatch repository; this copy exists only to be required by
+ * includes/hatch/class-uich-hatch-loader.php.
  *
  * @package Hatch
  */

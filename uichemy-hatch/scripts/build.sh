@@ -146,5 +146,36 @@ if unzip -Z1 "$OUT" | grep -q '/\.sandbox/'; then
     exit 1
 fi
 
+# Exactly ONE file in the archive may carry a `Plugin Name:` header.
+#
+# This guard exists because shipping a second one made the plugin impossible to
+# activate. The installer picks the file to offer an "Activate" link for via
+# Plugin_Upgrader::plugin_info() → get_plugins( '/uichemy' ), which — scoped to a
+# folder — scans that folder's top level AND one subdirectory deep, then sorts by
+# plugin name. A bundled runtime carrying its own header (hatch/hatch.php did)
+# can therefore win the pick, and the link points at a path three levels below
+# the plugins root. activate_plugin() validates against the UNSCOPED get_plugins(),
+# which only ever scans two levels, so it fails with:
+#
+#     "The plugin does not have a valid header."
+#
+# WordPress reads only the first 8KB of a file for headers, so that is all this
+# checks. Restricted to the two depths WordPress itself looks at.
+HEADERS=$(
+    cd "$STAGE/uichemy" && for f in ./*.php ./*/*.php; do
+        [ -f "$f" ] || continue
+        if head -c 8192 "$f" | grep -qiE '^[[:space:]*#@/]*Plugin Name:'; then
+            echo "${f#./}"
+        fi
+    done
+)
+HEADER_COUNT=$(printf '%s' "$HEADERS" | grep -c . || true)
+if [ "$HEADER_COUNT" -ne 1 ] || [ "$HEADERS" != "uichemy.php" ]; then
+    echo "ERROR: the archive must contain exactly one plugin header, in uichemy.php." >&2
+    echo "       Found: ${HEADERS:-<none>}" >&2
+    echo "       A bundled runtime must not advertise itself as a plugin." >&2
+    exit 1
+fi
+
 echo "built: $OUT"
 unzip -l "$OUT" | tail -1
