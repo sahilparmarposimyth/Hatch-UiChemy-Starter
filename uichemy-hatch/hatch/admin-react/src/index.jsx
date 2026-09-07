@@ -28,7 +28,23 @@ import PluginBridge from './tabs/PluginBridge.jsx';
    <body> so WordPress admin chrome (which we cannot scope to .hatch-react)
    can react through the [data-hx-theme="dark"] rules in styles.css. */
 const THEME_KEY = 'hx-theme';
+/* A host page embedding this admin can PIN the palette via
+   hatchBoot.forceTheme. UiChemy's "Sync with Astro" screen frames these
+   pages inside its own light dashboard and sets 'light', because a dark panel
+   dropped into a light page reads as a rendering fault rather than a choice —
+   and the host, not the visitor's OS, is what this palette has to match there.
+
+   Checked ahead of localStorage and prefers-color-scheme deliberately: it
+   OVERRIDES rather than seeds. Writing 'light' into localStorage instead would
+   have clobbered a preference the user set for Hatch's own full-screen admin,
+   which is reached from that same screen and still follows their choice. */
+function forcedTheme() {
+	const forced = window.hatchBoot && window.hatchBoot.forceTheme;
+	return (forced === 'light' || forced === 'dark') ? forced : null;
+}
 function resolveTheme() {
+	const forced = forcedTheme();
+	if (forced) return forced;
 	try {
 		const saved = window.localStorage.getItem(THEME_KEY);
 		if (saved === 'light' || saved === 'dark') return saved;
@@ -93,6 +109,9 @@ function App() {
 	/* Follow system changes only when the user has not made an explicit choice. */
 	useEffect(() => {
 		if (!window.matchMedia) return;
+		/* A pinned palette outranks the system too, or the panel would flip out
+		   from under its host the moment the OS switched appearance. */
+		if (forcedTheme()) return;
 		const mq = window.matchMedia('(prefers-color-scheme: dark)');
 		const onChange = (e) => {
 			let saved = null;

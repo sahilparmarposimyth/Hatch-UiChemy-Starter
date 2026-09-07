@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       UiChemy + Hatch — Figma Converter for Elementor, Gutenberg and Bricks
  * Plugin URI:        https://uichemy.com
- * Description:       Convert Figma Design to 100% Editable WordPress websites in Elementor Website Builder and Gutenberg aka WordPress Block Editor. Bundles Hatch, which publishes the result as a static headless frontend — see "Sync with Elementor" in the dashboard. SUPERSEDES the standalone UiChemy and Hatch plugins: deactivate UiChemy before activating this, and a standalone Hatch is retired automatically.
+ * Description:       Convert Figma Design to 100% Editable WordPress websites in Elementor Website Builder and Gutenberg aka WordPress Block Editor. Bundles Hatch, which publishes the result as a static headless frontend — see "Sync with Astro" in the dashboard. SUPERSEDES the standalone UiChemy and Hatch plugins: deactivate UiChemy before activating this, and a standalone Hatch is retired automatically.
  * Version:           5.1.0
  * Author:            POSIMYTH
  * Author URI:        https://posimyth.com
@@ -53,7 +53,7 @@ require UICH_PATH . 'includes/composer/class-uich-composer-loader.php';
 
 /**
  * The merged Hatch runtime (hatch/) — headless WordPress, reached from the
- * dashboard's "Sync with Elementor" screen.
+ * dashboard's "Sync with Astro" screen.
  *
  * Required here for two reasons. Hatch calls `Hatch::instance()` on the last
  * line of its own plugin file and registers every one of its hooks at top

@@ -1,7 +1,7 @@
 # UiChemy + Hatch — how the merge works
 
 This plugin is UiChemy with the **Hatch** plugin bundled inside it, reached from a
-`Sync with Elementor` row in the dashboard rail. It is a *separate copy*: the
+`Sync with Astro` row in the dashboard rail. It is a *separate copy*: the
 standalone `uichemy-wordpress-main` and `wp-plugin/` (Hatch) sources in this repo
 are untouched.
 
@@ -16,7 +16,7 @@ uichemy-hatch/
 ├── hatch/                           the Hatch runtime, near-verbatim
 └── new-dashboard/src/
     ├── dashboard/tabs.js                    + the rail row
-    ├── screens/dashboard/SyncElementor.jsx  + the screen
+    ├── screens/dashboard/SyncAstro.jsx  + the screen
     └── screens/dashboard/DashboardApp.jsx   + the route
 ```
 
@@ -24,7 +24,7 @@ It follows the pattern this codebase already uses for `uichemy-composer/`
 (`includes/composer/class-uich-composer-loader.php`) — a bundled runtime
 re-pointed by constants rather than rewritten.
 
-## The four edits inside `hatch/`
+## The edits inside `hatch/`
 
 Everything else moved across verbatim.
 
@@ -35,11 +35,33 @@ Everything else moved across verbatim.
 | `admin/dashboard.php` | `hatch_register_admin_menu()` registers a **hidden submenu** instead of a top-level menu | one product, one sidebar entry |
 | `admin/setup-wizard.php` | first-run redirect stands down | the host owns post-activation landing |
 | `includes/class-options-rest.php` | `/self-update` refuses | it would overwrite `hatch/` with a standalone release and un-merge the product |
+| `admin-react/src/index.jsx` | `resolveTheme()` honours `hatchBoot.forceTheme` | the frame must match the host's light page, not the visitor's OS |
 
-All but the header removal are guarded by `UICH_HATCH_MERGED` and are inert
-outside this plugin. The header removal is unconditional, so `hatch/` is no
+Three are guarded by `UICH_HATCH_MERGED` and inert outside this plugin. The
+`forceTheme` hook needs no guard — it does nothing until a host sets the flag.
+The header removal is the one edit that cannot be conditional, so `hatch/` is no
 longer independently activatable — deliberate, since standalone Hatch still
 lives at `wp-plugin/`.
+
+### Why the frame is forced light
+
+Hatch resolves its own palette from `localStorage`, then `prefers-color-scheme`,
+defaulting to light — and its dark palette is gated on a `data-hx-theme="dark"`
+attribute, not a media query. A visitor whose OS is in dark mode therefore got a
+dark Hatch panel in the middle of this plugin's light dashboard, which reads as a
+rendering fault rather than a choice.
+
+`Uich_Hatch_Embed::pin_light_theme()` sets `hatchBoot.forceTheme = 'light'` on the
+embedded request only, and the stylesheet hides Hatch's own light/dark toggle
+there so it cannot contradict what is on screen. Nothing is written to
+`localStorage`: "Open full screen" is right above the frame, and Hatch's own admin
+still follows whatever the user picked for it.
+
+Re-declaring Hatch's ~34 dark tokens in the embed stylesheet would also have
+worked — an important rule at higher specificity beats
+`[data-hx-theme="dark"] .hatch-react` — but it forks the palette, and the copy
+drifts silently the first time Hatch retunes a colour. Going through the boot
+payload keeps one palette and leaves the app's own React theme state truthful.
 
 `POST /hatch/v1/self-update` downloads a Hatch release and `copy_dir()`s it over
 `HATCH_PLUGIN_DIR`. Unmerged that is an in-place upgrade; merged, that directory
@@ -88,7 +110,7 @@ the dashboard's DOM the two systems fight and neither survives. Its wizard also
 advances through real form POSTs to `admin-post.php` so all its server logic runs
 — full page loads, which are free inside a frame and would destroy the SPA on the
 dashboard page. `Uich_Hatch_Embed` strips the WP chrome (admin bar, rail, footer)
-from those requests; `SyncElementor.jsx` measures the same-origin document and
+from those requests; `SyncAstro.jsx` measures the same-origin document and
 sizes the frame to it, so there is no inner scrollbar.
 
 Admin **notices are left visible** inside the frame on purpose — Hatch warns

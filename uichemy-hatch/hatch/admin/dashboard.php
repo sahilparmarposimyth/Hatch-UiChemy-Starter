@@ -1643,7 +1643,7 @@ function hatch_register_admin_menu(): void {
 	 * a second one here would put two entries in the sidebar for what is now a
 	 * single product. Registered as a HIDDEN submenu instead (empty parent) —
 	 * `admin.php?page=hatch` keeps resolving exactly as before, which is what
-	 * the host's "Sync with Elementor" screen loads into its content area, and
+	 * the host's "Sync with Astro" screen loads into its content area, and
 	 * `hatch_enqueue_admin_assets()` still fires because the resulting hook
 	 * (`admin_page_hatch`) contains 'hatch'.
 	 *

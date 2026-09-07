@@ -14,7 +14,7 @@ import ThemeBuilder from './ThemeBuilder.jsx';
 import Placeholder from './Placeholder.jsx';
 import BuilderScreenHost from './BuilderScreenHost.jsx';
 import SetupFlow from './SetupFlow.jsx';
-import SyncElementor from './SyncElementor.jsx';
+import SyncAstro from './SyncAstro.jsx';
 import { Toaster } from '../../design-system';
 
 /**
@@ -40,7 +40,7 @@ const SCREENS = {
   aiwebsite: AiWebsiteScreen,
   whitelabel: WhiteLabel,
   themebuilder: ThemeBuilder,
-  syncelementor: SyncElementor,
+  syncastro: SyncAstro,
 };
 
 /**

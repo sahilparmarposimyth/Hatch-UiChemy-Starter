@@ -29,13 +29,20 @@
  *                                every edit listed above — silently un-merging
  *                                the product. This plugin owns updates for what
  *                                it bundles.
+ *   hatch/admin-react/src/index.jsx — resolveTheme() now honours
+ *                                `hatchBoot.forceTheme`, so a host page can pin
+ *                                the palette. Hatch otherwise picks dark from
+ *                                the visitor's OS, and a dark panel inside this
+ *                                plugin's light dashboard reads as a rendering
+ *                                fault. See Uich_Hatch_Embed::pin_light_theme().
  *
- * All but the header removal are guarded by UICH_HATCH_MERGED, so they are inert when the
- * code runs outside this plugin. The header removal is not conditional — a file
- * either advertises itself to WordPress or it does not — so `hatch/` is no
- * longer independently activatable. That is deliberate: the standalone Hatch
- * plugin still lives at wp-plugin/ in the Hatch repository, and this copy exists
- * only to be required from here.
+ * Three of these are guarded by UICH_HATCH_MERGED and are inert outside this
+ * plugin. The forceTheme hook needs no guard — it is an opt-in that does nothing
+ * until a host sets the flag. The header removal is the one edit that cannot be
+ * conditional, because a file either advertises itself to WordPress or it does
+ * not, so `hatch/` is no longer independently activatable. That is deliberate:
+ * the standalone Hatch plugin still lives at wp-plugin/ in the Hatch repository,
+ * and this copy exists only to be required from here.
  *
  * Everything else reaches the filesystem and the browser through HATCH_PLUGIN_DIR
  * / HATCH_PLUGIN_URL, and both are derived from `__FILE__` inside `hatch/`, so
@@ -238,7 +245,7 @@ if ( ! class_exists( 'Uich_Hatch_Loader' ) ) {
 			// The bridge owns everything that is about the SEAM rather than about
 			// Hatch: the boot payload the dashboard reads, the activation call
 			// Hatch can no longer make for itself, and the chrome-free embed the
-			// "Sync with Elementor" screen loads.
+			// "Sync with Astro" screen loads.
 			require_once UICH_PATH . 'includes/hatch/class-uich-hatch-embed.php';
 			require_once UICH_PATH . 'includes/hatch/class-uich-hatch-bridge.php';
 
@@ -258,7 +265,7 @@ if ( ! class_exists( 'Uich_Hatch_Loader' ) ) {
 			echo '<div class="notice notice-warning"><p><strong>UiChemy:</strong> ';
 			printf(
 				/* translators: %s: expected directory path, e.g. hatch/hatch.php */
-				esc_html__( 'the bundled Hatch runtime is missing (%s), so "Sync with Elementor" is unavailable. Re-install the plugin to restore it.', 'uichemy' ),
+				esc_html__( 'the bundled Hatch runtime is missing (%s), so "Sync with Astro" is unavailable. Re-install the plugin to restore it.', 'uichemy' ),
 				'<code>' . esc_html( self::DIR . 'hatch.php' ) . '</code>'
 			);
 			echo '</p></div>';

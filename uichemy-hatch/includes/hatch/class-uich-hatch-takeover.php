@@ -7,7 +7,7 @@
  * same 57 global `hatch_*` functions and 56 `Hatch_*` classes, so loading them
  * together fatals on the first redeclaration and takes down the whole site, not
  * just this plugin. Standing down means the Hatch features are simply missing
- * and "Sync with Elementor" has nothing to open.
+ * and "Sync with Astro" has nothing to open.
  *
  * Rather than leave the site in that half-working state until someone reads a
  * notice, this class removes the conflict for them:
@@ -68,12 +68,20 @@ if ( ! class_exists( 'Uich_Hatch_Takeover' ) ) {
 		 * folder is whatever the zip was named — `hatch/` from a release zip,
 		 * `hatch-main/` or `hatch-wordpress-main/` from a GitHub source zip.
 		 *
-		 * Note this can never match the copy bundled here. WordPress only scans
-		 * `plugins/*.php` and `plugins/*<slash>*.php` for plugin headers, and the
-		 * bundled runtime sits two levels down at `<this-plugin>/hatch/hatch.php`,
-		 * so it is never a plugin in its own right and never appears in
-		 * `active_plugins`. standalone_plugins() excludes this plugin's own file
-		 * name as well, belt and braces.
+		 * Note this can never match the copy bundled here, for three independent
+		 * reasons — the first of which is the one that actually matters:
+		 *
+		 *   1. `hatch/hatch.php` carries NO plugin header any more, so nothing in
+		 *      WordPress will treat it as a plugin. See the docblock at the top of
+		 *      that file for why it had to go.
+		 *   2. The UNSCOPED get_plugins() — the one behind `active_plugins`, and
+		 *      the only list this method reads — scans `plugins/*.php` and
+		 *      `plugins/*<slash>*.php` only, and the bundled runtime sits a level
+		 *      below that. (Careful: get_plugins() called WITH a folder argument
+		 *      scans one level deeper relative to that folder, which is exactly
+		 *      how the header in reason 1 broke activation. It does not apply
+		 *      here, but do not generalise "two levels" to every call site.)
+		 *   3. standalone_plugins() excludes this plugin's own file name outright.
 		 */
 		const STANDALONE_FILES = array( 'hatch.php' );
 

@@ -95,14 +95,14 @@ export const TABS = [
   },
   // The merged Hatch runtime (hatch/): publish this site as a static headless
   // frontend. Its setup wizard and its whole admin UI render in the content
-  // area from here — see screens/dashboard/SyncElementor.jsx. Last in the rail
+  // area from here — see screens/dashboard/SyncAstro.jsx. Last in the rail
   // because it is the one row that leads out of UiChemy's own surface.
   {
-    key: 'sync-elementor',
-    path: '/sync-elementor',
-    label: __( 'Sync with Elementor', 'uichemy' ),
+    key: 'sync-astro',
+    path: '/sync-astro',
+    label: __( 'Sync with Astro', 'uichemy' ),
     icon: Icon.Swap,
-    screen: 'syncelementor',
+    screen: 'syncastro',
     section: 'manage',
   },
 ];

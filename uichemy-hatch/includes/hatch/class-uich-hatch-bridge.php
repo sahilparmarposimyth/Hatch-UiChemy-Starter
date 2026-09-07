@@ -3,7 +3,7 @@
  * The seam between this plugin and the bundled Hatch runtime.
  *
  * Everything here is about the MERGE rather than about Hatch: the payload the
- * dashboard's "Sync with Elementor" screen reads, and the activation and
+ * dashboard's "Sync with Astro" screen reads, and the activation and
  * deactivation calls Hatch can no longer make for itself.
  *
  * @package Uichemy
@@ -140,8 +140,13 @@ if ( ! class_exists( 'Uich_Hatch_Bridge' ) ) {
 		}
 
 		/**
-		 * Is Elementor active? The screen is called "Sync with Elementor", so it
-		 * says up front when the builder it names is missing.
+		 * Is Elementor active?
+		 *
+		 * The screen no longer names Elementor — it is "Sync with Astro", after
+		 * the frontend Hatch deploys — but Elementor is still the builder whose
+		 * output gets published, and it is this plugin's whole purpose. Reported
+		 * so the screen can say so up front rather than letting someone deploy
+		 * and wonder why the result is bare.
 		 *
 		 * @return bool
 		 */
@@ -152,7 +157,7 @@ if ( ! class_exists( 'Uich_Hatch_Bridge' ) ) {
 		/**
 		 * The `hatch` block of `window.uich_nd_boot`.
 		 *
-		 * Read by new-dashboard/src/screens/dashboard/SyncElementor.jsx.
+		 * Read by new-dashboard/src/screens/dashboard/SyncAstro.jsx.
 		 *
 		 * @return array<string, mixed>
 		 */

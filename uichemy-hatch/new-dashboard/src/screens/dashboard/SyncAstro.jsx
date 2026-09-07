@@ -6,7 +6,7 @@ import { Alert, Button } from '../../design-system';
 import { getBoot } from '../../lib/api.js';
 
 /**
- * Sync with Elementor — the merged Hatch runtime, hosted in this content area.
+ * Sync with Astro — the merged Hatch runtime, hosted in this content area.
  *
  * Hatch turns the site into a headless WordPress: an Elementor/Gutenberg build
  * here, a static Astro frontend deployed to Cloudflare / Vercel / a VPS. Its
@@ -146,7 +146,7 @@ const VIEWS = [
   },
 ];
 
-export default function SyncElementor() {
+export default function SyncAstro() {
   const boot = getBoot();
   const hatch = boot?.hatch || { available: false };
 
@@ -211,7 +211,7 @@ export default function SyncElementor() {
   const openUrl = hatch[ onScreen.openKey ] || '';
 
   const subtitle = __(
-    'Publish this site as a static frontend on Cloudflare, Vercel or your own server, and keep editing it here.',
+    'Publish this site as a static Astro frontend on Cloudflare, Vercel or your own server, and keep editing it here.',
     'uichemy'
   );
 
@@ -222,7 +222,7 @@ export default function SyncElementor() {
   if ( ! hatch.available ) {
     return (
       <div className="nd-hatch">
-        <ScreenHead title={ __( 'Sync with Elementor', 'uichemy' ) } subtitle={ subtitle } />
+        <ScreenHead title={ __( 'Sync with Astro', 'uichemy' ) } subtitle={ subtitle } />
         { hatch.standalone ? (
           <Alert tone="warning" title={ __( 'Retiring the standalone Hatch plugin', 'uichemy' ) }>
             { __(
@@ -245,7 +245,7 @@ export default function SyncElementor() {
   if ( hatch.buildMissing ) {
     return (
       <div className="nd-hatch">
-        <ScreenHead title={ __( 'Sync with Elementor', 'uichemy' ) } subtitle={ subtitle } />
+        <ScreenHead title={ __( 'Sync with Astro', 'uichemy' ) } subtitle={ subtitle } />
         <Alert tone="warning" title={ __( 'Hatch’s admin bundle has not been built', 'uichemy' ) }>
           { __( 'Run this from the plugin root, then reload:', 'uichemy' ) }
           <code className="nd-hatch__cmd">cd hatch &amp;&amp; npm install &amp;&amp; npm run build:admin</code>
@@ -259,7 +259,7 @@ export default function SyncElementor() {
   return (
     <div className="nd-hatch">
       <ScreenHead
-        title={ __( 'Sync with Elementor', 'uichemy' ) }
+        title={ __( 'Sync with Astro', 'uichemy' ) }
         subtitle={ subtitle }
         action={
           <div className="nd-hatch__actions">

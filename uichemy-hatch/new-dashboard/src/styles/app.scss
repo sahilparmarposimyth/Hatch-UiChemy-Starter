@@ -3800,9 +3800,9 @@
     flex-wrap: wrap;
   }
 
-  /* ── Sync with Elementor (merged Hatch runtime) ───────────────────────────
+  /* ── Sync with Astro (merged Hatch runtime) ───────────────────────────
      Hatch's own admin renders inside .nd-hatch__frame, a same-origin iframe
-     sized to its content by SyncElementor.jsx. The wrapper carries the card
+     sized to its content by SyncAstro.jsx. The wrapper carries the card
      treatment so the framed page sits on this dashboard's surface rather than
      floating on the raw admin background, and clips the frame to the card's
      radius — the inner document has square corners of its own. */

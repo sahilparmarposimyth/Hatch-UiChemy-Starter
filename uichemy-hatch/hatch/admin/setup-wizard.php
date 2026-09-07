@@ -88,7 +88,7 @@ function hatch_setup_wizard_maybe_redirect_first_run(): void {
 	 * plugins racing to redirect the same request means whichever hooks later
 	 * wins, non-deterministically — and landing on Hatch's wizard would skip
 	 * the host's onboarding entirely. The wizard is reached deliberately here,
-	 * from the "Sync with Elementor" screen, so nothing needs to bounce.
+	 * from the "Sync with Astro" screen, so nothing needs to bounce.
 	 */
 	if ( defined( 'UICH_HATCH_MERGED' ) && UICH_HATCH_MERGED ) {
 		delete_transient( 'hatch_just_activated' );

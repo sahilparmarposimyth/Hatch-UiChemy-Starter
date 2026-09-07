@@ -2,7 +2,7 @@
 /**
  * Chrome-free render mode for the bundled Hatch admin pages.
  *
- * The dashboard's "Sync with Elementor" screen shows Hatch's setup wizard and
+ * The dashboard's "Sync with Astro" screen shows Hatch's setup wizard and
  * Hatch's admin UI in its own content area, inside a same-origin iframe. An
  * iframe rather than a second React root on the page, deliberately:
  *
@@ -78,6 +78,53 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 			add_filter( 'wp_redirect', array( __CLASS__, 'keep_flag_on_redirect' ), 10, 1 );
 			add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
 			add_action( 'admin_head', array( __CLASS__, 'strip_chrome_css' ), 99 );
+
+			// Priority 11: Hatch enqueues its bundle and localises
+			// `window.hatchBoot` at priority 10, and `before` inline scripts on a
+			// handle are emitted in the order they were added. Later priority =
+			// our line lands after that assignment rather than before it, where
+			// it would be overwritten.
+			add_action( 'admin_enqueue_scripts', array( __CLASS__, 'pin_light_theme' ), 11 );
+		}
+
+		/**
+		 * Pin Hatch's palette to light for the embedded render.
+		 *
+		 * Hatch's admin resolves its own theme from localStorage, then from
+		 * `prefers-color-scheme` — so a visitor whose OS is in dark mode got a
+		 * dark panel dropped into the middle of this plugin's light dashboard,
+		 * which reads as a rendering fault rather than a choice. Inside the frame
+		 * the palette has to match the host page, not the OS.
+		 *
+		 * Set through Hatch's own boot payload rather than by re-declaring its
+		 * ~34 dark-palette tokens in the stylesheet below. Duplicating the values
+		 * would work — an important rule at higher specificity beats
+		 * `[data-hx-theme="dark"] .hatch-react` — but it forks Hatch's palette,
+		 * and the copy would drift silently the first time Hatch retunes a
+		 * colour. This way there is one palette and the app genuinely runs in
+		 * light mode, so its own React theme state stays truthful.
+		 *
+		 * Nothing is written to localStorage: Hatch's full-screen admin is one
+		 * click away on this same screen ("Open full screen") and still follows
+		 * whatever the user picked for it.
+		 *
+		 * @param string $page Current admin page hook.
+		 * @return void
+		 */
+		public static function pin_light_theme( $page ) {
+			// Same test Hatch's own enqueue uses to decide these are its screens.
+			if ( false === strpos( (string) $page, 'hatch' ) ) {
+				return;
+			}
+			if ( ! wp_script_is( 'hatch-admin-react', 'enqueued' ) ) {
+				return;
+			}
+
+			wp_add_inline_script(
+				'hatch-admin-react',
+				'window.hatchBoot = window.hatchBoot || {}; window.hatchBoot.forceTheme = "light";',
+				'before'
+			);
 		}
 
 		/**
@@ -315,6 +362,14 @@ body.uich-hatch-embed {
  */
 .hatch-react {
 	min-height: 0 !important;
+}
+/* The palette is pinned to light for this render (see pin_light_theme), so the
+   app's own light/dark switch would only ever contradict what is on screen —
+   its icon says one thing while the panel stays the other. Hidden rather than
+   disabled: "Open full screen" is right above the frame and Hatch's own admin
+   still honours the user's choice there. */
+.hx-theme-toggle {
+	display: none !important;
 }
 </style>
 			<?php
