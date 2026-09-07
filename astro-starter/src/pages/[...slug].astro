@@ -15,6 +15,7 @@ import HatchImage from '@/components/HatchImage.astro';
 import HatchForm from '@/components/HatchForm.astro';
 import { getPageBySlug, getContentBySlug } from '@/lib/hatch';
 import { getFeatures, rewriteContentImages } from '@/lib/features';
+import { resolveFrontPageSlug, rewriteFrontPageLinks } from '@/lib/front-page';
 
 const { slug } = Astro.params;
 const slugStr = Array.isArray(slug) ? slug.join('/') : (slug || '');
@@ -68,6 +69,27 @@ if (!page) {
 // every route. Inner reading column for posts is still capped via
 // .hatch-prose max-width below; pages fill the full article width.
 const articleMaxWStyle = 'max-width: var(--hatch-max-width, 1160px);';
+
+/*
+ * The front page is reachable both at `/` (rewritten from index.astro) and at
+ * its own slug, because nothing redirects between them. Two consequences:
+ *
+ *   - Links in the CONTENT point at the slug. An imported design carries its
+ *     own nav inside the page body, so "Home" arrives as href="/home" and
+ *     would take a visitor off the canonical URL. rewriteFrontPageLinks maps
+ *     those to `/`.
+ *   - The canonical must name ONE of the two URLs. `/` wins, so a direct hit
+ *     on the slug is not indexed as a duplicate. Astro.url is already `/` when
+ *     this renders through the rewrite, so this only changes the direct case.
+ */
+const frontSlug = await resolveFrontPageSlug( features );
+const isFrontPage = !! frontSlug && slugStr === frontSlug;
+const canonical = isFrontPage ? new URL( '/', Astro.url ).toString() : Astro.url.toString();
+const contentHtml = rewriteFrontPageLinks(
+  rewriteContentImages( page.content, features ),
+  frontSlug,
+  Astro.url.origin
+);
 ---
 
 {/* v0.51 SEO: prefer resolved RankMath/Yoast values from the /hatch/v1/content
@@ -80,6 +102,7 @@ const articleMaxWStyle = 'max-width: var(--hatch-max-width, 1160px);';
     const img = (page.seo?.og_image || page.featuredImage || '').toString();
     return /^https?:\/\//i.test(img) ? img : undefined;
   })()}
+  canonical={canonical}
 >
   {/* Article container matches posts + homepage at --hatch-max-width. The
       inner .hatch-prose fills 100% of the article so wide hero images and
@@ -102,7 +125,7 @@ const articleMaxWStyle = 'max-width: var(--hatch-max-width, 1160px);';
 
     {/* v0.50.31 — Override global .hatch-prose 68ch cap on PAGES so content
         fills the article width (~1160px). Posts keep the cap for reading. */}
-    <div class="hatch-prose" style="max-width: 100%;" set:html={rewriteContentImages(page.content, features)}></div>
+    <div class="hatch-prose" style="max-width: 100%;" set:html={contentHtml}></div>
   </article>
   {/* v0.51: hydrates any [fluentform]/[wpforms]/[gravityform]/[contact-form-7]
       shortcode that the Forms Bridge rewrote into <div class="hatch-form-mount">.

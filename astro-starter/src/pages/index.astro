@@ -10,8 +10,26 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import PostCard from '@/components/PostCard.astro';
 import { getPosts } from '@/lib/hatch';
 import { getFeatures } from '@/lib/features';
+import { resolveFrontPageSlug } from '@/lib/front-page';
 
 const features = await getFeatures();
+
+/*
+ * If the site has a designed front page, render THAT here rather than the
+ * posts landing below. Every UiChemy import has one, and without this the root
+ * URL showed a bare site-name-and-tagline page while the actual design sat at
+ * /home — so the domain you hand a client displayed none of their site.
+ *
+ * A rewrite, not a redirect: the visitor stays on `/`, and the whole of
+ * [...slug].astro does the rendering, so pages get identical treatment
+ * whichever URL they arrive through. Nothing redirects back the other way, on
+ * purpose — see the note in lib/front-page.ts about the ping-pong that causes.
+ */
+const frontSlug = await resolveFrontPageSlug( features );
+if ( frontSlug ) {
+  return Astro.rewrite( `/${ frontSlug }` );
+}
+
 const { posts } = await getPosts({ page: 1, perPage: 3, category: null });
 const SITE = features.site.url || import.meta.env.PUBLIC_SITE_URL;
 const siteName = features.site.name || 'Hatch';
