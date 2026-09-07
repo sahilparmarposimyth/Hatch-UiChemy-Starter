@@ -43,14 +43,46 @@ egress clones and builds fine, then fails at upload.
 
 ## Run it
 
+On a Debian/Ubuntu VPS, one command does everything except the parts only you
+can do:
+
 ```bash
-cd hatch-deploy
-npm install
-npm start          # = node server.js
+sudo bash deploy/install.sh
 ```
 
-Put nginx (or RunCloud's vhost) in front of `PORT` with a certificate, and keep
-the process up with a supervisor.
+It checks Node ≥ 20, git, and — importantly — that the box can reach the npm
+registry, because every deploy fetches `vercel` / `wrangler` through `npx`; a box
+without that egress clones and builds fine, then fails at upload. Then it creates
+a `hatch` service user, installs dependencies, writes a starter `.env` (mode 600,
+never overwritten on re-run), installs a systemd unit, starts it and verifies
+`/health` locally.
+
+Re-running it upgrades the code and restarts the service. It deletes nothing.
+
+It stops short of three things on purpose:
+
+1. editing `.env` — `HATCH_DEPLOY_BASE` at minimum,
+2. TLS — see `deploy/nginx.conf.example`, then `certbot --nginx -d your.domain`,
+3. pointing WordPress at it.
+
+**On a managed panel (RunCloud, Ploi, Forge), skip the nginx and systemd parts.**
+Those panels generate and overwrite their own vhosts, so a hand-written one gets
+clobbered. Create a Web Application for the domain and a supervisor job running
+`npm start` in this directory as the service user, with `.env` loaded.
+
+Manually, if you prefer:
+
+```bash
+cd hatch-deploy && npm ci --omit=dev && npm start   # = node server.js
+```
+
+### Files
+
+| | |
+|---|---|
+| `deploy/install.sh` | the installer above |
+| `deploy/hatch-deploy.service` | systemd unit — restart-always, `PrivateTmp`, `LimitCORE=0` so the in-memory credentials cannot reach a core dump |
+| `deploy/nginx.conf.example` | reverse proxy, `proxy_buffering off` so the streaming build log is not held back |
 
 ## Configuration
 
