@@ -1118,8 +1118,13 @@ export default function SetupApp() {
 			    product name stacked on top of it read as two products bolted
 			    together, which is the one thing the merge exists to avoid.
 			    Astro is also what the user is actually setting up — the
-			    frontend this deploys. */}
+			    frontend this deploys.
+
+			    The mark below is COMMENTED OUT, not deleted, so restoring
+			    Hatch's own branding here is a one-line revert. Previous
+			    heading text: "Hatch setup". */}
 			<div style={{ textAlign: 'center', padding: '40px 24px 0' }}>
+				{/* <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 8 }}>🐣</div> */}
 				<h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--hx-fg)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
 					Astro setup
 				</h1>

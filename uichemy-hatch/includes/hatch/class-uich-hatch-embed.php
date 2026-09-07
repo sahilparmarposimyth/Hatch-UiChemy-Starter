@@ -31,6 +31,15 @@
  * `wp_redirect` for every hop it takes. Between them the whole surface stays
  * embedded without one edit to Hatch's own code.
  *
+ * Knowing when to LEAVE the frame
+ * -------------------------------
+ * Not every hop should stay inside it. Hatch hands off to external origins
+ * mid-flow — the deploy broker, and any provider OAuth screen — and no such
+ * service allows itself to be framed, so those navigations died on
+ * "refused to connect". The same `wp_redirect` filter therefore splits on the
+ * target's host: same-site keeps the 302 and the flag, off-site is answered
+ * with a document that moves the TOP window instead. See break_out_of_frame().
+ *
  * @package Uichemy
  */
 
@@ -75,7 +84,7 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 
 			add_filter( 'show_admin_bar', '__return_false', 99 );
 			add_filter( 'admin_url', array( __CLASS__, 'keep_flag_on_url' ), 10, 2 );
-			add_filter( 'wp_redirect', array( __CLASS__, 'keep_flag_on_redirect' ), 10, 1 );
+			add_filter( 'wp_redirect', array( __CLASS__, 'filter_redirect' ), 10, 1 );
 			add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
 			add_action( 'admin_head', array( __CLASS__, 'strip_chrome_css' ), 99 );
 
@@ -267,9 +276,36 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 		 * @param string $location Redirect target.
 		 * @return string
 		 */
-		public static function keep_flag_on_redirect( $location ) {
+		public static function filter_redirect( $location ) {
 			$location = (string) $location;
+			if ( '' === $location ) {
+				return $location;
+			}
 
+			$host = strtolower( (string) wp_parse_url( $location, PHP_URL_HOST ) );
+			$home = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+
+			// Relative, or somewhere on this site: an ordinary 302 inside the
+			// frame is exactly right. Just keep the embed flag attached.
+			if ( '' === $host || $host === $home ) {
+				return self::keep_flag_on_redirect( $location );
+			}
+
+			return self::break_out_of_frame( $location );
+		}
+
+		/**
+		 * Same-site redirect: carry the flag so the next page stays embedded.
+		 *
+		 * Hatch's admin-post handlers finish with `wp_safe_redirect( admin_url(
+		 * 'admin.php?page=hatch…' ) )`. Those URLs are built through the
+		 * `admin_url` filter above and so already carry the flag; this is the
+		 * safety net for any redirect assembled some other way.
+		 *
+		 * @param string $location Redirect target.
+		 * @return string
+		 */
+		private static function keep_flag_on_redirect( $location ) {
 			if ( false === strpos( $location, 'page=hatch' ) ) {
 				return $location;
 			}
@@ -278,6 +314,67 @@ if ( ! class_exists( 'Uich_Hatch_Embed' ) ) {
 			}
 
 			return add_query_arg( self::FLAG, 1, $location );
+		}
+
+		/**
+		 * Off-site redirect: navigate the TOP window instead of the frame.
+		 *
+		 * Hatch hands off to external origins mid-flow. The one that matters is
+		 * the deploy broker — Hatch_Deploy_Broker::handle_start_deploy() ends in
+		 * `wp_redirect( <broker>/deploy/<provider>/start?ticket=… )`, and its own
+		 * comment there says "send the BROWSER to the broker's live-log page".
+		 * Framed, that 302 navigated the iframe instead, and the broker (like any
+		 * sensible service) refuses to be framed, so the panel showed
+		 *
+		 *     hatch.adityaarsharma.com refused to connect.
+		 *
+		 * A cross-origin hand-off simply cannot complete inside the frame: the
+		 * frame is the wrong target for it. So this stops the 302 and returns a
+		 * document that moves the top-level window instead. Returning '' is what
+		 * stops it — wp_redirect() bails on a falsy filtered location without
+		 * sending headers, and every caller does `wp_redirect(); exit;`, so the
+		 * body printed here becomes the response.
+		 *
+		 * Where the user ends up: the broker sends them back to
+		 * `admin-post.php?action=hatch_deploy_callback`, which is now a top-level
+		 * request, and Hatch's callback lands them on `admin.php?page=hatch`. That
+		 * is full-screen rather than back inside the dashboard — deliberate, since
+		 * a deploy is long-running and worth watching full-screen. They return to
+		 * this screen through the plugin's own menu.
+		 *
+		 * @param string $location Off-site redirect target.
+		 * @return string Empty string, which suppresses the redirect.
+		 */
+		private static function break_out_of_frame( $location ) {
+			// Only real web navigations. Anything else falls through to the
+			// normal redirect rather than being turned into a scripted one.
+			$scheme = strtolower( (string) wp_parse_url( $location, PHP_URL_SCHEME ) );
+			if ( 'http' !== $scheme && 'https' !== $scheme ) {
+				return $location;
+			}
+			// Headers already gone (an unusual caller) — a scripted breakout
+			// cannot win against a redirect that is already on the wire.
+			if ( headers_sent() ) {
+				return $location;
+			}
+
+			nocache_headers();
+			header( 'Content-Type: text/html; charset=utf-8' );
+
+			printf(
+				'<!doctype html><meta charset="utf-8"><title>%1$s</title>'
+				// The frame is same-origin with its host, so it is allowed to
+				// navigate the top window. `replace` keeps this hop out of the
+				// history, so Back does not bounce through it.
+				. '<script>try{window.top.location.replace(%2$s);}catch(e){window.location.replace(%2$s);}</script>'
+				. '<p style="font:14px/1.6 system-ui,sans-serif;padding:24px">%1$s<br><a href="%3$s">%4$s</a></p>',
+				esc_html__( 'Continuing…', 'uichemy' ),
+				wp_json_encode( $location ),
+				esc_url( $location ),
+				esc_html__( 'Continue', 'uichemy' )
+			);
+
+			return '';
 		}
 
 		/**

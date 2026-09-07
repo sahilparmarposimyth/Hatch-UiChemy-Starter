@@ -122,6 +122,21 @@ patching Hatch's ~20 URL-building sites: `admin_url` (every URL Hatch mints) and
 `wp_redirect` (every hop its handlers take). `Sec-Fetch-Dest: iframe` is honoured
 as an additional hint, not as the mechanism.
 
+**Off-site hand-offs leave the frame.** Hatch's deploy step ends in
+`wp_redirect( <broker>/deploy/<provider>/start?ticket=… )` — its own comment says
+"send the BROWSER to the broker's live-log page". Framed, that navigated the
+iframe, and the broker refuses to be framed:
+`hatch.adityaarsharma.com refused to connect.` The `wp_redirect` filter now
+splits on the target host: same-site keeps the 302 and the flag, off-site is
+answered with a small document that moves `window.top` instead (returning `''`
+from the filter is what suppresses the 302 — `wp_redirect()` bails on a falsy
+location without sending headers, and every caller does `wp_redirect(); exit;`).
+
+The broker returns to `admin-post.php?action=hatch_deploy_callback` top-level, so
+the deploy finishes on `admin.php?page=hatch` full-screen rather than back inside
+the dashboard. Deliberate — a deploy is long-running and worth watching
+full-screen — but it does mean the user returns to this screen via the menu.
+
 ## Plugin conflicts
 
 - **Standalone Hatch** — handled automatically. Both copies declare the same 57
