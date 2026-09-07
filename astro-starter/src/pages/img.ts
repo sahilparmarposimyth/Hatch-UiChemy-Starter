@@ -11,7 +11,7 @@ import type { APIRoute } from 'astro';
  *
  * Cache the response aggressively — output is content-addressable.
  */
-const BACKEND = (import.meta.env.HATCH_IMG_BACKEND || 'https://hatch.adityaarsharma.com').replace(/\/$/, '');
+const BACKEND = (import.meta.env.HATCH_IMG_BACKEND || 'https://hatch-uichemy-starter.onrender.com').replace(/\/$/, '');
 
 // Backlog #161 — SSRF allowlist. Without this the proxy will fetch any
 // attacker-controlled URL (169.254.169.254, internal admin dashboards, etc.)
