@@ -4,7 +4,7 @@ Tags: figma to wordpress, figma to elementor, figma to gutenberg, figma to brick
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.1.0
+Stable tag: 5.2.0
 License: GPLv3
 License URI: https://opensource.org/licenses/GPL-3.0
 
@@ -221,6 +221,11 @@ Yes. UiChemy supports multi-site connections directly from the plugin dashboard.
 == Changelog ==
 
 ### View full changelog and upcoming features: [roadmap.uichemy.com](https://roadmap.uichemy.com/)
+
+= 5.2.0 = 7 September 2026
+- Added : Sync with Astro, publish your site as a fast static frontend on Cloudflare, Vercel or your own server. Set it up from the new screen in the dashboard, your content keeps living in WordPress.
+- Added : Bundles Hatch 0.7.6.1, the headless engine behind it, so there is nothing extra to install.
+- Improved : If you already run the separate Hatch plugin, it is retired automatically and all of its settings carry over untouched.
 
 = 5.1.0 = 1 September 2026
 - Added : New Composer, a visual editor to fine-tune your imported designs, no coding needed.
