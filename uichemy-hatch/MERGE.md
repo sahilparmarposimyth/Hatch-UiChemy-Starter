@@ -103,6 +103,14 @@ cd ../hatch       && npm install && npm run build:admin   # Hatch admin bundle
   `scripts/build.sh` asserts the two prefixed licence files exist, so the official
   release path fails loudly rather than shipping without them.
 
+- **The WP media modal inside the frame.** Hatch calls `wp_enqueue_media()` for
+  its logo / favicon / OG-image pickers. The modal is `position: fixed`, which
+  inside an iframe anchors to the FRAME's box — and the frame is sized to its
+  content, so on a tall page the modal centres somewhere the viewer has scrolled
+  past. The "Open full screen" button in the screen header is the escape hatch;
+  it opens the same page as a normal admin screen where the modal behaves. Capping
+  the frame at viewport height would fix the modal but reintroduce an inner
+  scrollbar on every screen, which is the worse trade for the common case.
 - **Licensing.** Hatch is AGPL-3.0-or-later; UiChemy's header says GPLv3. GPLv3
   §13 explicitly permits the combination, but the combined work's header
   understates the AGPL terms that travel with `hatch/`. Both are POSIMYTH/Etica
