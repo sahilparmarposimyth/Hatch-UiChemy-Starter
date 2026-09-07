@@ -76,10 +76,50 @@ Manually, if you prefer:
 cd hatch-deploy && npm ci --omit=dev && npm start   # = node server.js
 ```
 
+### Railway / Render
+
+Both work, because both give a long-running container with a shell. Deploy via
+the **Dockerfile**, not the auto-detected Node buildpack: the broker needs `git`
+present at *runtime* (it clones on every deploy) and buildpacks do not reliably
+keep it in the runtime image. The Dockerfile makes it explicit and identical on
+both platforms.
+
+**Render** — `render.yaml` in this directory is a ready blueprint
+(*New → Blueprint*). Or by hand: New → Web Service, Docker runtime, **Root
+Directory `hatch-deploy`**, health check `/health`.
+
+**Railway** — New Project → Deploy from repo, set the service **Root Directory**
+to `hatch-deploy` so it picks up this Dockerfile. Railway injects `PORT`, which
+`server.js` already honours.
+
+Either way, set:
+
+| | |
+|---|---|
+| `HATCH_DEPLOY_BASE` | the URL the platform gives you, or your custom domain |
+| `HATCH_REPO` / `HATCH_BRANCH` | starter source — the default is public |
+| `HATCH_MAX_CONCURRENT_BUILDS` | **`1`** on a managed instance |
+
+Three things that will bite on a managed platform:
+
+- **Do not use the free/starter tier.** Every build is an `npm install` plus an
+  `astro build` — about a gigabyte. 512 MB OOMs mid-deploy. Render *Standard* or
+  the Railway equivalent is the floor, and set the concurrency to 1.
+- **Keep egress to the npm registry.** `npx vercel` / `npx wrangler@latest` are
+  fetched at deploy time, not baked into the image. A locked-down egress policy
+  lets the clone and build succeed and then fails at upload.
+- **Do not put it to sleep.** Free tiers idle containers out. Tickets live in
+  process memory, so a sleep mid-deploy loses the build, and the plugin polls a
+  ticket that no longer exists.
+
+Serverless is not an option — see the note at the end of this file.
+
 ### Files
 
 | | |
 |---|---|
+| `Dockerfile` | container image: Debian slim (glibc, for `sharp`), plus `git` |
+| `render.yaml` | Render blueprint |
 | `deploy/install.sh` | the installer above |
 | `deploy/hatch-deploy.service` | systemd unit — restart-always, `PrivateTmp`, `LimitCORE=0` so the in-memory credentials cannot reach a core dump |
 | `deploy/nginx.conf.example` | reverse proxy, `proxy_buffering off` so the streaming build log is not held back |
@@ -95,6 +135,7 @@ All environment variables — nothing to edit in the source.
 | `HATCH_REPO` | `https://github.com/adityaarsharma/hatch.git` | repo the starter is cloned from |
 | `HATCH_BRANCH` | `main` | branch to clone |
 | `HATCH_ROOT_DIR` | — | build scratch directory |
+| `HATCH_MAX_CONCURRENT_BUILDS` | `3` | parallel builds; each is ~1 GB. Use `1` on a small instance |
 
 Example, pointing at the UiChemy starter mirror:
 
@@ -212,3 +253,31 @@ are `vercel`, `cloudflare`, `vps`.
 `/status` is what makes the dashboard's inline deploy screen possible — it
 returns the whole log, so the browser never has to visit this service. See
 `includes/hatch/class-uich-hatch-deploy.php` in the merged UiChemy plugin.
+
+## Why this cannot run on serverless
+
+Not a configuration limit — the design is incompatible, in two ways that no plan
+tier fixes.
+
+**The build is deliberately detached from the response.** `makeBuildHandler`
+starts the pipeline in an un-awaited async function and then answers immediately:
+
+```js
+(async () => { await cfg.runner(...) })();   // 60–90s of git + npm + astro
+res.type('html').send(...)                   // returns at once
+```
+
+Serverless guarantees the opposite: once the response is sent the instance is
+frozen or destroyed. The pipeline would die mid-`npm install` every time.
+
+**Tickets live in process memory.** `const tickets = new Map()`. `/prepare`
+writes one and `/build` and `/status` read it; across instances those are
+different Maps, so `/build` reports "Ticket expired" for a ticket issued a second
+earlier.
+
+On top of that it needs `git`, `npm` and `npx` on PATH, a writable temp dir large
+enough for a `node_modules` tree plus Astro output, and a concurrency counter
+that means something — none of which survive a per-request runtime.
+
+Making it serverless means moving tickets to Redis/KV and the build to a queued
+container worker. At which point it is a container worker, so start with one.

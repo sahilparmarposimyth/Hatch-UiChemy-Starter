@@ -1,0 +1,36 @@
+# Render blueprint for the Hatch deploy broker.
+#
+#   render.com → New → Blueprint → point at this repo
+#
+# `rootDir` matters: the broker is one directory inside a monorepo, and the
+# Dockerfile paths are relative to it.
+services:
+  - type: web
+    name: hatch-deploy
+    runtime: docker
+    rootDir: hatch-deploy
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+
+    # NOT the free/starter tier. Each concurrent build is an `npm install` plus
+    # an `astro build` — roughly a gigabyte — and 512 MB will OOM mid-deploy.
+    # Standard is the realistic floor; pair it with the concurrency setting below.
+    plan: standard
+
+    envVars:
+      # This instance's own public URL. Render assigns one on first deploy;
+      # set it after, or point it at your custom domain.
+      - key: HATCH_DEPLOY_BASE
+        sync: false
+
+      # Public by default, so no credentials are needed. For a private repo see
+      # the README — do NOT put a token here unless the broker includes the
+      # clone-URL redaction, because the URL is written into the build log.
+      - key: HATCH_REPO
+        value: https://github.com/eticastudio/hatch.git
+      - key: HATCH_BRANCH
+        value: main
+
+      # One at a time on a managed instance. The default of 3 assumes a 4 GB box.
+      - key: HATCH_MAX_CONCURRENT_BUILDS
+        value: "1"

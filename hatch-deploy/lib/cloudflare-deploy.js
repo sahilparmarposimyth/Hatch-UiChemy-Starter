@@ -29,7 +29,16 @@ import { mkdtemp, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const MAX_CONCURRENT_BUILDS = 3;
+/*
+ * Each concurrent build is its own `npm install` + `astro build`, which is
+ * roughly a gigabyte of RAM and a node_modules tree on disk. Three is right for
+ * a 4 GB VPS and will OOM a 512 MB container, so it is settable — a small
+ * managed instance should run 1.
+ */
+const MAX_CONCURRENT_BUILDS = Math.max(
+	1,
+	parseInt(process.env.HATCH_MAX_CONCURRENT_BUILDS || '3', 10) || 3
+);
 const BUILD_TIMEOUT_MS = 10 * 60 * 1000;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
