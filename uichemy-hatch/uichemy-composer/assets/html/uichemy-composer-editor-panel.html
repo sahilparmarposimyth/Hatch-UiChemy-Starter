@@ -1,0 +1,948 @@
+<div class="uichemy-composer-panel-resizer" id="uichemy-composer-panel-resizer" aria-hidden="true"></div>
+<div class="uichemy-composer-panel-header" id="uichemy-composer-panel-header">
+	<div class="uichemy-composer-panel-header-left">
+		<svg width="24" height="24" style="border-radius: 4px" viewBox="0 0 400 400" fill="none"
+			xmlns="http://www.w3.org/2000/svg">
+			<rect width="400" height="400" fill="#4B22CC" />
+			<path
+				d="M223.001 261.203C223.001 261.203 176.796 263.816 176.796 228.857V139.714C176.796 131.215 175.093 122.799 171.782 114.947C168.472 107.094 163.62 99.9598 157.503 93.9503C151.386 87.9409 144.125 83.1744 136.133 79.9228C128.142 76.6713 119.576 74.9985 110.927 75H75V252.676C75 271.766 82.7175 290.074 96.4548 303.573C110.192 317.071 128.824 324.655 148.251 324.655H148.352C153.322 325.115 158.325 325.115 163.296 324.655H250.78C270.464 324.655 289.343 316.971 303.262 303.294C317.181 289.617 325 271.066 325 251.724V207.518H223.238L223.001 261.203ZM232.016 216.144H316.142V251.669C316.116 268.695 309.221 285.016 296.968 297.055C284.716 309.094 268.107 315.869 250.78 315.896H209.331C213.748 312.416 217.615 308.311 220.803 303.715C230.63 289.452 231.892 273.495 231.892 261.214L232.016 216.144Z"
+				fill="white" />
+			<path
+				d="M282.425 75C266.714 75 251.647 81.1317 240.537 92.0465C229.427 102.961 223.184 117.766 223.181 133.203V168.107H324.978V75H282.425Z"
+				fill="white" />
+		</svg>
+
+		<div class="uichemy-composer-header-tabs" role="tablist" aria-label="UiChemy Composer tabs">
+			<button class="uichemy-composer-tab-btn is-active" type="button" data-uichemy-composer-tab="direct" role="tab"
+				aria-selected="true">Direct Editor</button>
+			<button class="uichemy-composer-tab-btn" type="button" data-uichemy-composer-tab="code" role="tab"
+				aria-selected="false">Code</button>
+			<button class="uichemy-composer-tab-btn" type="button" data-uichemy-composer-tab="chat" role="tab"
+				aria-selected="false">Chat</button>
+		</div>
+	</div>
+	<div class="uichemy-composer-panel-header-right">
+		<button class="uichemy-composer-chat-pick-btn uichemy-composer-chat-pick-header-btn" id="uichemy-composer-chat-pick-btn" type="button"
+			title="Pick element for AI targeting">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+				stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="3" />
+				<path
+					d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+			</svg>
+			<span id="uichemy-composer-chat-pick-label">Pick element</span>
+		</button>
+		<button class="uichemy-composer-panel-toggle" id="uichemy-composer-panel-toggle">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				stroke-linecap="round" stroke-linejoin="round">
+				<path d="M6 9l6 6 6-6" />
+			</svg>
+		</button>
+	</div>
+</div>
+<div class="uichemy-composer-panel-panels">
+	<div class="uichemy-composer-panel-tab is-active" data-uichemy-composer-panel="direct" role="tabpanel">
+		<div class="uichemy-composer-direct-layout">
+			<div class="uichemy-composer-direct-list">
+				<div class="uichemy-composer-direct-list-header">
+					<span>Layers</span>
+					<button class="uichemy-composer-panel-hover-toggle" id="uichemy-composer-panel-hover-toggle" type="button"
+						aria-pressed="false" title="Inspect Element">
+						<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+							<rect x="2" y="2" width="12" height="12" stroke="currentColor" stroke-width="1.5"
+								stroke-dasharray="2 1" />
+							<path d="M6 6L11 11M6 6L9 6M6 6L6 9" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+						<span class="button-text">Hover Off</span>
+					</button>
+				</div>
+				<div class="uichemy-composer-direct-list-body" id="uichemy-composer-direct-list"></div>
+			</div>
+			<div class="uichemy-composer-direct-editor">
+				<div class="uichemy-composer-direct-editor-header">Direct Editor</div>
+				<div class="uichemy-composer-direct-editor-body">
+					<div class="uichemy-composer-direct-meta" id="uichemy-composer-direct-meta">Pick an element from the left list
+						to edit its text and link settings.</div>
+					<div class="uichemy-composer-direct-field" id="uichemy-composer-direct-classes-field">
+						<label for="uichemy-composer-direct-class-input">Applied Classes</label>
+						<div class="uichemy-composer-direct-classes-wrap" id="uichemy-composer-direct-classes-wrap">
+							<div class="uichemy-composer-direct-classes-chips" id="uichemy-composer-direct-classes-chips"
+								role="list" aria-label="Classes on this element"></div>
+							<div class="uichemy-composer-direct-class-input-row">
+								<input id="uichemy-composer-direct-class-input" type="text"
+									placeholder="Add class, then press Enter" autocomplete="off"
+									aria-autocomplete="list" aria-controls="uichemy-composer-direct-class-suggestions"
+									aria-expanded="false" />
+								<button class="uichemy-composer-btn ghost" type="button" id="uichemy-composer-direct-class-unselect"
+									style="margin-top:6px; display:none;">Unselect class</button>
+								<ul class="uichemy-composer-direct-class-suggestions" id="uichemy-composer-direct-class-suggestions"
+									role="listbox" hidden></ul>
+							</div>
+						</div>
+					</div>
+					<div class="uichemy-composer-direct-field" id="uichemy-composer-direct-text-field" style="display:none;">
+						<label for="uichemy-composer-direct-text">Text</label>
+						<textarea id="uichemy-composer-direct-text" spellcheck="false"
+							placeholder="Select an element first"></textarea>
+					</div>
+					<div class="uichemy-composer-direct-link-grid" id="uichemy-composer-direct-link-wrap" style="display:none;">
+						<div class="uichemy-composer-direct-link-group">
+							<label for="uichemy-composer-direct-url">Link URL</label>
+							<input id="uichemy-composer-direct-url" type="url" placeholder="https://example.com" />
+							<div class="uichemy-composer-direct-link-row">
+								<input id="uichemy-composer-direct-external" type="checkbox" />
+								<label for="uichemy-composer-direct-external">Open in new tab</label>
+							</div>
+							<div class="uichemy-composer-direct-link-row">
+								<input id="uichemy-composer-direct-nofollow" type="checkbox" />
+								<label for="uichemy-composer-direct-nofollow">nofollow</label>
+							</div>
+						</div>
+						<div class="uichemy-composer-direct-link-group">
+							<label for="uichemy-composer-direct-custom">Custom Attributes</label>
+							<textarea id="uichemy-composer-direct-custom" spellcheck="false"
+								placeholder="Example: data-id|123 || aria-label|Read more"></textarea>
+						</div>
+					</div>
+					<div class="uichemy-composer-direct-typography-section" id="uichemy-composer-direct-image-section"
+						style="display:none;">
+						<span class="uichemy-composer-direct-section-title"
+							id="uichemy-composer-direct-image-section-title">Image</span>
+						<div class="uichemy-composer-direct-svg-mode-wrap" id="uichemy-composer-direct-svg-mode-wrap"
+							style="display:none;">
+							<div class="uichemy-composer-header-tabs" role="tablist" aria-label="SVG mode">
+								<button class="uichemy-composer-tab-btn is-active" type="button"
+									data-uichemy-composer-direct-svg-mode="code" role="tab" aria-selected="true">SVG
+									Code</button>
+								<button class="uichemy-composer-tab-btn" type="button" data-uichemy-composer-direct-svg-mode="url"
+									role="tab" aria-selected="false">SVG URL</button>
+							</div>
+							<input id="uichemy-composer-direct-svg-mode" type="hidden" value="code" />
+						</div>
+						<div class="uichemy-composer-direct-media-grid" id="uichemy-composer-direct-media-grid">
+							<div class="uichemy-composer-direct-media-left">
+								<div class="uichemy-composer-direct-image-preview-wrap">
+									<button class="uichemy-composer-direct-image-preview" type="button"
+										id="uichemy-composer-direct-image-preview" aria-label="Change Image">
+										<img id="uichemy-composer-direct-image-preview-img" alt="Selected image preview" />
+										<span class="uichemy-composer-direct-image-empty"
+											id="uichemy-composer-direct-image-empty">No image selected</span>
+										<span class="uichemy-composer-direct-image-overlay"
+											id="uichemy-composer-direct-image-overlay-text">Change Image</span>
+									</button>
+								</div>
+								<div class="uichemy-composer-direct-field-input uichemy-composer-direct-typography-full"
+									id="uichemy-composer-direct-image-url-wrap">
+									<label for="uichemy-composer-direct-image-path"
+										id="uichemy-composer-direct-image-path-label">Image URL</label>
+									<input id="uichemy-composer-direct-image-path" type="url"
+										placeholder="https://example.com/image.jpg" />
+								</div>
+							</div>
+							<div class="uichemy-composer-direct-svg-code-wrap" id="uichemy-composer-direct-svg-code-wrap">
+								<label for="uichemy-composer-direct-svg-code">SVG Code</label>
+								<textarea id="uichemy-composer-direct-svg-code" spellcheck="false"
+									placeholder="<svg>...</svg>"></textarea>
+							</div>
+						</div>
+					</div>
+
+					<div class="uichemy-composer-direct-sections-grid">
+						<!-- Typography Accordion -->
+						<div class="uichemy-composer-accordion is-active" id="uichemy-composer-direct-typography-section">
+							<div class="uichemy-composer-accordion-header">
+								<span class="uichemy-composer-accordion-icon"><i class="eicon-caret-right"></i></span>
+								<span>Typography</span>
+							</div>
+							<div class="uichemy-composer-accordion-content">
+								<div class="uichemy-composer-direct-typography-grid">
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-font-size">Font Size</label>
+										<input id="uichemy-composer-direct-font-size" type="text" placeholder="e.g. 16px" />
+									</div>
+									<div class="uichemy-composer-direct-font-family-wrap" style="position:relative;">
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-font-family">Font Family</label>
+											<input id="uichemy-composer-direct-font-family" type="text"
+												placeholder="e.g. Inter, sans-serif" />
+										</div>
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-font-weight">Font Weight</label>
+										<select id="uichemy-composer-direct-font-weight">
+											<option value=""></option>
+											<option value="300">300</option>
+											<option value="400">400</option>
+											<option value="500">500</option>
+											<option value="600">600</option>
+											<option value="700">700</option>
+											<option value="800">800</option>
+											<option value="900">900</option>
+										</select>
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-line-height">Line Height</label>
+										<input id="uichemy-composer-direct-line-height" type="text" placeholder="e.g. 1.6" />
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-text-align">Text Align</label>
+										<select id="uichemy-composer-direct-text-align">
+											<option value=""></option>
+											<option value="left">left</option>
+											<option value="center">center</option>
+											<option value="right">right</option>
+											<option value="justify">justify</option>
+										</select>
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-font-style">Font Style</label>
+										<select id="uichemy-composer-direct-font-style">
+											<option value=""></option>
+											<option value="normal">normal</option>
+											<option value="italic">italic</option>
+										</select>
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-letter-spacing">Letter Spacing</label>
+										<input id="uichemy-composer-direct-letter-spacing" type="text"
+											placeholder="e.g. 0.2px" />
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-text-transform">Text Transform</label>
+										<select id="uichemy-composer-direct-text-transform">
+											<option value=""></option>
+											<option value="none">none</option>
+											<option value="uppercase">uppercase</option>
+											<option value="lowercase">lowercase</option>
+											<option value="capitalize">capitalize</option>
+										</select>
+									</div>
+									<div class="uichemy-composer-direct-field-input">
+										<label for="uichemy-composer-direct-text-decoration">Text Decoration</label>
+										<select id="uichemy-composer-direct-text-decoration">
+											<option value=""></option>
+											<option value="none">none</option>
+											<option value="underline">underline</option>
+											<option value="line-through">line-through</option>
+										</select>
+									</div>
+									<div class="uichemy-composer-direct-field-input uichemy-composer-direct-typography-full">
+										<label for="uichemy-composer-direct-text-color">Text Color</label>
+										<div class="uichemy-composer-direct-color-inline">
+											<input id="uichemy-composer-direct-text-color-picker"
+												class="uichemy-composer-direct-color-picker" type="color" value="#000000" />
+											<input id="uichemy-composer-direct-text-color"
+												class="uichemy-composer-direct-color-text" type="text"
+												placeholder="e.g. #ffffff or var(--color)" />
+											<button type="button" class="uichemy-composer-direct-color-global-btn"
+												id="uichemy-composer-direct-text-color-global-btn" title="Choose global color"
+												aria-label="Choose global text color"><i class="eicon-global-settings"
+													aria-hidden="true"></i></button>
+											<button type="button" class="uichemy-composer-direct-color-global-btn"
+												id="uichemy-composer-direct-text-color-inline-remove"
+												title="Remove inline color"
+												aria-label="Remove inline text color">x</button>
+										</div>
+										<div class="uichemy-composer-direct-global-color-chip"
+											id="uichemy-composer-direct-text-color-global-chip" hidden>
+											<span id="uichemy-composer-direct-text-color-global-name"></span>
+											<button type="button" class="uichemy-composer-direct-global-color-chip-close"
+												id="uichemy-composer-direct-text-color-global-remove"
+												aria-label="Remove global text color">×</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div id="uichemy-composer-direct-layout-section">
+							<!-- Layout Accordions -->
+							<div class="uichemy-composer-accordion is-active">
+								<div class="uichemy-composer-accordion-header">
+									<span class="uichemy-composer-accordion-icon"><i class="eicon-caret-right"></i></span>
+									<span>Layout</span>
+								</div>
+								<div class="uichemy-composer-accordion-content">
+									<div class="uichemy-composer-direct-typography-grid">
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-display">Display</label>
+											<select id="uichemy-composer-direct-layout-display" data-layout-style="display">
+												<option value=""></option>
+												<option value="block">block</option>
+												<option value="inline">inline</option>
+												<option value="inline-block">inline-block</option>
+												<option value="flex">flex</option>
+												<option value="inline-flex">inline-flex</option>
+												<option value="grid">grid</option>
+												<option value="none">none</option>
+											</select>
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-position">Position</label>
+											<select id="uichemy-composer-direct-layout-position" data-layout-style="position">
+												<option value=""></option>
+												<option value="static">static</option>
+												<option value="relative">relative</option>
+												<option value="absolute">absolute</option>
+												<option value="fixed">fixed</option>
+												<option value="sticky">sticky</option>
+											</select>
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-top">Top</label>
+											<input id="uichemy-composer-direct-layout-top" type="text" placeholder="e.g. 0"
+												data-layout-style="top" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-right">Right</label>
+											<input id="uichemy-composer-direct-layout-right" type="text" placeholder="e.g. 0"
+												data-layout-style="right" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-bottom">Bottom</label>
+											<input id="uichemy-composer-direct-layout-bottom" type="text" placeholder="e.g. 0"
+												data-layout-style="bottom" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-left">Left</label>
+											<input id="uichemy-composer-direct-layout-left" type="text" placeholder="e.g. 0"
+												data-layout-style="left" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-zindex">Z-Index</label>
+											<input id="uichemy-composer-direct-layout-zindex" type="text"
+												placeholder="e.g. 10" data-layout-style="z-index" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-overflow">Overflow</label>
+											<select id="uichemy-composer-direct-layout-overflow" data-layout-style="overflow">
+												<option value=""></option>
+												<option value="visible">visible</option>
+												<option value="hidden">hidden</option>
+												<option value="auto">auto</option>
+												<option value="scroll">scroll</option>
+											</select>
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-width">Width</label>
+											<input id="uichemy-composer-direct-layout-width" type="text"
+												placeholder="e.g. 100%" data-layout-style="width" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-height">Height</label>
+											<input id="uichemy-composer-direct-layout-height" type="text"
+												placeholder="e.g. auto" data-layout-style="height" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-min-width">Min Width</label>
+											<input id="uichemy-composer-direct-layout-min-width" type="text"
+												placeholder="e.g. 0" data-layout-style="min-width" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-max-width">Max Width</label>
+											<input id="uichemy-composer-direct-layout-max-width" type="text"
+												placeholder="e.g. none" data-layout-style="max-width" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-min-height">Min Height</label>
+											<input id="uichemy-composer-direct-layout-min-height" type="text"
+												placeholder="e.g. 0" data-layout-style="min-height" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-max-height">Max Height</label>
+											<input id="uichemy-composer-direct-layout-max-height" type="text"
+												placeholder="e.g. none" data-layout-style="max-height" />
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-box-sizing">Box Sizing</label>
+											<select id="uichemy-composer-direct-layout-box-sizing"
+												data-layout-style="box-sizing">
+												<option value=""></option>
+												<option value="content-box">content-box</option>
+												<option value="border-box">border-box</option>
+											</select>
+										</div>
+										<div class="uichemy-composer-direct-field-input">
+											<label for="uichemy-composer-direct-layout-opacity">Opacity</label>
+											<input id="uichemy-composer-direct-layout-opacity" type="number" min="0" max="1"
+												step="0.01" placeholder="1" data-layout-style="opacity" />
+										</div>
+									</div>
+									<div style="margin-top: 15px;">
+										<div class="uichemy-composer-direct-typography-grid">
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-flex-direction">Flex
+													Direction</label>
+												<select id="uichemy-composer-direct-layout-flex-direction"
+													data-layout-style="flex-direction">
+													<option value=""></option>
+													<option value="row">row</option>
+													<option value="column">column</option>
+													<option value="row-reverse">row-reverse</option>
+													<option value="column-reverse">column-reverse</option>
+												</select>
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-flex-wrap">Flex Wrap</label>
+												<select id="uichemy-composer-direct-layout-flex-wrap"
+													data-layout-style="flex-wrap">
+													<option value=""></option>
+													<option value="nowrap">nowrap</option>
+													<option value="wrap">wrap</option>
+												</select>
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-justify-content">Justify
+													Content</label>
+												<select id="uichemy-composer-direct-layout-justify-content"
+													data-layout-style="justify-content">
+													<option value=""></option>
+													<option value="flex-start">flex-start</option>
+													<option value="center">center</option>
+													<option value="flex-end">flex-end</option>
+													<option value="space-between">space-between</option>
+													<option value="space-around">space-around</option>
+													<option value="space-evenly">space-evenly</option>
+												</select>
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-align-items">Align Items</label>
+												<select id="uichemy-composer-direct-layout-align-items"
+													data-layout-style="align-items">
+													<option value=""></option>
+													<option value="stretch">stretch</option>
+													<option value="flex-start">flex-start</option>
+													<option value="center">center</option>
+													<option value="flex-end">flex-end</option>
+													<option value="baseline">baseline</option>
+												</select>
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-gap">Gap</label>
+												<input id="uichemy-composer-direct-layout-gap" type="text"
+													placeholder="e.g. 10px" data-layout-style="gap" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-row-gap">Row Gap</label>
+												<input id="uichemy-composer-direct-layout-row-gap" type="text"
+													placeholder="e.g. 8px" data-layout-style="row-gap" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-column-gap">Column Gap</label>
+												<input id="uichemy-composer-direct-layout-column-gap" type="text"
+													placeholder="e.g. 8px" data-layout-style="column-gap" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-grid-cols">Grid Template
+													Columns</label>
+												<input id="uichemy-composer-direct-layout-grid-cols" type="text"
+													placeholder="e.g. 1fr 1fr"
+													data-layout-style="grid-template-columns" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-grid-rows">Grid Template
+													Rows</label>
+												<input id="uichemy-composer-direct-layout-grid-rows" type="text"
+													placeholder="e.g. auto auto"
+													data-layout-style="grid-template-rows" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-grid-column">Grid Column</label>
+												<input id="uichemy-composer-direct-layout-grid-column" type="text"
+													placeholder="e.g. 1 / 3" data-layout-style="grid-column" />
+											</div>
+											<div class="uichemy-composer-direct-field-input">
+												<label for="uichemy-composer-direct-layout-grid-row">Grid Row</label>
+												<input id="uichemy-composer-direct-layout-grid-row" type="text"
+													placeholder="e.g. 1 / 2" data-layout-style="grid-row" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="uichemy-composer-accordion is-active">
+								<div class="uichemy-composer-accordion-header">
+									<span class="uichemy-composer-accordion-icon"><i class="eicon-caret-right"></i></span>
+									<span>Spacing</span>
+								</div>
+								<div class="uichemy-composer-accordion-content">
+									<div class="uichemy-composer-direct-typography-grid">
+										<div class="uichemy-composer-direct-sides-field" data-sides-type="margin">
+											<div class="uichemy-composer-direct-sides-header">
+												<label>Margin</label>
+												<div class="uichemy-composer-unit-selector">
+													<select class="uichemy-composer-sides-unit">
+														<option value="px">PX</option>
+														<option value="%">%</option>
+														<option value="em">EM</option>
+														<option value="rem">REM</option>
+														<option value="vh">VH</option>
+														<option value="vw">VW</option>
+													</select>
+												</div>
+											</div>
+											<div class="uichemy-composer-direct-sides-inputs">
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="top"
+														placeholder="0" />
+													<span>Top</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="right"
+														placeholder="0" />
+													<span>Right</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input"
+														data-side="bottom" placeholder="0" />
+													<span>Bottom</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="left"
+														placeholder="0" />
+													<span>Left</span>
+												</div>
+												<div class="uichemy-composer-dimension-link">
+													<button type="button" class="uichemy-composer-sides-link-btn is-active"
+														title="Link values together">
+														<i class="eicon-link" aria-hidden="true"></i>
+													</button>
+												</div>
+											</div>
+										</div>
+										<div class="uichemy-composer-direct-sides-field" data-sides-type="padding">
+											<div class="uichemy-composer-direct-sides-header">
+												<label>Padding</label>
+												<div class="uichemy-composer-unit-selector">
+													<select class="uichemy-composer-sides-unit">
+														<option value="px">PX</option>
+														<option value="%">%</option>
+														<option value="em">EM</option>
+														<option value="rem">REM</option>
+														<option value="vh">VH</option>
+														<option value="vw">VW</option>
+													</select>
+												</div>
+											</div>
+											<div class="uichemy-composer-direct-sides-inputs">
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="top"
+														placeholder="0" />
+													<span>Top</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="right"
+														placeholder="0" />
+													<span>Right</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input"
+														data-side="bottom" placeholder="0" />
+													<span>Bottom</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="left"
+														placeholder="0" />
+													<span>Left</span>
+												</div>
+												<div class="uichemy-composer-dimension-link">
+													<button type="button" class="uichemy-composer-sides-link-btn is-active"
+														title="Link values together">
+														<i class="eicon-link" aria-hidden="true"></i>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="uichemy-composer-accordion is-active">
+								<div class="uichemy-composer-accordion-header">
+									<span class="uichemy-composer-accordion-icon"><i class="eicon-caret-right"></i></span>
+									<span>Border</span>
+								</div>
+								<div class="uichemy-composer-accordion-content">
+									<div class="uichemy-composer-direct-typography-grid">
+										<div class="uichemy-composer-direct-field-input uichemy-composer-direct-typography-full">
+											<label for="uichemy-composer-direct-layout-border-style">Border Type</label>
+											<select id="uichemy-composer-direct-layout-border-style"
+												data-layout-style="border-style">
+												<option value=""></option>
+												<option value="solid">Solid</option>
+												<option value="double">Double</option>
+												<option value="dotted">Dotted</option>
+												<option value="dashed">Dashed</option>
+												<option value="groove">Groove</option>
+											</select>
+										</div>
+
+										<div class="uichemy-composer-direct-sides-field" data-sides-type="border-width">
+											<div class="uichemy-composer-direct-sides-header">
+												<label>Border Width</label>
+												<div class="uichemy-composer-unit-selector">
+													<select class="uichemy-composer-sides-unit">
+														<option value="px">PX</option>
+														<option value="em">EM</option>
+														<option value="rem">REM</option>
+													</select>
+												</div>
+											</div>
+											<div class="uichemy-composer-direct-sides-inputs">
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="top"
+														placeholder="0" />
+													<span>Top</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="right"
+														placeholder="0" />
+													<span>Right</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input"
+														data-side="bottom" placeholder="0" />
+													<span>Bottom</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="left"
+														placeholder="0" />
+													<span>Left</span>
+												</div>
+												<div class="uichemy-composer-dimension-link">
+													<button type="button" class="uichemy-composer-sides-link-btn is-active"
+														title="Link values together">
+														<i class="eicon-link" aria-hidden="true"></i>
+													</button>
+												</div>
+											</div>
+										</div>
+
+										<div class="uichemy-composer-direct-field-input uichemy-composer-direct-typography-full">
+											<label for="uichemy-composer-direct-layout-border-color">Border Color</label>
+											<div class="uichemy-composer-direct-color-inline">
+												<input id="uichemy-composer-direct-layout-border-color-picker"
+													class="uichemy-composer-direct-color-picker" type="color"
+													value="#000000" />
+												<input id="uichemy-composer-direct-layout-border-color"
+													class="uichemy-composer-direct-color-text" type="text"
+													placeholder="e.g. #111111" data-layout-style="border-color" />
+												<button type="button" class="uichemy-composer-direct-color-global-btn"
+													id="uichemy-composer-direct-layout-border-color-global-btn"
+													title="Choose global color"><i class="eicon-global-settings"
+														aria-hidden="true"></i></button>
+												<button type="button" class="uichemy-composer-direct-color-global-btn"
+													id="uichemy-composer-direct-layout-border-color-inline-remove"
+													title="Remove inline color">x</button>
+											</div>
+											<div class="uichemy-composer-direct-global-color-chip"
+												id="uichemy-composer-direct-layout-border-color-global-chip" hidden>
+												<span id="uichemy-composer-direct-layout-border-color-global-name"></span>
+												<button type="button" class="uichemy-composer-direct-global-color-chip-close"
+													id="uichemy-composer-direct-layout-border-color-global-remove">×</button>
+											</div>
+										</div>
+
+										<div class="uichemy-composer-direct-sides-field" data-sides-type="border-radius">
+											<div class="uichemy-composer-direct-sides-header">
+												<label>Border Radius</label>
+												<div class="uichemy-composer-unit-selector">
+													<select class="uichemy-composer-sides-unit">
+														<option value="px">PX</option>
+														<option value="%">%</option>
+														<option value="em">EM</option>
+														<option value="rem">REM</option>
+													</select>
+												</div>
+											</div>
+											<div class="uichemy-composer-direct-sides-inputs">
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="top"
+														placeholder="0" />
+													<span>Top</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="right"
+														placeholder="0" />
+													<span>Right</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input"
+														data-side="bottom" placeholder="0" />
+													<span>Bottom</span>
+												</div>
+												<div class="uichemy-composer-side-input-group">
+													<input type="number" class="uichemy-composer-side-input" data-side="left"
+														placeholder="0" />
+													<span>Left</span>
+												</div>
+												<div class="uichemy-composer-dimension-link">
+													<button type="button" class="uichemy-composer-sides-link-btn is-active"
+														title="Link values together">
+														<i class="eicon-link" aria-hidden="true"></i>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="uichemy-composer-accordion is-active">
+								<div class="uichemy-composer-accordion-header">
+									<span class="uichemy-composer-accordion-icon"><i class="eicon-caret-right"></i></span>
+									<span>Background</span>
+								</div>
+								<div class="uichemy-composer-accordion-content">
+									<div class="uichemy-composer-direct-typography-grid">
+										<div class="uichemy-composer-direct-field-input uichemy-composer-direct-typography-full">
+											<label for="uichemy-composer-direct-layout-bg-color">Background Color</label>
+											<div class="uichemy-composer-direct-color-inline">
+												<input id="uichemy-composer-direct-layout-bg-color-picker"
+													class="uichemy-composer-direct-color-picker" type="color"
+													value="#000000" />
+												<input id="uichemy-composer-direct-layout-bg-color"
+													class="uichemy-composer-direct-color-text" type="text"
+													placeholder="e.g. #111111 or var(--bg)"
+													data-layout-style="background-color" />
+												<button type="button" class="uichemy-composer-direct-color-global-btn"
+													id="uichemy-composer-direct-layout-bg-color-global-btn"
+													title="Choose global color"
+													aria-label="Choose global background color"><i
+														class="eicon-global-settings" aria-hidden="true"></i></button>
+												<button type="button" class="uichemy-composer-direct-color-global-btn"
+													id="uichemy-composer-direct-layout-bg-color-inline-remove"
+													title="Remove inline color"
+													aria-label="Remove inline background color">x</button>
+											</div>
+											<div class="uichemy-composer-direct-global-color-chip"
+												id="uichemy-composer-direct-layout-bg-color-global-chip" hidden>
+												<span id="uichemy-composer-direct-layout-bg-color-global-name"></span>
+												<button type="button" class="uichemy-composer-direct-global-color-chip-close"
+													id="uichemy-composer-direct-layout-bg-color-global-remove"
+													aria-label="Remove global background color">×</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div> <!-- End Layout Wrapper -->
+
+					</div> <!-- close uichemy-composer-direct-sections-grid -->
+
+					<div class="uichemy-composer-direct-actions">
+						<button class="uichemy-composer-btn ghost" type="button" id="uichemy-composer-direct-reset">Reset
+							Style</button>
+					</div>
+					<div class="uichemy-composer-direct-status" id="uichemy-composer-direct-status"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="uichemy-composer-direct-global-color-popover" id="uichemy-composer-direct-global-color-popover" hidden></div>
+	<div class="uichemy-composer-panel-tab" data-uichemy-composer-panel="code" role="tabpanel">
+		<div class="uichemy-composer-code-layout">
+			<div class="uichemy-composer-code-row-tabs" role="tablist" aria-orientation="vertical" aria-label="Code groups">
+				<button class="uichemy-composer-code-row-tab is-active" type="button" data-uichemy-composer-code-tab="core"
+					data-tooltip="Code" aria-selected="true" aria-label="Code">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+						<path fill="currentColor"
+							d="m12.89 3l1.96.4L11.11 21l-1.96-.4zm6.7 9L16 8.41V5.58L22.42 12L16 18.41v-2.83zM1.58 12L8 5.58v2.83L4.41 12L8 15.58v2.83z"
+							stroke-width="0.2" stroke="currentColor" />
+					</svg>
+				</button>
+				<button class="uichemy-composer-code-row-tab" type="button" data-uichemy-composer-code-tab="page"
+					data-tooltip="Page" aria-selected="false" aria-label="Page">
+					<svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+						<path d="M7 3h8l5 5v13H7z"></path>
+						<path d="M15 3v5h5"></path>
+					</svg>
+				</button>
+				<button class="uichemy-composer-code-row-tab" type="button" data-uichemy-composer-code-tab="site"
+					data-tooltip="Entire Site" aria-selected="false" aria-label="Entire Site">
+					<i class="eicon-global-settings" aria-hidden="true"></i>
+				</button>
+				<button class="uichemy-composer-code-row-tab" type="button" data-uichemy-composer-code-tab="globals"
+					data-tooltip="Globals" aria-selected="false" aria-label="Globals">
+					<svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+						<circle cx="12" cy="12" r="9"></circle>
+						<path d="M3 12h18"></path>
+						<path d="M12 3a13 13 0 0 1 0 18"></path>
+						<path d="M12 3a13 13 0 0 0 0 18"></path>
+					</svg>
+				</button>
+			</div>
+			<div class="uichemy-composer-code-row-panels">
+				<div class="uichemy-composer-code-row-panel is-active" data-uichemy-composer-code-panel="core">
+					<div class="uichemy-composer-panel-body">
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title html">HTML</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-html">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-html">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-html" spellcheck="false"></textarea>
+						</div>
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title css">CSS</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-css">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-css">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-css" spellcheck="false"></textarea>
+						</div>
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title js">JAVASCRIPT</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-js">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-js">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-js" spellcheck="false"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="uichemy-composer-code-row-panel" data-uichemy-composer-code-panel="page">
+					<div class="uichemy-composer-panel-body">
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title html">Before &lt;/head&gt; on this page only</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-page-head">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-page-head">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-page-head" spellcheck="false" placeholder=""></textarea>
+						</div>
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title js">Before &lt;/body&gt; on this page only</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-page-footer">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-page-footer">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-page-footer" spellcheck="false" placeholder=""></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="uichemy-composer-code-row-panel" data-uichemy-composer-code-panel="site">
+					<div class="uichemy-composer-panel-body">
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title html">Before &lt;/head&gt; on the entire site</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-site-head">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-site-head">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-site-head" spellcheck="false" placeholder=""></textarea>
+						</div>
+						<div class="uichemy-composer-panel-col">
+							<div class="uichemy-composer-panel-col-header">
+								<span class="uichemy-composer-col-title js">Before &lt;/body&gt; on the entire site</span>
+								<div class="uichemy-composer-col-actions">
+									<button class="uichemy-composer-btn format-btn"
+										data-target="uichemy-composer-panel-site-footer">Format</button>
+									<button class="uichemy-composer-btn copy-btn"
+										data-target="uichemy-composer-panel-site-footer">Copy</button>
+								</div>
+							</div>
+							<textarea id="uichemy-composer-panel-site-footer" spellcheck="false" placeholder=""></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="uichemy-composer-code-row-panel" data-uichemy-composer-code-panel="globals">
+					<div class="uichemy-composer-globals-root">
+						<div class="uichemy-composer-globals-status" id="uichemy-composer-globals-status">Read-only · synced with
+							Elementor Site Settings</div>
+						<div class="uichemy-composer-globals-scroll">
+							<div class="uichemy-composer-globals-column">
+								<div class="uichemy-composer-globals-toolbar">
+									<span class="uichemy-composer-globals-toolbar-label">Elementor Globals Editor</span>
+									<button type="button" class="uichemy-composer-btn ghost copy-btn"
+										data-target="uichemy-composer-globals-doc">Copy</button>
+								</div>
+								<div class="uichemy-composer-globals-editor-wrap">
+									<textarea id="uichemy-composer-globals-doc" spellcheck="false" readonly
+										aria-label="Elementor globals snapshot"></textarea>
+								</div>
+							</div>
+							<div class="uichemy-composer-globals-column">
+								<div class="uichemy-composer-globals-toolbar">
+									<span class="uichemy-composer-globals-toolbar-label">AI Data Sending</span>
+									<button type="button" class="uichemy-composer-btn ghost copy-btn"
+										data-target="uichemy-composer-globals-ai-data">Copy</button>
+								</div>
+								<div class="uichemy-composer-globals-editor-wrap">
+									<textarea id="uichemy-composer-globals-ai-data" spellcheck="false"
+										aria-label="AI Data Sending"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="uichemy-composer-panel-tab" data-uichemy-composer-panel="chat" role="tabpanel">
+		<div class="uichemy-composer-chat-shell">
+			<div class="uichemy-composer-chat-log" id="uichemy-composer-chat-log"></div>
+			<div id="uichemy-composer-agent-status" style="display:none;padding:0 12px 8px;font-size:11px;"></div>
+			<div class="uichemy-composer-chat-compose">
+				<div class="uichemy-composer-chat-input-wrap">
+					<!-- Image preview strip — visible when images are attached or pasted -->
+					<div class="uichemy-composer-chat-image-strip" id="uichemy-composer-chat-image-strip" style="display:none"></div>
+					<textarea id="uichemy-composer-chat-input" spellcheck="false" placeholder="Type a prompt..."></textarea>
+					<div class="uichemy-composer-chat-compose-row">
+						<div class="uichemy-composer-chat-compose-left">
+							<button class="uichemy-composer-chat-attach-btn" id="uichemy-composer-chat-attach-btn" type="button" title="Attach image">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+									<circle cx="8.5" cy="8.5" r="1.5"/>
+									<polyline points="21 15 16 10 5 21"/>
+								</svg>
+							</button>
+							<input type="file" id="uichemy-composer-chat-file-input" accept="image/*" multiple style="display:none" tabindex="-1">
+						</div>
+						<div class="uichemy-composer-chat-compose-right">
+							<button class="uichemy-composer-btn primary" type="button" id="uichemy-composer-chat-send">Send</button>
+						</div>
+					</div>
+				</div>
+				<!-- Target element indicator — below the input box -->
+				<div class="uichemy-composer-chat-target-bar" id="uichemy-composer-chat-target-bar" style="display:none">
+					<svg class="uichemy-composer-chat-target-icon" width="11" height="11" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2.5"
+						stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="4 17 10 11 4 5"></polyline>
+						<line x1="12" y1="19" x2="20" y2="19"></line>
+					</svg>
+					<span class="uichemy-composer-chat-target-label">Target</span>
+					<code class="uichemy-composer-chat-target-tag" id="uichemy-composer-chat-target-tag"></code>
+					<button class="uichemy-composer-chat-target-clear" id="uichemy-composer-chat-target-clear"
+						type="button" title="Clear element selection">✕</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,93 @@
+/*
+ * Tailwind entry for the CANVAS bundle — the design system, minus the reset.
+ *
+ * The on-canvas toolbar (composer-box-handles.js) renders in whichever document
+ * holds the page: in Elementor that is the preview iframe, while the panel — and
+ * therefore composer.css — lives in the editor window. The toolbar's controls are
+ * real PropField / design-system components, so without their utilities they
+ * arrive as unstyled blocks and the previewed page's own CSS paints them.
+ *
+ * `@tailwind base` is deliberately ABSENT, and that absence is the whole point of
+ * this file existing. Preflight is a global reset on bare `*`, `body` and
+ * `h1`…`p` selectors — `border-width: 0`, `margin: 0`, `display: block` on
+ * images — and the document this loads into is the USER'S PAGE. Loading
+ * composer.css here instead would restyle the very design they are editing.
+ *
+ * Components and utilities are safe because tailwind.config.js sets
+ * `important: '.uich-tw'`, so every utility ships scoped as `.uich-tw .foo` and
+ * cannot reach page markup. Same trade the dashboard bundle already makes with
+ * admin-island.css.
+ */
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tailwind's --tw-* defaults, scoped to the island.
+ *
+ * These normally arrive with preflight, in its `*, ::before, ::after` block —
+ * which declares NOTHING else, no reset, only these variables. Every
+ * shadow-*, ring-*, transform and filter utility is written in terms of them, so
+ * without this block those utilities compute to nothing at all and fail silently:
+ * a menu with `shadow-md` simply has no shadow. That is why they are reproduced
+ * here rather than left to preflight.
+ *
+ * Scoped to `.uich-tw` and its descendants, so unlike preflight's version this
+ * touches no page markup. Regenerate from the first `*, ::before, ::after` block
+ * of build/composer.css if Tailwind is upgraded.
+ */
+.uich-tw,
+.uich-tw *,
+.uich-tw ::before,
+.uich-tw ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:;
+  --tw-pan-y:;
+  --tw-pinch-zoom:;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:;
+  --tw-gradient-via-position:;
+  --tw-gradient-to-position:;
+  --tw-ordinal:;
+  --tw-slashed-zero:;
+  --tw-numeric-figure:;
+  --tw-numeric-spacing:;
+  --tw-numeric-fraction:;
+  --tw-ring-inset:;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:;
+  --tw-brightness:;
+  --tw-contrast:;
+  --tw-grayscale:;
+  --tw-hue-rotate:;
+  --tw-invert:;
+  --tw-saturate:;
+  --tw-sepia:;
+  --tw-drop-shadow:;
+  --tw-backdrop-blur:;
+  --tw-backdrop-brightness:;
+  --tw-backdrop-contrast:;
+  --tw-backdrop-grayscale:;
+  --tw-backdrop-hue-rotate:;
+  --tw-backdrop-invert:;
+  --tw-backdrop-opacity:;
+  --tw-backdrop-saturate:;
+  --tw-backdrop-sepia:;
+  --tw-contain-size:;
+  --tw-contain-layout:;
+  --tw-contain-paint:;
+  --tw-contain-style:;
+}

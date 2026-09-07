@@ -1,0 +1,12 @@
+/* Label, form label typography. */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uc-space-6);
+  font-size: var(--uc-text-sm);
+  font-weight: var(--uc-weight-medium);
+  color: var(--uc-text-strong);
+  line-height: var(--uc-leading-snug);
+  user-select: none;
+}
+.label[data-disabled] { color: var(--uc-text-subtle); cursor: not-allowed; }

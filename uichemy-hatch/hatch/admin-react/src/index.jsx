@@ -1,0 +1,412 @@
+/**
+ * Hatch admin — React SPA entrypoint.
+ *
+ * Mounts on <div id="hatch-react-root"> rendered by hatch_render_admin_page().
+ * Reads initial state from window.hatchBoot.state for SSR-style first paint —
+ * no fetch round-trip on mount. Saves go through hxFetch() to POST
+ * /hatch/v1/options which the plugin's REST controller accepts as a flat
+ * key/value batch.
+ *
+ * Design contract: admin-react/DESIGN-SYSTEM.md. Locked from Claude Design v2.
+ */
+import { createRoot, useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import { HxIcon, hxFetch } from './components.jsx';
+import Connection from './tabs/Connection.jsx';
+import Design from './tabs/Design.jsx';
+import Content from './tabs/Content.jsx';
+import Performance from './tabs/Performance.jsx';
+import Security from './tabs/Security.jsx';
+import Status from './tabs/Status.jsx';
+import SetupApp from './setup/SetupApp.jsx';
+import './styles.css';
+
+import PluginBridge from './tabs/PluginBridge.jsx';
+
+/* Dark mode: resolve preference and apply BEFORE first paint so there is no
+   flash of light. Reads localStorage first, then prefers-color-scheme, then
+   falls back to light. The value lives on <html data-hx-theme="..."> AND on
+   <body> so WordPress admin chrome (which we cannot scope to .hatch-react)
+   can react through the [data-hx-theme="dark"] rules in styles.css. */
+const THEME_KEY = 'hx-theme';
+function resolveTheme() {
+	try {
+		const saved = window.localStorage.getItem(THEME_KEY);
+		if (saved === 'light' || saved === 'dark') return saved;
+	} catch (e) { /* privacy mode: fall through */ }
+	if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+	return 'light';
+}
+function applyTheme(next) {
+	document.documentElement.setAttribute('data-hx-theme', next);
+	document.body.setAttribute('data-hx-theme', next);
+}
+/* Apply immediately on script load so first paint is correct. */
+applyTheme(resolveTheme());
+
+const TABS = [
+	{ id: 'connection',  label: 'Connection',  Component: Connection },
+	{ id: 'design',      label: 'Design',      Component: Design },
+	{ id: 'content',     label: 'Content',     Component: Content },
+	{ id: 'bridge',      label: 'Bridge',      Component: PluginBridge },
+	{ id: 'performance', label: 'Performance', Component: Performance },
+	{ id: 'security',    label: 'Security',    Component: Security },
+	{ id: 'status',      label: 'Status',      Component: Status },
+];
+
+function App() {
+	const boot = window.hatchBoot || {};
+	const initialState = boot.state || {};
+
+	// Hash routing keeps tab state shareable / survivable across refresh.
+	const initialTab = (window.location.hash || '#connection').slice(1);
+	const [tab, setTabRaw] = useState(TABS.some((t) => t.id === initialTab) ? initialTab : 'connection');
+	const setTab = (id) => {
+		setTabRaw(id);
+		if (window.history.replaceState) window.history.replaceState(null, '', `#${id}`);
+	};
+	useEffect(() => {
+		const onHash = () => {
+			const id = window.location.hash.slice(1);
+			if (TABS.some((t) => t.id === id)) setTabRaw(id);
+		};
+		window.addEventListener('hashchange', onHash);
+		return () => window.removeEventListener('hashchange', onHash);
+	}, []);
+
+	const [state, setState] = useState(initialState);
+	const [pending, setPending] = useState({});
+	const [phase, setPhase] = useState('idle'); // idle | saving | saved | error
+	const [lastSaved, setLastSaved] = useState(null);
+
+	/* Theme state: seeded from the same resolver used at boot so React and
+	   the DOM never disagree. Toggle flips DOM attribute + persists + updates
+	   React state so any tab reading `theme` from context/prop stays in sync. */
+	const [theme, setTheme] = useState(() => (
+		document.documentElement.getAttribute('data-hx-theme') || resolveTheme()
+	));
+	const toggleTheme = useCallback(() => {
+		const next = theme === 'dark' ? 'light' : 'dark';
+		applyTheme(next);
+		try { window.localStorage.setItem(THEME_KEY, next); } catch (e) { /* privacy mode */ }
+		setTheme(next);
+	}, [theme]);
+	/* Follow system changes only when the user has not made an explicit choice. */
+	useEffect(() => {
+		if (!window.matchMedia) return;
+		const mq = window.matchMedia('(prefers-color-scheme: dark)');
+		const onChange = (e) => {
+			let saved = null;
+			try { saved = window.localStorage.getItem(THEME_KEY); } catch (err) { /* privacy mode */ }
+			if (saved === 'light' || saved === 'dark') return;
+			const next = e.matches ? 'dark' : 'light';
+			applyTheme(next);
+			setTheme(next);
+		};
+		mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
+		return () => {
+			mq.removeEventListener ? mq.removeEventListener('change', onChange) : mq.removeListener(onChange);
+		};
+	}, []);
+	const setupUrl = boot.setupUrl || 'admin.php?page=hatch-setup';
+	const openWizard = () => { window.location.href = setupUrl; };
+
+	const dirtyCount = useMemo(() => Object.keys(pending).length, [pending]);
+
+	const setSetting = useCallback((path, value) => {
+		setPending((p) => ({ ...p, [path]: value }));
+		setState((s) => {
+			const next = structuredClone(s);
+			const keys = path.split('.');
+			let cursor = next;
+			for (let i = 0; i < keys.length - 1; i++) {
+				cursor[keys[i]] = cursor[keys[i]] || {};
+				cursor = cursor[keys[i]];
+			}
+			cursor[keys[keys.length - 1]] = value;
+			return next;
+		});
+	}, []);
+
+	const onDirty = useCallback(() => { setPhase('idle'); }, []);
+
+	const save = useCallback(async () => {
+		if (Object.keys(pending).length === 0) return;
+		setPhase('saving');
+		try {
+			await hxFetch('options', { method: 'POST', body: JSON.stringify(pending) });
+			setPending({});
+			setPhase('saved');
+			setLastSaved(new Date());
+			setTimeout(() => setPhase('idle'), 2200);
+		} catch (e) {
+			console.error('[hatch] save failed', e);
+			setPhase('error');
+		}
+	}, [pending]);
+
+	const discard = useCallback(() => {
+		setPending({});
+		setState(initialState);
+		setPhase('idle');
+	}, [initialState]);
+
+	// ⌘S / Ctrl-S keyboard shortcut.
+	useEffect(() => {
+		const h = (e) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+				e.preventDefault();
+				if (dirtyCount > 0 && phase === 'idle') save();
+			}
+		};
+		window.addEventListener('keydown', h);
+		return () => window.removeEventListener('keydown', h);
+	}, [dirtyCount, phase, save]);
+
+	const fmtSaved = (d) => {
+		if (!d) return null;
+		const m = Math.round((Date.now() - d.getTime()) / 60000);
+		return m < 1 ? 'just now' : m === 1 ? '1 min ago' : `${m} mins ago`;
+	};
+
+	const Current = TABS.find((t) => t.id === tab)?.Component || Connection;
+	// Disabled by request — users don't want a constant attention dot on Security.
+	const securityBadge = false;
+
+	return (
+		<div className="hatch-react" style={{ minHeight: '100vh', paddingBottom: 100, background: 'var(--hx-bg)' }}>
+			{/* ── Header ───────────────────────────────────────────────── */}
+			<div style={{ textAlign: 'center', padding: '44px 24px 0' }}>
+				<div style={{ fontSize: 44, lineHeight: 1, marginBottom: 10 }}>🐣</div>
+				<h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--hx-fg)', letterSpacing: '-0.035em', lineHeight: 1, margin: 0 }}>
+					Hatch
+				</h1>
+				<p style={{ fontSize: 14, color: 'var(--hx-subtle)', marginTop: 6 }}>The Headless Engine for WordPress</p>
+
+				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
+					<span
+						style={{
+							padding: '4px 12px',
+							borderRadius: 999,
+							border: '1px solid var(--hx-border)',
+							fontSize: 12,
+							color: 'var(--hx-subtle)',
+							fontFamily: 'ui-monospace,SFMono-Regular,Menlo,monospace',
+						}}
+					>
+						v{boot.version || ''}
+					</span>
+					{/* Dark mode toggle. Icon swaps based on current theme. */}
+					<button
+						type="button"
+						className="hx-theme-toggle"
+						onClick={toggleTheme}
+						aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+						title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+					>
+						{theme === 'dark' ? (
+							<HxIcon size={14} sw={2}>
+								<circle cx="12" cy="12" r="4" />
+								<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+							</HxIcon>
+						) : (
+							<HxIcon size={14} sw={2}>
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+							</HxIcon>
+						)}
+					</button>
+				</div>
+			</div>
+
+			{/* ── Pill segmented tab nav ───────────────────────────────── */}
+			<div style={{ display: 'flex', justifyContent: 'center', padding: '28px 24px 0' }}>
+				<div
+					style={{
+						display: 'inline-flex',
+						background: 'var(--hx-surface-2)',
+						borderRadius: 999,
+						padding: 4,
+						gap: 2,
+						border: '1px solid var(--hx-border)',
+					}}
+					role="tablist"
+					aria-label="Hatch settings tabs"
+				>
+					{TABS.map(({ id, label }) => {
+						const active = tab === id;
+						const badge = id === 'security' && securityBadge;
+						return (
+							<button
+								key={id}
+								role="tab"
+								id={`hatch-tab-${id}`}
+								aria-selected={active}
+								aria-controls={`hatch-panel-${id}`}
+								tabIndex={active ? 0 : -1}
+								onClick={() => setTab(id)}
+								style={{
+									padding: '8px 18px',
+									borderRadius: 999,
+									border: 'none',
+									background: active ? 'var(--hx-surface)' : 'transparent',
+									color: active ? 'var(--hx-fg)' : 'var(--hx-subtle)',
+									fontWeight: active ? 600 : 500,
+									fontSize: 13,
+									cursor: 'pointer',
+									fontFamily: 'inherit',
+									boxShadow: active ? '0 1px 4px rgba(0,0,0,.1), 0 0 0 0.5px rgba(0,0,0,.06)' : 'none',
+									transition: 'all .18s var(--hx-ease)',
+									whiteSpace: 'nowrap',
+									position: 'relative',
+								}}
+							>
+								{label}
+								{badge && (
+									<span
+										style={{
+											position: 'absolute',
+											top: 6,
+											right: 8,
+											width: 6,
+											height: 6,
+											borderRadius: '50%',
+											background: '#d97706',
+											display: 'inline-block',
+										}}
+										aria-label="Needs attention"
+									/>
+								)}
+							</button>
+						);
+					})}
+				</div>
+			</div>
+
+			{/* ── Tab content ──────────────────────────────────────────── */}
+			<div style={{ maxWidth: 760, margin: '24px auto 0', padding: '0 24px' }}>
+				<div
+					key={tab}
+					className="hatch-tab-enter"
+					role="tabpanel"
+					id={`hatch-panel-${tab}`}
+					aria-labelledby={`hatch-tab-${tab}`}
+				>
+					<Current
+						state={state}
+						onDirty={onDirty}
+						setSetting={setSetting}
+						onSetup={openWizard}
+					/>
+				</div>
+			</div>
+
+			{/* ── Footer ───────────────────────────────────────────────── */}
+			<div
+				style={{
+					maxWidth: 760,
+					margin: '40px auto 0',
+					padding: '0 24px 24px',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					flexWrap: 'wrap',
+					gap: 12,
+				}}
+			>
+				<div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+					<a href={setupUrl} className="hatch-foot-link">Run setup wizard again</a>
+					<a href="https://adityaarsharma.com/connect" target="_blank" rel="noopener noreferrer" className="hatch-foot-link">Need help with setup?</a>
+				</div>
+				<span style={{ fontSize: 12, color: 'var(--hx-subtle)', fontFamily: 'ui-monospace,SFMono-Regular,Menlo,monospace' }}>
+					{lastSaved ? `Saved ${fmtSaved(lastSaved)} · ` : ''}Hatch v{boot.version || ''} · MIT licensed
+				</span>
+			</div>
+
+			{/* ── Floating save bar (warm dark #18181b, ⌘S badge) ─────── */}
+			{(dirtyCount > 0 || phase !== 'idle') && (
+				<div
+					className="hatch-save-bar"
+					style={{
+						position: 'fixed',
+						bottom: 24,
+						left: '50%',
+						transform: 'translateX(-50%)',
+						zIndex: 200,
+						borderRadius: 999,
+						overflow: 'hidden',
+						boxShadow: '0 8px 32px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.1)',
+						display: 'flex',
+						alignItems: 'center',
+						gap: 12,
+						whiteSpace: 'nowrap',
+						background: '#18181b',
+							border: '1px solid rgba(255,255,255,.08)',
+							padding: '12px 20px',
+					}}
+				>
+					{phase === 'saved' && (
+						<span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#ffffff' }}>
+							<HxIcon size={16} color="#22c55e" sw={2.5}>
+								<polyline points="20 6 9 17 4 12" />
+							</HxIcon>
+							Saved. Frontend picks up in ~60 seconds.
+						</span>
+					)}
+					{phase === 'saving' && (
+						<span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#ffffff' }}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'hxSpin 0.8s linear infinite' }}>
+								<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity="0.2" />
+								<path d="M21 12a9 9 0 01-9 9" />
+							</svg>
+							Saving...
+						</span>
+					)}
+					{phase === 'error' && (
+						<span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#ffffff' }}>
+							<HxIcon size={16} color="#f87171" sw={2.5}>
+								<line x1="18" y1="6" x2="6" y2="18" />
+								<line x1="6" y1="6" x2="18" y2="18" />
+							</HxIcon>
+							Save failed. Check console.
+							<button onClick={save} className="hatch-sb-retry">Retry</button>
+						</span>
+					)}
+					{phase === 'idle' && dirtyCount > 0 && (
+						<>
+							<span style={{ fontSize: 13, color: '#ffffff', fontWeight: 500 }}>
+								{dirtyCount} unsaved change{dirtyCount !== 1 ? 's' : ''}
+							</span>
+							<span style={{ fontSize: 13, color: 'rgba(255,255,255,.5)' }}>·</span>
+							<span style={{ fontSize: 13, color: 'rgba(255,255,255,.75)' }}>
+								Frontend picks up in ~60s · no redeploy needed
+							</span>
+							<span
+								style={{
+									fontSize: 11,
+									color: 'rgba(255,255,255,.28)',
+									border: '1px solid rgba(255,255,255,.12)',
+									borderRadius: 5,
+									padding: '2px 6px',
+									fontFamily: 'ui-monospace,SFMono-Regular,Menlo,monospace',
+									marginLeft: 2,
+								}}
+							>
+								⌘S
+							</span>
+							<div style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
+								<button onClick={discard} className="hatch-sb-discard">Discard</button>
+								<button onClick={save} className="hatch-sb-save">Save</button>
+							</div>
+						</>
+					)}
+				</div>
+			)}
+
+		</div>
+	);
+}
+
+const root = document.getElementById('hatch-react-root');
+if (root) {
+	const page = (window.hatchBoot && window.hatchBoot.page) || 'dashboard';
+	createRoot(root).render(page === 'setup' ? <SetupApp /> : <App />);
+}

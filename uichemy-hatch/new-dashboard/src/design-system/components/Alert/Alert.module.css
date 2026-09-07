@@ -1,0 +1,19 @@
+/* Alert, inline message banner on uc- tokens. */
+.alert {
+  display: flex;
+  gap: var(--uc-space-12);
+  padding: var(--uc-space-16);
+  border-radius: var(--uc-radius-md);
+  background: var(--_soft, var(--uc-accent-soft));
+  box-shadow: inset 0 0 0 1px var(--_border, var(--uc-accent-border));
+}
+.icon { flex: none; color: var(--_fg, var(--uc-accent-fg)); margin-top: 1px; }
+.icon svg { display: block; }
+.content { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.title { font-size: var(--uc-text-base); font-weight: var(--uc-weight-semibold); color: var(--uc-text-strong); }
+.desc { font-size: var(--uc-text-sm); color: var(--uc-text-muted); }
+
+.accent  { --_soft: var(--uc-accent-soft);    --_border: var(--uc-accent-border);    --_fg: var(--uc-accent-fg); }
+.success { --_soft: var(--uc-success-soft); --_border: var(--uc-success-border); --_fg: var(--uc-success-fg); }
+.warning { --_soft: var(--uc-warning-soft); --_border: var(--uc-warning-border); --_fg: var(--uc-warning-fg); }
+.danger  { --_soft: var(--uc-danger-soft);  --_border: var(--uc-danger-border);  --_fg: var(--uc-danger-fg); }

@@ -1,0 +1,16 @@
+/* Popover, light raised surface, soft elevation. */
+.content {
+  min-width: 200px;
+  background: var(--uc-surface-raised);
+  color: var(--uc-text);
+  border: 1px solid var(--uc-border-subtle);
+  border-radius: var(--uc-radius-md);
+  box-shadow: var(--uc-shadow-4);
+  padding: var(--uc-space-16);
+  font-size: var(--uc-text-base);
+  z-index: var(--uc-z-dropdown);
+  animation: uc-pop-in var(--uc-dur-enter) var(--uc-ease-emphasized);
+}
+.content:focus-visible { outline: none; }
+
+@keyframes uc-pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }

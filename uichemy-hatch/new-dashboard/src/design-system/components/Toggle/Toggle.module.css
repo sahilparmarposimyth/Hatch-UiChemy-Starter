@@ -1,0 +1,26 @@
+/* Toggle, ghost by default, inverse fill when on. */
+.toggle {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uc-space-6);
+  height: var(--uc-control-h-md);
+  min-width: var(--uc-control-h-md);
+  padding: 0 var(--uc-space-10);
+  border-radius: var(--uc-radius-sm);
+  font-size: var(--uc-text-base);
+  color: var(--uc-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--uc-dur-fast) var(--uc-ease-standard),
+    color var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.toggle:hover { background: var(--uc-surface-sunken); color: var(--uc-text-strong); }
+.toggle:focus-visible { outline: 2px solid var(--uc-ring); outline-offset: 2px; }
+.toggle[data-state="on"] { background: var(--uc-inverse-bg); color: var(--uc-inverse-fg); }
+.toggle[data-disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.sm { height: var(--uc-control-h-sm); min-width: var(--uc-control-h-sm); font-size: var(--uc-text-sm); padding: 0 var(--uc-space-8); }
+.lg { height: var(--uc-control-h-lg); min-width: var(--uc-control-h-lg); font-size: var(--uc-text-md); padding: 0 var(--uc-space-12); }

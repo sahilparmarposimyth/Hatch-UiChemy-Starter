@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UiChemy · Design System editor</title>
+<style>
+  :root{
+    --bg:#F4F4F4; --panel:#FFFFFF; --sunken:#EBEBEB;
+    --ink:#0A0A0A; --ink-2:#171717; --muted:#737373; --subtle:#A3A3A3;
+    --line:rgba(0,0,0,.09); --line-2:rgba(0,0,0,.055);
+    --primary:#171717; --primary-hover:#000;
+    --r:10px; --r-sm:7px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+  header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto}
+  header h1{font-size:14px;font-weight:600;margin:0;letter-spacing:-.01em}
+  header .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  header .spacer{flex:1}
+  #status{font-size:12px;color:var(--muted);min-width:120px;text-align:right}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:12.5px;font-weight:500;
+       height:32px;padding:0 14px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{background:var(--sunken)}
+  .btn--primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn--primary:hover{background:var(--primary-hover)}
+  .btn:disabled{opacity:.5;cursor:default}
+
+  .body{flex:1;display:flex;min-height:0}
+  aside{width:384px;flex:0 0 auto;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line);padding:4px 0 40px}
+  main{flex:1;min-width:0;background:var(--sunken)}
+  iframe{width:100%;height:100%;border:0;background:var(--bg)}
+
+  .grp{border-bottom:1px solid var(--line-2)}
+  .grp>summary{list-style:none;cursor:pointer;padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .grp>summary::-webkit-details-marker{display:none}
+  .grp>summary::before{content:"▸";font-size:10px;color:var(--subtle);transition:transform .15s}
+  .grp[open]>summary::before{transform:rotate(90deg)}
+  .rows{padding:2px 16px 12px}
+
+  .row{display:flex;align-items:center;gap:10px;padding:5px 0}
+  .row .name{flex:1;font-size:12.5px;color:var(--ink-2);font-variant-ligatures:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .name.changed{font-weight:600}
+  .row .name.changed::after{content:"•";color:var(--primary);margin-left:5px}
+  .swatch{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);flex:0 0 auto;padding:0;cursor:pointer;background:transparent;overflow:hidden}
+  .swatch::-webkit-color-swatch-wrapper{padding:0}
+  .swatch::-webkit-color-swatch{border:0;border-radius:5px}
+  .swatch.static{cursor:default}
+  .val{width:132px;flex:0 0 auto;height:28px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font:inherit;font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--ink)}
+  .val:focus{outline:none;border-color:var(--primary)}
+  .val.wide{width:158px}
+  .hint{padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Design System</h1>
+    <span class="tag">tokens.css · live</span>
+    <div class="spacer"></div>
+    <span id="status"></span>
+    <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="export">Copy CSS</button>
+    <button class="btn btn--primary" id="save">Save &amp; rebuild</button>
+  </header>
+  <div class="body">
+    <aside id="panel"><div class="hint">Loading tokens…</div></aside>
+    <main><iframe id="frame" src="/new-dashboard/dev-preview.html?nd_preview=ds-gallery"></iframe></main>
+  </div>
+
+<script>
+const HEX6 = /^#[0-9a-f]{6}$/i;
+const state = { groups: [], originals: {}, meta: {}, overrides: {} };
+const $ = (s, r=document) => r.querySelector(s);
+const frame = $('#frame');
+const statusEl = $('#status');
+const pretty = (n) => n.replace(/^--uc-/, '');
+
+function setStatus(t){ statusEl.textContent = t || ''; }
+
+async function load(){
+  const r = await fetch('/ds-editor/api/tokens');
+  const { groups } = await r.json();
+  state.groups = groups;
+  groups.forEach(g => g.rows.forEach(row => {
+    state.originals[row.name] = row.value;
+    state.meta[row.name] = { block: g.block, kind: g.kind, file: g.file || 'tokens' };
+  }));
+  render();
+}
+
+function render(){
+  const panel = $('#panel');
+  panel.innerHTML = '';
+  state.groups.forEach((g, gi) => {
+    const d = document.createElement('details');
+    d.className = 'grp'; if (gi < 5) d.open = true;
+    d.innerHTML = `<summary>${g.title}</summary>`;
+    const rows = document.createElement('div'); rows.className = 'rows';
+    g.rows.forEach(row => rows.appendChild(rowEl(g, row)));
+    d.appendChild(rows); panel.appendChild(d);
+  });
+}
+
+function rowEl(g, row){
+  const el = document.createElement('div'); el.className = 'row';
+  const name = document.createElement('span');
+  name.className = 'name'; name.textContent = pretty(row.name); name.title = row.name;
+  el.appendChild(name);
+
+  const val = state.originals[row.name] ?? '';
+  if (g.kind === 'color'){
+    const isHex = HEX6.test(val);
+    const sw = document.createElement('input');
+    if (isHex){ sw.type = 'color'; sw.value = val.toLowerCase(); }
+    else { sw.type = 'button'; sw.style.background = val; sw.className = 'static'; }
+    sw.classList.add('swatch');
+    el.appendChild(sw);
+    const tx = document.createElement('input');
+    tx.className = 'val'; tx.value = val;
+    el.appendChild(tx);
+    const sync = (v) => {
+      change(row.name, v, name);
+      tx.value = v;
+      if (HEX6.test(v)){ if (sw.type==='color') sw.value = v.toLowerCase(); }
+      else if (sw.type !== 'color') sw.style.background = v;
+    };
+    if (isHex) sw.addEventListener('input', () => sync(sw.value));
+    tx.addEventListener('input', () => sync(tx.value));
+  } else {
+    const tx = document.createElement('input');
+    tx.className = 'val wide'; tx.value = val;
+    el.appendChild(tx);
+    tx.addEventListener('input', () => change(row.name, tx.value, name));
+  }
+  return el;
+}
+
+function change(name, value, nameEl){
+  if (value === state.originals[name]) delete state.overrides[name];
+  else state.overrides[name] = { block: state.meta[name].block, file: state.meta[name].file, value };
+  if (nameEl) nameEl.classList.toggle('changed', name in state.overrides);
+  applyLive();
+}
+
+function overrideCss(){
+  const base = [], light = [];
+  for (const [n, o] of Object.entries(state.overrides))
+    (o.block === 'light' ? light : base).push(`${n}:${o.value};`);
+  let css = '';
+  if (base.length)  css += `.uc-scope,.uc-content,.uc-chrome,.uc-portal{${base.join('')}}\n`;
+  if (light.length) css += `.uc-scope,.uc-content,.uc-portal{${light.join('')}}\n`;
+  return css;
+}
+
+function applyLive(){
+  try {
+    const doc = frame.contentDocument;
+    if (!doc) return;
+    let s = doc.getElementById('ds-editor-live');
+    if (!s){ s = doc.createElement('style'); s.id = 'ds-editor-live'; doc.head.appendChild(s); }
+    s.textContent = overrideCss();
+  } catch (_) { /* iframe not ready */ }
+}
+
+frame.addEventListener('load', applyLive);
+
+$('#reset').addEventListener('click', () => {
+  state.overrides = {};
+  render();
+  try { const s = frame.contentDocument.getElementById('ds-editor-live'); if (s) s.textContent = ''; } catch(_){}
+  setStatus('reset');
+});
+
+$('#export').addEventListener('click', async () => {
+  const css = overrideCss();
+  if (!css){ setStatus('no changes to copy'); return; }
+  try { await navigator.clipboard.writeText(css); setStatus('CSS copied ✓'); }
+  catch(_){ setStatus('copy failed'); }
+});
+
+$('#save').addEventListener('click', async () => {
+  const edits = Object.entries(state.overrides).map(([name, o]) => ({ name, value: o.value, block: o.block, file: o.file }));
+  if (!edits.length){ setStatus('nothing changed'); return; }
+  const btn = $('#save'); btn.disabled = true;
+  setStatus(`saving ${edits.length} & rebuilding…`);
+  try {
+    const r = await fetch('/ds-editor/api/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ edits, rebuild: true }),
+    });
+    const res = await r.json();
+    if (!res.ok) throw new Error(res.error || 'save failed');
+    // bake: originals become the saved values, clear override highlights.
+    for (const e of edits) state.originals[e.name] = e.value;
+    state.overrides = {};
+    render();
+    setStatus(res.build && res.build.ok ? `saved ✓ rebuilt` : `saved · build FAILED (see terminal)`);
+    frame.contentWindow.location.reload();     // load freshly-built CSS
+  } catch (err){
+    setStatus('error: ' + err.message);
+  } finally { btn.disabled = false; }
+});
+
+load().catch(e => { $('#panel').innerHTML = '<div class="hint">Failed to load tokens: ' + e.message + '</div>'; });
+</script>
+</body>
+</html>

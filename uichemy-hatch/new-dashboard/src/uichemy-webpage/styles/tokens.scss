@@ -1,0 +1,226 @@
+/* ==========================================================================
+   AI Website Creator, design tokens.
+
+   These `--uich-wpc-*` tokens are now a THIN BRIDGE onto the dashboard design
+   system (`src/design-system/styles/tokens.css`, the `--uc-*` variables). The
+   flow renders inside `.uc-content` (the dashboard mount), so every `var(--uc-*)`
+   below resolves through inheritance, colours, radius, shadows and the font
+   all come from ONE source of truth, and the flow re-skins for free whenever the
+   DS tokens change (e.g. via the token editor).
+
+   Two deliberate carve-outs:
+     1. Scoped to `.uich-wpc` (the flow's own container), it renders inside the
+        Import tab, so it must not claim the viewport. No `min-height: 100vh`,
+        black page background or WP-admin chrome overrides.
+     2. Token prefix kept as `--uich-wpc-*` so the ~10 component/screen
+        stylesheets that consume it need no edits, and nothing collides with the
+        dashboard's own tokens or the standalone plugin's if both are active.
+
+   Font is Zalando Sans, inherited from the DS (`--uc-font-sans`), the same
+   typeface the rest of the dashboard uses, so the flow reads as one product.
+
+   Light mode only for now: the DS surface tokens are surface-aware, but this
+   flow is not exercised in dark yet, so the values resolve to the DS light
+   surface. A handful of intentionally-dark elements (the sort menu) keep literal
+   dark values.
+   ========================================================================== */
+
+.uich-wpc {
+  /* ==========================================================================
+     COLOR SYSTEM, bridged to the design system (--uc-* tokens).
+     ========================================================================== */
+
+  /* Primary Colors, brand orange (drives the flow's main CTAs) */
+  --uich-wpc-color-primary: var(--uc-brand);
+  --uich-wpc-color-primary-darker: #CC4B23; /* pressed/hover, DS has no darker-brand fill */
+
+  /* Secondary Colors, MONOCHROME (grey scale, no purple) */
+  --uich-wpc-color-secondary: var(--uc-inverse-bg);
+  --uich-wpc-color-secondary-lighter: var(--uc-border-strong);
+  --uich-wpc-color-secondary-lightest: var(--uc-brand-soft); /* neutral grey tint */
+  --uich-wpc-color-secondary-darker: #000000; /* [legacy] */
+
+  /* Background Colors */
+  --uich-wpc-color-background-weaker: var(--uc-surface-raised);
+  --uich-wpc-color-background-weaker-2: rgba(255, 255, 255, 0.1); /* white @ 10% (dark menu) */
+  --uich-wpc-color-background-default: var(--uc-surface-base);
+  --uich-wpc-color-background-stronger: var(--uc-surface-sunken);
+  --uich-wpc-color-background-dark: var(--uc-inverse-bg);
+  --uich-wpc-color-background-dark-2: #202020; /* dark menu chrome */
+  --uich-wpc-color-background-strongest: var(--uc-surface-sunken); /* [legacy] */
+
+  /* Text Colors */
+  --uich-wpc-color-text-default: var(--uc-text-strong);
+  --uich-wpc-color-text-stronger: var(--uc-text);
+  --uich-wpc-color-text-weaker: var(--uc-text-muted);
+  --uich-wpc-color-text-weakest: var(--uc-text-subtle);
+  --uich-wpc-color-text-white: var(--uc-text-inverse);
+  --uich-wpc-color-text-disabled: var(--uc-text-muted); /* [legacy] */
+
+  /* Border Colors */
+  --uich-wpc-color-border-weak: var(--uc-border);
+  --uich-wpc-color-border-default: var(--uc-border-strong);
+  --uich-wpc-color-border-dark-default: #404040; /* dark menu border */
+  --uich-wpc-color-border-dark-weakest: #333333;
+
+  /* Success Colors */
+  --uich-wpc-color-success: var(--uc-success);
+  --uich-wpc-color-success-darker: var(--uc-success-fg);
+  --uich-wpc-color-success-lightest: var(--uc-success-soft); /* [legacy] */
+
+  /* Accent primitive (decorative) */
+  --uich-wpc-color-magenta-650: #FF5DE6;
+
+  /* Warning Colors */
+  --uich-wpc-color-warning-lightest: var(--uc-warning-soft); /* warning background */
+  --uich-wpc-color-warning-lighter: var(--uc-warning-border); /* warning border */
+  --uich-wpc-color-warning: var(--uc-warning); /* warning text */
+
+  /* Error Colors */
+  --uich-wpc-color-error: var(--uc-danger);
+  --uich-wpc-color-error-darker: var(--uc-danger-fg);
+  --uich-wpc-color-error-lightest: var(--uc-danger-soft); /* [legacy] */
+
+  /* Focus ring colors */
+  --uich-wpc-color-focus-ring: var(--uc-ring);
+  --uich-wpc-color-focus-ring-error: var(--uc-danger-border);
+
+  /* ==========================================================================
+     TYPOGRAPHY, font family from the DS (Zalando Sans); sizes/weights local.
+     ========================================================================== */
+
+  --uich-wpc-font-family: var(--uc-font-sans);
+
+  /* Font sizes (Figma role -> px) */
+  --uich-wpc-font-size-footnote: 10px; /* text-2xs */
+  --uich-wpc-font-size-label: 12px;    /* text-xs  */
+  --uich-wpc-font-size-caption: 14px;  /* text-sm  */
+  --uich-wpc-font-size-body: 16px;     /* text-base */
+  --uich-wpc-font-size-h6: 18px;       /* text-lg  */
+  --uich-wpc-font-size-h5: 20px;       /* text-xl  */
+  --uich-wpc-font-size-h4: 24px;       /* text-2xl */
+
+  /* Line heights (paired with the sizes above) */
+  --uich-wpc-line-height-footnote: 14px;
+  --uich-wpc-line-height-label: 16px;
+  --uich-wpc-line-height-caption: 20px;
+  --uich-wpc-line-height-body: 24px;
+  --uich-wpc-line-height-h6: 24px;
+  --uich-wpc-line-height-h5: 24px;
+  --uich-wpc-line-height-h4: 28px;
+
+  /* Font weights */
+  --uich-wpc-font-weight-regular: var(--uc-weight-regular);
+  --uich-wpc-font-weight-medium: var(--uc-weight-medium);
+  --uich-wpc-font-weight-semibold: var(--uc-weight-semibold); /* [legacy] */
+  --uich-wpc-font-weight-bold: 700;     /* [legacy] */
+
+  /* ==========================================================================
+     SPACING, value === number of px
+     ========================================================================== */
+
+  --uich-wpc-space-0: 0px;
+  --uich-wpc-space-2: 2px;
+  --uich-wpc-space-3: 3px;
+  --uich-wpc-space-4: 4px;
+  --uich-wpc-space-5: 5px;
+  --uich-wpc-space-6: 6px;
+  --uich-wpc-space-7: 7px;
+  --uich-wpc-space-8: 8px;
+  --uich-wpc-space-10: 10px;
+  --uich-wpc-space-12: 12px;
+  --uich-wpc-space-14: 14px;
+  --uich-wpc-space-16: 16px;
+  --uich-wpc-space-20: 20px;
+  --uich-wpc-space-24: 24px;
+  --uich-wpc-space-32: 32px;
+  --uich-wpc-space-48: 48px;
+
+  /* ==========================================================================
+     CORNER RADIUS, bridged to the DS radius scale (identical px values).
+     ========================================================================== */
+
+  --uich-wpc-radius-0: var(--uc-radius-0);
+  --uich-wpc-radius-2: var(--uc-radius-2);
+  --uich-wpc-radius-4: var(--uc-radius-4);
+  --uich-wpc-radius-6: var(--uc-radius-6);
+  --uich-wpc-radius-8: var(--uc-radius-8);
+  --uich-wpc-radius-12: var(--uc-radius-12);
+  --uich-wpc-radius-16: var(--uc-radius-16);
+  --uich-wpc-radius-infinite: var(--uc-radius-infinite);
+
+  /* ==========================================================================
+     ELEVATION / SHADOWS, bridged to the DS recipes. The DS is FLAT at rest
+     (definition comes from the hairline border); only true overlays float.
+     ========================================================================== */
+
+  --uich-wpc-elevation-xs: var(--uc-shadow-2);   /* flat resting */
+  --uich-wpc-elevation-sm: var(--uc-shadow-3);
+  --uich-wpc-elevation-md: var(--uc-shadow-3);
+  --uich-wpc-elevation-lg: var(--uc-shadow-4);
+  --uich-wpc-elevation-xl: var(--uc-shadow-5);
+
+  /* --------------------------------------------------------------------------
+     Shorthand / Mapped Variables (resolve through the bridged primitives above)
+     -------------------------------------------------------------------------- */
+
+  /* Primary Brand - maps to primary orange for CTAs */
+  --uich-wpc-primary: var(--uich-wpc-color-primary);
+  --uich-wpc-primary-hover: var(--uich-wpc-color-primary-darker);
+
+  /* Text - maps to text tokens */
+  --uich-wpc-text: var(--uich-wpc-color-text-default);
+  --uich-wpc-text-dark: var(--uich-wpc-color-text-stronger);
+  --uich-wpc-text-muted: var(--uich-wpc-color-text-weaker);
+  --uich-wpc-text-light: var(--uich-wpc-color-text-weaker);
+  --uich-wpc-text-lighter: var(--uich-wpc-color-text-weakest);
+  --uich-wpc-text-icon: var(--uich-wpc-color-text-weakest);
+  --uich-wpc-text-pending: var(--uich-wpc-color-text-disabled);
+  --uich-wpc-text-white: var(--uich-wpc-color-text-white);
+  --uich-wpc-text-header: var(--uich-wpc-color-background-default);
+
+  /* Background - maps to background tokens */
+  --uich-wpc-bg: var(--uich-wpc-color-background-dark);
+  --uich-wpc-bg-dark: #1c1c1f;
+  --uich-wpc-bg-darker: #2a2a2e;
+  --uich-wpc-bg-card: var(--uich-wpc-color-background-weaker);
+  --uich-wpc-bg-lighter: var(--uich-wpc-color-background-default);
+  --uich-wpc-bg-hover: var(--uich-wpc-color-background-stronger);
+  --uich-wpc-bg-hover-dark: var(--uich-wpc-color-background-strongest);
+  --uich-wpc-bg-success: var(--uich-wpc-color-success-lightest);
+
+  /* Border - maps to border tokens */
+  --uich-wpc-border: var(--uich-wpc-color-border-default);
+  --uich-wpc-border-light: var(--uich-wpc-color-border-weak);
+  --uich-wpc-border-lighter: var(--uich-wpc-color-border-weak);
+  --uich-wpc-border-dark: var(--uich-wpc-color-border-dark-default);
+  --uich-wpc-border-darker: #2a2a2e;
+  --uich-wpc-border-hover: var(--uich-wpc-color-border-default);
+  --uich-wpc-border-mockup: var(--uich-wpc-color-border-weak);
+
+  /* Semantic state aliases (kept short for ergonomic usage in components) */
+  --uich-wpc-accent-green: var(--uich-wpc-color-success);
+  --uich-wpc-accent-red: var(--uich-wpc-color-error);
+  --uich-wpc-accent-red-hover: var(--uich-wpc-color-error-lightest);
+  --uich-wpc-accent-orange: var(--uich-wpc-color-primary);
+
+  /* Shadow Colors */
+  --uich-wpc-shadow-sm: rgba(0, 0, 0, 0.06);
+  --uich-wpc-shadow-md: rgba(0, 0, 0, 0.08);
+  --uich-wpc-shadow-lg: rgba(0, 0, 0, 0.4);
+
+  /* Mockup/Design (maps to design tokens) */
+  --uich-wpc-mockup-footer: var(--uich-wpc-color-background-dark);
+
+  /* Legacy fallbacks (for backward compatibility) */
+  --uich-wpc-card-bg: var(--uich-wpc-bg-card);
+
+
+  box-sizing: border-box;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}

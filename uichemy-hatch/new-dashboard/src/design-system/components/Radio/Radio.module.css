@@ -1,0 +1,43 @@
+/* Radio, Radix radio-group behavior, uc- token look. */
+.group { display: flex; flex-direction: column; gap: var(--uc-space-12); }
+
+.item {
+  all: unset;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--uc-surface-overlay);
+  box-shadow: inset 0 0 0 1px var(--uc-border-strong), var(--uc-shadow-input);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background var(--uc-dur-fast) var(--uc-ease-standard),
+    box-shadow var(--uc-dur-fast) var(--uc-ease-standard);
+  flex: none;
+}
+.item:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--uc-text-subtle), var(--uc-shadow-input); }
+
+/* sizes (md is the base above) */
+.sm { width: 16px; height: 16px; }
+.sm .indicator::after { width: 6px; height: 6px; }
+.lg { width: 22px; height: 22px; }
+.lg .indicator::after { width: 9px; height: 9px; }
+.item[data-state="checked"] {
+  background: var(--uc-inverse-bg);
+  box-shadow: var(--uc-shadow-control);
+}
+.item:focus-visible { outline: 2px solid var(--uc-ring); outline-offset: 2px; }
+.item:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.indicator { display: grid; place-items: center; }
+.indicator::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--uc-inverse-fg);
+}
+
+.row { display: flex; align-items: center; gap: var(--uc-space-12); }
+.rowLabel { font-size: var(--uc-text-base); color: var(--uc-text); cursor: pointer; }

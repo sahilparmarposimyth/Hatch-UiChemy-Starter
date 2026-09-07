@@ -1,0 +1,17 @@
+node_modules
+.sandbox
+.claude
+.DS_Store
+.vscode
+.mcp.json
+skills-lock.json
+
+# PHP Composer dependencies (MCP adapter). Regenerate with `composer install`.
+/vendor/
+/vendor-prefixed/
+
+# Compiled dashboard bundle. `scripts/build.sh` always runs `npm run build`
+# from new-dashboard/ source before packaging the release zip, so a committed
+# copy here is never actually consumed by the release process, only diff noise.
+# Run `npm run build` in new-dashboard/ to regenerate it locally.
+/new-dashboard/build/

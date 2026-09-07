@@ -1,0 +1,172 @@
+/* "Select Your Project" screen (Figma node 10441:16489) */
+.uich-wpc-project {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  /* No section header, the tab, search placeholder and card grid already say
+     "select your project", so the redundant heading/subtitle were removed. */
+
+  /* Scrollable body region (project cards live here). No padding, the grey
+     group (`.uich-wpc--grouped`) supplies the surrounding inset. */
+  &__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  /* ---- Toolbar: search fills the row, the account ⋯ icon-box sits at the end,
+     matched to the search field's height. ---- */
+  &__toolbar {
+    display: flex;
+    align-items: stretch;
+    gap: var(--uich-wpc-space-12);
+    margin-bottom: var(--uich-wpc-space-20);
+  }
+
+  &__search-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+  }
+
+  /* In the toolbar the ⋯ is a true square button, sized to the search field's
+     control height (DS md) and vertically centred. Explicit width = height is
+     reliable across browsers; `align-self: stretch` + `aspect-ratio` was
+     rendering as a wide rectangle. */
+  &__toolbar .uich-wpc-account__more {
+    align-self: center;
+    flex: 0 0 auto;
+    width: var(--uc-control-h-md, 2rem);
+    height: var(--uc-control-h-md, 2rem);
+    aspect-ratio: auto;
+  }
+
+  /* ---- Card grid: 4 columns at the design width, responsive ---- */
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--uich-wpc-space-16);
+  }
+
+  /* ---- Empty / no-results state ---- */
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: 250px;
+    margin: auto;
+    align-self: center;
+    text-align: center;
+  }
+
+  &__empty-illustration {
+    position: relative;
+    flex-shrink: 0;
+    width: 95px;
+    height: 80px;
+    background: var(--uich-wpc-color-background-stronger, #f1f1f7);
+    border: 0.5px solid var(--uich-wpc-color-border-weak, #e5e5e5);
+    border-radius: 4.4px;
+    overflow: hidden;
+  }
+
+  &__empty-card {
+    position: absolute;
+    width: 58px;
+    height: 74px;
+    background: var(--uich-wpc-color-background-weaker);
+    border-radius: 1.5px;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      left: 6px;
+      height: 3px;
+      background: var(--uich-wpc-color-background-stronger);
+      border-radius: 1px;
+    }
+
+    &::before {
+      top: 10px;
+      right: 6px;
+    }
+
+    &::after {
+      top: 17px;
+      width: 55%;
+    }
+
+    &--a {
+      top: 19px;
+      left: 36px;
+      transform: rotate(-1.88deg);
+    }
+
+    &--b {
+      top: 11px;
+      left: 45px;
+      transform: rotate(-1.88deg);
+      box-shadow: -3px 4px 8px rgba(0, 0, 0, 0.09);
+    }
+
+    &--c {
+      top: 7px;
+      left: 57px;
+      transform: rotate(3.53deg);
+      box-shadow: -3px 4px 8px rgba(0, 0, 0, 0.09);
+    }
+  }
+
+  &__empty-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    background: linear-gradient(to bottom, transparent, var(--uich-wpc-color-background-stronger, #f1f1f7));
+    z-index: 4;
+  }
+
+  &__empty-count {
+    position: absolute;
+    bottom: 8px;
+    left: 4.4px;
+    z-index: 5;
+    margin: 0;
+    font-family: var(--uich-wpc-font-family);
+    font-size: 7px;
+    font-weight: var(--uich-wpc-font-weight-medium);
+    line-height: 1.4;
+    color: var(--uich-wpc-color-text-default, #0a0a0a);
+  }
+
+  &__empty-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
+  &__empty-title {
+    margin: 0;
+    font-family: var(--uich-wpc-font-family);
+    font-size: var(--uich-wpc-font-size-h5, 20px);
+    line-height: var(--uich-wpc-line-height-h5, 24px);
+    font-weight: var(--uich-wpc-font-weight-medium);
+    color: var(--uich-wpc-color-text-default, #0a0a0a);
+  }
+
+  &__empty-subtitle {
+    margin: 0;
+    font-family: var(--uich-wpc-font-family);
+    font-size: var(--uich-wpc-font-size-caption, 14px);
+    line-height: var(--uich-wpc-line-height-caption, 20px);
+    font-weight: var(--uich-wpc-font-weight-regular);
+    color: var(--uich-wpc-color-text-weaker, #737373);
+    white-space: nowrap;
+  }
+}

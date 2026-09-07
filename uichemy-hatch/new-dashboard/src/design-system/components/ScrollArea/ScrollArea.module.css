@@ -1,0 +1,26 @@
+/* ScrollArea, thin token-styled scrollbars that fade in on hover. */
+.root { overflow: hidden; }
+.viewport { width: 100%; height: 100%; border-radius: inherit; }
+.scrollbar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 2px;
+  background: transparent;
+  transition: background var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.scrollbar:hover { background: var(--uc-surface-sunken); }
+.scrollbar[data-orientation="vertical"] { width: 10px; }
+.scrollbar[data-orientation="horizontal"] { flex-direction: column; height: 10px; }
+.thumb {
+  flex: 1;
+  background: var(--uc-border-strong);
+  border-radius: var(--uc-radius-pill);
+  position: relative;
+}
+/* enlarge the invisible hit target so the thin thumb is easy to grab */
+.thumb::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}

@@ -1,0 +1,161 @@
+/* Button, raised, physically-lit control on uc- tokens. */
+
+.button {
+  --_h: var(--uc-btn-h, var(--uc-control-h-md));
+  --_px: var(--uc-btn-px, var(--uc-space-16));
+  --_fs: var(--uc-text-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uc-space-8);
+  height: var(--_h);
+  padding: 0 var(--_px);
+  font-family: var(--uc-font-sans);
+  font-size: var(--_fs);
+  font-weight: var(--uc-btn-weight, var(--uc-weight-medium));
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--uc-btn-radius, var(--uc-radius-md));
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  isolation: isolate;
+  transition: background var(--uc-dur-fast) var(--uc-ease-standard),
+    box-shadow var(--uc-dur-fast) var(--uc-ease-standard),
+    transform var(--uc-dur-fast) var(--uc-ease-standard),
+    color var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.button:focus-visible {
+  outline: 2px solid var(--uc-ring);
+  outline-offset: 2px;
+}
+.button:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ---- Sizes ---------------------------------------------------------------- */
+.sm { --_h: var(--uc-control-h-sm); --_px: var(--uc-space-12); --_fs: var(--uc-text-sm); }
+.md { --_h: var(--uc-btn-h, var(--uc-control-h-md)); --_px: var(--uc-btn-px, var(--uc-space-16)); --_fs: var(--uc-text-base); }
+.lg { --_h: var(--uc-control-h-lg); --_px: var(--uc-space-20); --_fs: var(--uc-text-md); }
+
+.iconOnly { padding: 0; width: var(--_h); }
+
+/* ---- Variant: solid ------------------------------------------------------- */
+.solid {
+  color: var(--uc-brand-on);
+  background: var(--_fill, var(--uc-brand));
+  background-image: var(--uc-sheen);
+  box-shadow: var(--_shadow, var(--uc-shadow-control-brand));
+}
+.solid:hover:not(:disabled) { background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), var(--uc-sheen); }
+.solid:active:not(:disabled) {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), var(--uc-sheen);
+  box-shadow: var(--uc-shadow-control-pressed);
+}
+
+/* neutral solid = the B&W PRIMARY: high-contrast inverse fill that flips per
+   surface (dark on light content, light on dark chrome/content). */
+.solid.neutral {
+  color: var(--uc-inverse-fg);
+  background: var(--uc-inverse-bg);
+  box-shadow: var(--uc-shadow-control);
+}
+/* grey wash nudges black->lighter and white->darker, so hover reads on both */
+.solid.neutral:hover:not(:disabled) {
+  background-image: linear-gradient(to bottom, rgba(128, 128, 128, 0.16), rgba(128, 128, 128, 0.16));
+}
+.solid.neutral:active:not(:disabled) {
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.14));
+}
+
+/* ---- Variant: soft -------------------------------------------------------- */
+.soft {
+  color: var(--_fg, var(--uc-brand-fg));
+  background: var(--_soft, var(--uc-brand-soft));
+  background-image: var(--uc-sheen);
+  box-shadow: inset 0 0 0 1px var(--_border, var(--uc-brand-border)), var(--uc-shadow-1);
+}
+.soft:hover:not(:disabled) { background-image: var(--uc-sheen), linear-gradient(var(--_glow, var(--uc-brand-glow-hover)), var(--_glow, var(--uc-brand-glow-hover))); }
+
+/* ---- Variant: outline (raised secondary) ---------------------------------- */
+.outline {
+  color: var(--_fg, var(--uc-brand-fg));
+  background: var(--uc-surface-control);
+  background-image: var(--uc-sheen);
+  box-shadow: inset 0 0 0 1px var(--_border, var(--uc-border-subtle)), var(--uc-shadow-raised);
+}
+.outline.neutral { color: var(--uc-text-strong); }
+.outline:hover:not(:disabled) { background-image: var(--uc-sheen), linear-gradient(var(--_glow, var(--uc-brand-glow-hover)), var(--_glow, var(--uc-brand-glow-hover))); }
+
+/* ---- Variant: ghost ------------------------------------------------------- */
+.ghost {
+  color: var(--_fg, var(--uc-brand-fg));
+  background: transparent;
+}
+.ghost.neutral { color: var(--uc-text); }
+.ghost:hover:not(:disabled) { background: var(--_glow, var(--uc-brand-glow-hover)); color: var(--uc-text-strong); }
+
+/* ---- Tones (feed the --_* channels the variants read) --------------------- */
+.brand   { --_fill: var(--uc-brand);   --_fg: var(--uc-brand-fg);   --_soft: var(--uc-brand-soft);   --_border: var(--uc-brand-border);   --_glow: var(--uc-brand-glow-hover);   --_shadow: var(--uc-shadow-control-brand); }
+.success { --_fill: var(--uc-success); --_fg: var(--uc-success-fg); --_soft: var(--uc-success-soft); --_border: var(--uc-success-border); --_glow: var(--uc-success-glow-hover); --_shadow: var(--uc-shadow-control-brand); }
+.danger  { --_fill: var(--uc-danger);  --_fg: var(--uc-danger-fg);  --_soft: var(--uc-danger-soft);  --_border: var(--uc-danger-border);  --_glow: var(--uc-danger-glow-hover);  --_shadow: var(--uc-shadow-control-brand); }
+.neutral {
+  --_fg: var(--uc-text-strong);
+  --_soft: var(--uc-surface-sunken);
+  --_border: var(--uc-border-strong);
+  --_glow: rgba(128, 128, 128, 0.12);
+}
+
+/* ---- Loading -------------------------------------------------------------- */
+.loading { color: transparent !important; pointer-events: none; }
+.spinner {
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  color: var(--uc-brand-on);
+  animation: uc-spin 0.6s linear infinite;
+}
+.soft .spinner, .outline .spinner, .ghost .spinner { color: var(--uc-text); }
+.solid.neutral .spinner { color: var(--uc-inverse-fg); }
+@keyframes uc-spin { to { transform: rotate(360deg); } }
+
+/* ---- Surface: dark -------------------------------------------------------- *
+   `surface="dark"`, remaps the semantic tokens the variants read to the fixed
+   dark-chrome values (mirrors `.uc-chrome` in tokens.css). Lets a single Button
+   render correctly on the app's dark header / sidebar / rails WITHOUT needing a
+   `.uc-chrome` ancestor (the app chrome is styled with UiChemy's own app tokens, not the
+   DS scope). Orthogonal to variant + tone: every variant flips automatically,
+   solid-neutral becomes a white B&W primary, outline/ghost go light-on-dark,
+   brand stays orange. */
+.onDark {
+  --uc-surface-sunken:  #101010;
+  --uc-surface-control: rgba(255, 255, 255, 0.05);
+
+  --uc-text-strong: #FFFFFF;
+  --uc-text:        #A3A3A3;
+
+  /* B&W primary flips to a light fill with dark ink on dark chrome */
+  --uc-inverse-bg: #F5F5F5;
+  --uc-inverse-fg: #171717;
+
+  --uc-border-subtle: #333333;
+  --uc-border:        #404040;
+  --uc-border-strong: #525252;
+  --uc-brand-border:  var(--uc-border);
+  --uc-ring:          rgba(245, 245, 245, 0.55);
+
+  /* per-family fg/soft readable on dark */
+  --uc-brand-fg:   #EDEDED;  --uc-brand-soft:   rgba(255, 255, 255, 0.12);
+  --uc-success-fg: #A7EAAA;  --uc-success-soft: rgba(46, 163, 67, 0.20);
+  --uc-danger-fg:  #FDC9C6;  --uc-danger-soft:  rgba(246, 82, 88, 0.20);
+}

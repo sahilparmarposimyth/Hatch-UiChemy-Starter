@@ -1,0 +1,55 @@
+/* Menu, Radix dropdown-menu behavior, uc- token look. Always-dark popover
+   with a sliding highlight that follows the active item. */
+.content {
+  position: relative;
+  min-width: 200px;
+  background: var(--uc-surface-overlay);
+  border-radius: var(--uc-radius-md);
+  box-shadow: var(--uc-shadow-4);
+  padding: var(--uc-space-4);
+  z-index: var(--uc-z-dropdown);
+  animation: uc-menu-in var(--uc-dur-enter) var(--uc-ease-emphasized);
+}
+.highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: var(--uc-radius-sm);
+  background: var(--uc-surface-control);
+  /* transform is animated via the Web Animations API (see useSlidingHighlight);
+     only width/height use a CSS transition. */
+  transition: width var(--uc-dur-base) var(--uc-ease-emphasized),
+    height var(--uc-dur-base) var(--uc-ease-emphasized);
+  pointer-events: none;
+  z-index: 0;
+}
+.item {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--uc-space-8);
+  height: var(--uc-control-h-md);
+  padding: 0 var(--uc-space-12);
+  border-radius: var(--uc-radius-sm);
+  font-size: var(--uc-text-base);
+  color: var(--uc-text);
+  cursor: pointer;
+  user-select: none;
+}
+.itemSm { height: var(--uc-control-h-sm); font-size: var(--uc-text-sm); padding: 0 var(--uc-space-8); }
+.itemLg { height: var(--uc-control-h-lg); font-size: var(--uc-text-md); padding: 0 var(--uc-space-16); }
+.item[data-highlighted] { color: var(--uc-text-strong); }
+.item[data-disabled] { color: var(--uc-text-subtle); pointer-events: none; }
+.itemDanger { color: var(--uc-danger-fg); }
+.itemDanger[data-highlighted] { color: var(--uc-danger-fg); }
+.shortcut { margin-left: auto; font-size: var(--uc-text-xs); color: var(--uc-text-subtle); font-family: var(--uc-font-mono); }
+.label { padding: var(--uc-space-8) var(--uc-space-12) var(--uc-space-4); font-size: var(--uc-text-xs); font-weight: var(--uc-weight-medium); letter-spacing: var(--uc-tracking-wide); text-transform: uppercase; color: var(--uc-text-subtle); }
+.separator { height: 1px; background: var(--uc-border-subtle); margin: var(--uc-space-4) 0; }
+
+@keyframes uc-menu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }

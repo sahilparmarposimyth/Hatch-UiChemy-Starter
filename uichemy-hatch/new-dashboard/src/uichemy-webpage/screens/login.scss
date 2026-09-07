@@ -1,0 +1,171 @@
+/* Step 1, connect account. A centred card inside the Import tab, not the
+   full-viewport split screen the standalone plugin used. */
+
+.uich-wpc-login {
+  /* Full-width white inner card that fills the grey group (`.uich-wpc--grouped`),
+     matching the single white card on the Figma / AI Agent tabs. The connect
+     content centres within it. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  padding: var(--uich-wpc-space-48, 48px) var(--uich-wpc-space-24, 24px);
+  background: var(--uich-wpc-color-background-weaker, #fff);
+  border: 1px solid var(--uich-wpc-color-border-weak, #e5e5e5);
+  border-radius: var(--uich-wpc-radius-16, 16px);
+
+  &__card {
+    /* Just the centred content column now, the white card is the parent. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--uich-wpc-space-6, 6px);
+    max-width: 380px;
+  }
+
+  /* ---- Preview stack: a fanned trio of faux site thumbnails ---------------- */
+  &__preview {
+    position: relative;
+    width: 264px;
+    height: 128px;
+    margin-bottom: var(--uich-wpc-space-24, 24px);
+  }
+
+  &__thumb {
+    position: absolute;
+    box-sizing: border-box;
+    background: var(--uich-wpc-color-background-weaker, #fff);
+    border: 1px solid var(--uich-wpc-color-border-weak, #e5e5e5);
+    border-radius: var(--uich-wpc-radius-12, 12px);
+  }
+
+  /* Two back cards, tilted out behind the main one, slightly recessed. */
+  &__thumb--l,
+  &__thumb--r {
+    top: 16px;
+    width: 152px;
+    height: 96px;
+    background: var(--uich-wpc-color-background-default, #f7f7f7);
+  }
+  &__thumb--l { left: 18px; transform: rotate(-9deg); }
+  &__thumb--r { right: 18px; transform: rotate(9deg); }
+
+  /* Front card, a mini browser window with skeleton content. */
+  &__thumb--main {
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 168px;
+    height: 110px;
+    overflow: hidden;
+    border-color: var(--uich-wpc-color-border-default, #d4d4d4);
+    box-shadow: var(--uich-wpc-elevation-sm, 0 1px 2px rgba(0, 0, 0, 0.06));
+    text-align: left;
+  }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 9px;
+    background: var(--uich-wpc-color-background-default, #f7f7f7);
+    border-bottom: 1px solid var(--uich-wpc-color-border-weak, #e5e5e5);
+
+    i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--uich-wpc-color-border-default, #d4d4d4);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  &__line {
+    height: 6px;
+    width: 88%;
+    border-radius: 3px;
+    background: var(--uich-wpc-color-background-stronger, #ededed);
+  }
+  &__line--title {
+    height: 8px;
+    width: 58%;
+    background: var(--uich-wpc-color-secondary-lightest, #eee);
+  }
+  &__line--short { width: 72%; }
+
+  &__chip {
+    margin-top: 4px;
+    height: 15px;
+    width: 46px;
+    border-radius: 5px;
+    background: var(--uich-wpc-color-primary, #d85a30);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--uich-wpc-font-size-h6, 18px);
+    line-height: var(--uich-wpc-line-height-h6, 24px);
+    font-weight: var(--uich-wpc-font-weight-semibold, 600);
+    letter-spacing: -0.01em;
+    color: var(--uich-wpc-color-text-default, #0a0a0a);
+  }
+
+  &__desc {
+    margin: 0;
+    max-width: 320px;
+    font-size: 13px;
+    line-height: 19px;
+    font-weight: var(--uich-wpc-font-weight-regular, 400);
+    color: var(--uich-wpc-color-text-weaker, #737373);
+  }
+
+  &__error {
+    margin: 0;
+    width: 100%;
+    padding: var(--uich-wpc-space-8, 8px) var(--uich-wpc-space-12, 12px);
+    font-size: var(--uich-wpc-font-size-label, 12px);
+    line-height: var(--uich-wpc-line-height-label, 16px);
+    text-align: left;
+    color: var(--uich-wpc-color-error-darker, #d12d37);
+    background: var(--uich-wpc-color-error-lightest, #fff2ef);
+    border-radius: var(--uich-wpc-radius-8, 8px);
+  }
+
+  &__cta {
+    margin-top: var(--uich-wpc-space-12, 12px);
+  }
+
+  /* ---- Trust tags under the CTA ------------------------------------------- */
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--uich-wpc-space-20, 20px);
+    margin: var(--uich-wpc-space-20, 20px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--uich-wpc-space-6, 6px);
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--uich-wpc-color-text-weakest, #a3a3a3);
+  }
+
+  &__tag-ic {
+    display: inline-flex;
+    color: var(--uich-wpc-color-text-weaker, #737373);
+  }
+}

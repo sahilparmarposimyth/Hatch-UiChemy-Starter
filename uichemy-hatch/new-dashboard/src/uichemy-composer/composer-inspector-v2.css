@@ -1,0 +1,262 @@
+/* Inspector v2 — geometry matched to ds.shadcn.com/examples/print.
+ *
+ * Every number below was measured off the reference's computed styles, not
+ * eyeballed:
+ *   panel 243px · content 211px (16px sides)
+ *   tablist  h30, pad 3, radius 8, filled     tab h24, 12px/500, radius 6, pad 4/8
+ *   group    header 12px/500 normal-case, pad 0 16, lh 16, 16px below
+ *   row      flex, gap 8, align flex-start    label 72px, 12px/500, lh 12
+ *   rows     12px apart
+ *   field    h28, radius 8, FILLED surface    input pad-left 24, pad-right 8
+ *   addon    26x26 absolute inset 1px, radius 6, 12px/400
+ *   icons    12px at stroke-width 2
+ *
+ * COLOUR is the one thing not copied literally: the reference is a single
+ * light theme in lab(), while this panel has to survive brand/Elementor x
+ * light/dark. So each colour maps to the token playing the same role — the
+ * reference's filled input is shadcn --muted, so ours is hsl(var(--muted)).
+ *
+ * Scoped under .iv2 so none of it reaches the current inspector.
+ */
+
+.iv2 {
+  --iv2-pad: 16px;
+  --iv2-label-w: 72px;
+  --iv2-field-h: 28px;
+  --iv2-radius: 8px;
+  --iv2-radius-inner: 6px;
+  --iv2-row-gap: 12px;
+
+  /* The reference panel is 243px, but that is one number NOT to copy: its
+     values are bare ("2104") because the unit is a document-level setting,
+     while ours carry it ("2104px") because units are per-property CSS. Copying
+     243px clipped every 4-digit value. Control geometry above is exact; the
+     panel itself fills the dock, which is 420px by default and 320px minimum. */
+  width: 100%;
+  background: var(--panel-bg);
+  color: var(--text-hi);
+  font-size: 12px;
+}
+
+/* ── tabs: a segmented pill, not a bordered strip ─────────────────────────── */
+.iv2 .iv2-tablist {
+  display: flex;
+  height: 30px;
+  margin: var(--iv2-pad) var(--iv2-pad) 0;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--iv2-radius);
+  background: hsl(var(--muted));
+}
+
+.iv2 .iv2-tab {
+  flex: 1;
+  height: 24px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--iv2-radius-inner);
+  background: transparent;
+  color: var(--text-mid);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.iv2 .iv2-tab:hover { color: var(--text-hi); }
+
+/* The active tab lifts to the panel surface, so the pill reads as a track with
+   a raised thumb — same figure/ground as the reference. */
+.iv2 .iv2-tab[data-state='active'] {
+  background: var(--panel-bg);
+  color: var(--text-hi);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.iv2 .iv2-tabpanel { padding: var(--iv2-pad) 0 0; }
+
+/* ── groups ───────────────────────────────────────────────────────────────── */
+/* Normal-case, weight 500, FULL contrast — not an uppercase micro-label. */
+.iv2 .iv2-group + .iv2-group { margin-top: var(--iv2-pad); }
+
+.iv2 .iv2-group-head {
+  padding: 0 var(--iv2-pad);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--text-hi);
+}
+
+.iv2 .iv2-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--iv2-row-gap);
+  padding: var(--iv2-pad) var(--iv2-pad) 0;
+}
+
+/* ── rows ─────────────────────────────────────────────────────────────────── */
+.iv2 .iv2-row {
+  display: flex;
+  align-items: flex-start;
+  column-gap: 8px;
+}
+
+.iv2 .iv2-label {
+  flex: 0 0 var(--iv2-label-w);
+  width: var(--iv2-label-w);
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iv2 .iv2-ctl {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* ── fields ───────────────────────────────────────────────────────────────── */
+/* Filled surface with a matching border, radius 8, height 28 — overrides the
+   dock-right defaults, which are transparent/h36 by design elsewhere. */
+.iv2 .lin-ig {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--iv2-field-h);
+  padding-right: 0;
+  border-radius: var(--iv2-radius);
+  border-color: hsl(var(--muted));
+  background: hsl(var(--muted));
+  box-shadow: none;
+}
+
+/* Handle sits absolutely inside the field's left edge, inset 1px on the block
+   axis, so it never affects the input's own box. */
+/* Flush to the padding box, not inset 1px: the field's 1px border already
+   shrinks the containing block, so insetting again gave 24px where the
+   reference measures 26px. */
+.iv2 .lin-ig .lin-glyph {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 26px;
+  margin: 0;
+  border-radius: var(--iv2-radius-inner);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-mid);
+  z-index: 2;
+}
+
+.iv2 .lin-ig .lin-glyph:hover {
+  background: var(--panel-bg-4);
+  color: var(--text-hi);
+}
+
+/* 24px left gutter, the same as the reference's pl-6. Doubled selector to beat
+   `.panel.dock-right .lin-ig .lin-glyph + input`, whose 4px gutter is correct
+   for the shipping single-field layout but not here. */
+.iv2.iv2 .lin-ig .lin-glyph + input {
+  padding-left: 24px;
+  padding-right: 8px;
+  font-size: 12px;
+}
+
+.iv2 .lin-ig input { border-radius: var(--iv2-radius); }
+
+/* ── icon buttons ─────────────────────────────────────────────────────────── */
+.iv2 .iv2-iconbtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--iv2-field-h);
+  height: var(--iv2-field-h);
+  padding: 0;
+  border: 0;
+  border-radius: var(--iv2-radius-inner);
+  background: transparent;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.iv2 .iv2-iconbtn:hover {
+  background: hsl(var(--muted));
+  color: var(--text-hi);
+}
+
+.iv2 .iv2-iconbtn.is-on {
+  background: hsl(var(--muted));
+  color: var(--text-hi);
+}
+
+.iv2 .iv2-btn-pair { display: inline-flex; gap: 4px; }
+
+/* ── "Add…" fields ────────────────────────────────────────────────────────── */
+.iv2 .iv2-addfield {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--iv2-field-h);
+  padding: 0 6px 0 8px;
+  border: 1px solid hsl(var(--muted));
+  border-radius: var(--iv2-radius);
+  background: hsl(var(--muted));
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s ease;
+}
+
+.iv2 .iv2-addfield:hover { border-color: var(--text-dim); }
+
+.iv2 .iv2-addfield-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-hi);
+}
+
+.iv2 .iv2-addfield-text.is-empty { color: var(--text-mid); }
+
+.iv2 .iv2-swatch {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--panel-line-2);
+}
+
+.iv2 .iv2-swatch.is-filled { border-color: transparent; }
+
+/* ── select ───────────────────────────────────────────────────────────────── */
+.iv2 .iv2-select {
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--iv2-field-h);
+  padding: 0 8px;
+  border: 1px solid hsl(var(--muted));
+  border-radius: var(--iv2-radius);
+  background: hsl(var(--muted));
+  color: var(--text-hi);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.iv2 .iv2-select:focus { outline: none; border-color: var(--text-dim); }

@@ -1,0 +1,35 @@
+/* Badge, compact status/label pill on uc- tokens. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uc-space-4);
+  height: 20px;
+  padding: 0 var(--uc-space-8);
+  border-radius: var(--uc-radius-pill);
+  font-family: var(--uc-font-sans);
+  font-size: var(--uc-text-xs);
+  font-weight: var(--uc-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+.md { height: 24px; padding: 0 var(--uc-space-12); font-size: var(--uc-text-sm); }
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* variants read the --_* tone channels */
+.solid   { color: var(--_on, var(--uc-brand-on)); background: var(--_fill, var(--uc-brand)); background-image: var(--uc-sheen); box-shadow: var(--uc-shadow-1); }
+.soft    { color: var(--_fg, var(--uc-brand-fg)); background: var(--_soft, var(--uc-brand-soft)); }
+.outline { color: var(--_fg, var(--uc-brand-fg)); background: transparent; box-shadow: inset 0 0 0 1px var(--_border, var(--uc-brand-border)); }
+
+.brand   { --_fill: var(--uc-brand);   --_on: var(--uc-brand-on);   --_fg: var(--uc-brand-fg);   --_soft: var(--uc-brand-soft);   --_border: var(--uc-brand-border); }
+.success { --_fill: var(--uc-success); --_on: var(--uc-success-on); --_fg: var(--uc-success-fg); --_soft: var(--uc-success-soft); --_border: var(--uc-success-border); }
+.danger  { --_fill: var(--uc-danger);  --_on: var(--uc-danger-on);  --_fg: var(--uc-danger-fg);  --_soft: var(--uc-danger-soft);  --_border: var(--uc-danger-border); }
+.warning { --_fill: var(--uc-warning); --_on: var(--uc-warning-on); --_fg: var(--uc-warning-fg); --_soft: var(--uc-warning-soft); --_border: var(--uc-warning-border); }
+.accent  { --_fill: var(--uc-accent);  --_on: var(--uc-accent-on);  --_fg: var(--uc-accent-fg);  --_soft: var(--uc-accent-soft);  --_border: var(--uc-accent-border); }
+.neutral { --_fill: var(--uc-text); --_on: var(--uc-text-inverse); --_fg: var(--uc-text-muted); --_soft: var(--uc-surface-sunken); --_border: var(--uc-border-strong); }

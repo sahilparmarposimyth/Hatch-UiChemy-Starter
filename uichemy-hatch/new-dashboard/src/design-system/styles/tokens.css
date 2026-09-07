@@ -1,0 +1,349 @@
+/* =============================================================================
+   UiChemy Create, Design System Tokens (Phase 1, isolated)
+   -----------------------------------------------------------------------------
+   SURFACE MODEL, components are surface-agnostic. They read semantic tokens
+   (surfaces, text, borders, ring, per-family fg/soft) whose VALUES are set by
+   the surface scope a component lives in:
+
+     .uc-content            → light content   (current look, DEFAULT)
+     .uc-content[data-theme="dark"] → dark content (future, token change only)
+     .uc-chrome             → dark chrome     (fixed; sidebar/nav/rails)
+
+   `.uc-scope` and `.uc-portal` behave as light content, so existing usage is
+   unchanged and the light view is pixel-identical to before this restructure.
+
+   ISOLATION: all tokens are scoped under these classes (NOT :root). Nothing
+   here touches the existing globals/theme.
+   ========================================================================== */
+
+/* Brand typeface, bundled via webpack (relative paths resolve to
+   ../fonts/, emitted into build/ and URL-rewritten at build time so the
+   fonts load correctly from wp-content, not the server root). */
+@font-face { font-family:"Zalando Sans"; font-style:normal; font-weight:400; font-display:swap; src:url("../fonts/ZalandoSans-Regular.ttf") format("truetype"); }
+@font-face { font-family:"Zalando Sans"; font-style:normal; font-weight:500; font-display:swap; src:url("../fonts/ZalandoSans-Medium.ttf") format("truetype"); }
+@font-face { font-family:"Zalando Sans"; font-style:normal; font-weight:600; font-display:swap; src:url("../fonts/ZalandoSans-SemiBold.ttf") format("truetype"); }
+@font-face { font-family:"Zalando Sans"; font-style:normal; font-weight:700; font-display:swap; src:url("../fonts/ZalandoSans-Bold.ttf") format("truetype"); }
+
+/* =============================================================================
+   1. BASE, surface-INDEPENDENT tokens (identical on every surface).
+      Applies to every surface scope so the values are always present.
+   ========================================================================== */
+/* `:root` added (AI-creator port) so DS token VALUES resolve app-wide for
+   inline DS controls (buttons/inputs/triggers) WITHOUT importing the scope's
+   font/color/box-sizing reset, that stays under `.uc-*` only. Nothing in the
+   app references `--uc-*`, so these are inert for existing components. */
+:root,
+.uc-scope,
+.uc-content,
+.uc-chrome,
+.uc-portal {
+  /* ---- Brand + semantic SOLID fills + on-fill text (constant) ----------
+     ORANGE is back on the SOLID brand fill only, this paints the primary /
+     main-CTA buttons (tone="brand" solid). The brand -fg/-soft/-border/-glow
+     below stay NEUTRAL, so soft/outline/ghost brand controls, icon tints and
+     text remain monochrome. --uc-accent stays neutral (no purple). */
+  --uc-brand:   #FD6A35;  --uc-brand-on:   #FFFFFF;
+  --uc-success: #2EA343;  --uc-success-on: #FFFFFF;
+  --uc-danger:  #F65258;  --uc-danger-on:  #FFFFFF;
+  --uc-warning: #FFA940;  --uc-warning-on: #171717;
+  --uc-accent:  var(--uc-inverse-bg);  --uc-accent-on:  var(--uc-inverse-fg);
+
+  /* ---- Family hairline borders (translucent, work on any surface) ----- */
+  --uc-brand-border:   var(--uc-border);
+  --uc-success-border: rgba(46, 163, 67, 0.40);
+  --uc-danger-border:  rgba(246, 82, 88, 0.40);
+  --uc-warning-border: rgba(255, 169, 64, 0.42);
+  --uc-accent-border:  var(--uc-border);
+
+  /* ---- Hover / press glow washes (translucent, surface-agnostic) ------ */
+  --uc-brand-glow-hover:   rgba(128, 128, 128, 0.10); --uc-brand-glow-press:   rgba(128, 128, 128, 0.18);
+  --uc-success-glow-hover: rgba(46, 163, 67, 0.08);  --uc-success-glow-press: rgba(46, 163, 67, 0.16);
+  --uc-danger-glow-hover:  rgba(246, 82, 88, 0.08);  --uc-danger-glow-press:  rgba(246, 82, 88, 0.16);
+  --uc-warning-glow-hover: rgba(255, 169, 64, 0.10); --uc-warning-glow-press: rgba(255, 169, 64, 0.18);
+  --uc-accent-glow-hover:  rgba(128, 128, 128, 0.10); --uc-accent-glow-press:  rgba(128, 128, 128, 0.18);
+
+  /* ---- Inverse text (constant) ----------------------------------------- */
+  --uc-text-inverse: #FFFFFF;
+
+  /* ---- Semantic aliases (resolve per surface via the surface tokens) --- */
+  --uc-bg:        var(--uc-surface-base);
+  --uc-fg:        var(--uc-text-strong);
+  --uc-fg-muted:  var(--uc-text-muted);
+  --uc-card:      var(--uc-surface-raised);
+  --uc-card-fg:   var(--uc-text-strong);
+  --uc-muted:     var(--uc-surface-sunken);
+  --uc-elevated:  var(--uc-surface-overlay);
+
+  /* ---- Radius (UiChemy scale: name = pixel value; mirrors the styleguide
+         corner-radius set). Semantic aliases below keep components working. -- */
+  --uc-radius-0: 0;      --uc-radius-2: 2px;    --uc-radius-4: 4px;
+  --uc-radius-6: 6px;    --uc-radius-8: 8px;    --uc-radius-12: 12px;
+  --uc-radius-16: 16px;  --uc-radius-24: 24px;  --uc-radius-32: 32px;
+  --uc-radius-infinite: 9999px;
+  /* Semantic aliases → numeric scale (value-identical to before) */
+  --uc-radius-xs: var(--uc-radius-4);   --uc-radius-sm: var(--uc-radius-6);
+  --uc-radius-md: var(--uc-radius-8);   --uc-radius-lg: var(--uc-radius-12);
+  --uc-radius-xl: var(--uc-radius-16);  --uc-radius-pill: var(--uc-radius-infinite);
+
+  /* ---- Spacing (UiChemy scale: name = pixels) -------------------------- */
+  --uc-space-0: 0;     --uc-space-1: 1px;   --uc-space-2: 2px;   --uc-space-3: 3px;
+  --uc-space-4: 4px;   --uc-space-5: 5px;   --uc-space-6: 6px;   --uc-space-7: 7px;
+  --uc-space-8: 8px;   --uc-space-9: 9px;   --uc-space-10: 10px; --uc-space-11: 11px;
+  --uc-space-12: 12px; --uc-space-14: 14px; --uc-space-16: 16px; --uc-space-20: 20px;
+  --uc-space-24: 24px; --uc-space-28: 28px; --uc-space-32: 32px; --uc-space-36: 36px;
+  --uc-space-40: 40px; --uc-space-44: 44px; --uc-space-48: 48px;
+
+  /* ---- Typography ------------------------------------------------------ */
+  --uc-font-sans: "Zalando Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --uc-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --uc-text-3xs: 0.5rem;    --uc-text-2xs: 0.625rem;  --uc-text-xs: 0.75rem;
+  --uc-text-sm: 0.8125rem;  --uc-text-base: 0.875rem; --uc-text-md: 1rem;
+  --uc-text-lg: 1.125rem;   --uc-text-xl: 1.25rem;    --uc-text-2xl: 1.5rem;
+  --uc-text-3xl: 1.875rem;
+  /* --uc-weight-semibold is temporarily folded to Medium (500): no text renders
+     at 600 for now. Flip back to 600 here to restore SemiBold everywhere it's
+     used (Card / Alert / Dialog / Accordion titles, etc.). */
+  --uc-weight-regular: 400; --uc-weight-medium: 500;  --uc-weight-semibold: 500;
+  --uc-leading-tight: 1.2;  --uc-leading-snug: 1.35;  --uc-leading-normal: 1.5;
+  --uc-tracking-tight: -0.01em; --uc-tracking-normal: 0; --uc-tracking-wide: 0.02em;
+
+  /* ---- Elevation (neutral recipes; control-brand recolored to orange) --
+     Resting + hover surfaces are FLAT (ElevenLabs-style): definition comes
+     from the single hairline border, not a shadow. Only true overlays
+     (popovers/menus/modals = shadow-3/4/5) still float. */
+  --uc-shadow-1: none;
+  --uc-shadow-2: none;
+  --uc-shadow-3: 0 0 0 1px oklch(50% 0.01 285 / 0.06), 0 2px 4px -1px oklch(0% 0 0 / 0.05), 0 6px 14px -3px oklch(0% 0 0 / 0.08);
+  --uc-shadow-4: 0 0 0 1px oklch(50% 0.01 285 / 0.06), 0 6px 12px -4px oklch(0% 0 0 / 0.06), 0 14px 28px -6px oklch(0% 0 0 / 0.10);
+  --uc-shadow-5: 0 0 0 1px oklch(50% 0.01 285 / 0.06), 0 12px 24px -8px oklch(0% 0 0 / 0.08), 0 28px 56px -12px oklch(0% 0 0 / 0.14);
+  /* Filled controls (solid buttons): light top highlight + one soft drop.
+     Kept subtle, depth reads without heavy shadows. */
+  --uc-shadow-control:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(0, 0, 0, 0.07),
+    0 2px 3px -1px rgba(0, 0, 0, 0.05);
+  /* Colored solids (brand/success/danger): neutral dark inner edge so it suits
+     any hue, plus a light top highlight and soft drop. */
+  --uc-shadow-control-brand:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.24),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.09),
+    0 2px 3px -1px rgba(0, 0, 0, 0.06);
+  --uc-shadow-control-pressed: inset 0 1px 2px rgba(0, 0, 0, 0.14);
+  --uc-shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  /* Raised secondary controls (outline buttons, select/menu triggers): a faint
+     top highlight and a whisper of drop. Edge comes from the component border. */
+  --uc-shadow-raised:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 3px -1px rgba(0, 0, 0, 0.04);
+  /* Very subtle gloss: faint light top → faint dark bottom. */
+  --uc-sheen: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.03));
+
+  /* ---- Control sizing -------------------------------------------------- */
+  --uc-control-h-sm: 1.75rem; --uc-control-h-md: 2rem; --uc-control-h-lg: 2.5rem;
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --uc-dur-fast: 160ms; --uc-dur-base: 240ms; --uc-dur-slow: 340ms;
+  /* Appearance of popovers / overlays (tooltip, menu, select, dialog), a touch
+     slower than base so things ease in gracefully instead of flashing on. */
+  --uc-dur-enter: 300ms;
+  --uc-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --uc-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --uc-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ---- Z-index --------------------------------------------------------- */
+  /* Dropdowns/selects/menus sit ABOVE dialogs (1250 > z-dialog 1200) so a Select
+     opened inside a modal renders on top instead of behind it. Tooltip stays highest. */
+  --uc-z-overlay: 1100; --uc-z-dialog: 1200; --uc-z-dropdown: 1250; --uc-z-tooltip: 1300;
+}
+
+/* =============================================================================
+   2. SURFACE, CONTENT (light). DEFAULT. Values identical to pre-restructure,
+      so the light view is unchanged. `.uc-scope` / `.uc-portal` map here too.
+   ========================================================================== */
+:root,
+.uc-scope,
+.uc-content,
+.uc-portal {
+  --uc-surface-sunken:  #EBEBEB;
+  --uc-surface-base:    #F4F4F4;
+  --uc-surface-raised:  #FFFFFF;
+  --uc-surface-overlay: rgba(255, 255, 255, 0.10);
+  --uc-surface-control: #FFFFFF;   /* secondary control fill (raised) */
+
+  --uc-text-strong: #0A0A0A;
+  --uc-text:        #171717;
+  --uc-text-muted:  #737373;
+  --uc-text-subtle: #A3A3A3;
+
+  /* high-contrast inverse fill (B&W primary): dark on light content */
+  --uc-inverse-bg: #171717;
+  --uc-inverse-fg: #FFFFFF;
+
+  /* One soft, semi-transparent hairline (ElevenLabs uses rgba(0,0,0,0.1)).
+     Translucent so it composites correctly over white AND grey tiles. */
+  --uc-border-subtle: rgba(0, 0, 0, 0.055);
+  --uc-border:        rgba(0, 0, 0, 0.09);
+  --uc-border-strong: rgba(0, 0, 0, 0.14);
+  --uc-ring:          rgba(23, 23, 23, 0.40);
+
+  /* per-family foreground (readable on light). brand/accent = dark ink. */
+  --uc-brand-fg:   #171717;
+  --uc-success-fg: #0A842A;
+  --uc-danger-fg:  #D12D37;
+  --uc-warning-fg: #AA712B;
+  --uc-accent-fg:  #171717;
+
+  /* per-family soft tint backgrounds (opaque light tints). brand/accent = grey. */
+  --uc-brand-soft:   #F0F0F0;
+  --uc-success-soft: #E7FFE7;
+  --uc-danger-soft:  #FFF2EF;
+  --uc-warning-soft: #FFEDD8;
+  --uc-accent-soft:  #F0F0F0;
+}
+
+/* =============================================================================
+   3. SURFACE, CONTENT DARK (future). Token change only; no component rebuild.
+      Slightly lighter than chrome so content sits "above" the fixed chrome.
+   ========================================================================== */
+.uc-content[data-theme="dark"] {
+  --uc-surface-sunken:  #151515;
+  --uc-surface-base:    #1C1C1C;
+  --uc-surface-raised:  #242424;
+  --uc-surface-overlay: #2A2A2A;
+  --uc-surface-control: rgba(255, 255, 255, 0.05);  /* subtle lift, blends on dark */
+
+  --uc-text-strong: #F5F5F5;
+  --uc-text:        #E5E5E5;
+  --uc-text-muted:  #A3A3A3;
+  --uc-text-subtle: #737373;
+
+  /* inverse flips to light-on-dark so the B&W primary stays high-contrast */
+  --uc-inverse-bg: #F5F5F5;
+  --uc-inverse-fg: #1C1C1C;
+
+  --uc-border-subtle: #2E2E2E;
+  --uc-border:        #3D3D3D;
+  --uc-border-strong: #525252;
+  --uc-ring:          rgba(245, 245, 245, 0.55);
+
+  --uc-brand-fg:   #EDEDED;
+  --uc-success-fg: #A7EAAA;
+  --uc-danger-fg:  #FDC9C6;
+  --uc-warning-fg: #FFC680;
+  --uc-accent-fg:  #EDEDED;
+
+  --uc-brand-soft:   rgba(255, 255, 255, 0.12);
+  --uc-success-soft: rgba(46, 163, 67, 0.20);
+  --uc-danger-soft:  rgba(246, 82, 88, 0.20);
+  --uc-warning-soft: rgba(255, 169, 64, 0.22);
+  --uc-accent-soft:  rgba(255, 255, 255, 0.12);
+}
+
+/* =============================================================================
+   4. SURFACE, CHROME (dark, fixed). Values from the existing app dark sidebar
+      (#171717 / #202020, text-white / text-weakest, border-dark-weakest/default).
+   ========================================================================== */
+.uc-chrome {
+  --uc-surface-sunken:  #101010;
+  --uc-surface-base:    #171717;
+  --uc-surface-raised:  #202020;
+  --uc-surface-overlay: #242424;
+  --uc-surface-control: rgba(255, 255, 255, 0.05);  /* subtle lift, blends on dark */
+
+  --uc-text-strong: #FFFFFF;
+  --uc-text:        #A3A3A3;
+  --uc-text-muted:  #737373;
+  --uc-text-subtle: #525252;
+
+  /* inverse flips to light-on-dark so the B&W primary stays high-contrast */
+  --uc-inverse-bg: #F5F5F5;
+  --uc-inverse-fg: #171717;
+
+  --uc-border-subtle: #333333;
+  --uc-border:        #404040;
+  --uc-border-strong: #525252;
+  --uc-ring:          rgba(245, 245, 245, 0.55);
+
+  --uc-brand-fg:   #EDEDED;
+  --uc-success-fg: #A7EAAA;
+  --uc-danger-fg:  #FDC9C6;
+  --uc-warning-fg: #FFC680;
+  --uc-accent-fg:  #EDEDED;
+
+  --uc-brand-soft:   rgba(255, 255, 255, 0.12);
+  --uc-success-soft: rgba(46, 163, 67, 0.20);
+  --uc-danger-soft:  rgba(246, 82, 88, 0.20);
+  --uc-warning-soft: rgba(255, 169, 64, 0.22);
+  --uc-accent-soft:  rgba(255, 255, 255, 0.12);
+}
+
+/* =============================================================================
+   4b. POPOVER, fixed dark scope for dropdowns (Select / Menu). Always dark in
+       every mode. Applied alongside `uc-portal` (base tokens + box-sizing).
+   ========================================================================== */
+.uc-pop-dark {
+  --uc-surface-sunken:  #141414;
+  --uc-surface-base:    #1A1A1A;
+  --uc-surface-raised:  #242424;
+  --uc-surface-overlay: #1C1C1C;
+  --uc-surface-control: rgba(255, 255, 255, 0.08);
+
+  --uc-text-strong: #FFFFFF;
+  --uc-text:        #E5E5E5;
+  --uc-text-muted:  #A3A3A3;
+  --uc-text-subtle: #737373;
+
+  --uc-inverse-bg: #F5F5F5;
+  --uc-inverse-fg: #171717;
+
+  --uc-border-subtle: #2E2E2E;
+  --uc-border:        #3D3D3D;
+  --uc-border-strong: #525252;
+  --uc-ring:          rgba(245, 245, 245, 0.55);
+
+  --uc-brand-fg:   #EDEDED;  --uc-brand-soft:   rgba(255, 255, 255, 0.12);
+  --uc-success-fg: #A7EAAA;  --uc-success-soft: rgba(46, 163, 67, 0.20);
+  --uc-danger-fg:  #FDC9C6;  --uc-danger-soft:  rgba(246, 82, 88, 0.20);
+  --uc-warning-fg: #FFC680;  --uc-warning-soft: rgba(255, 169, 64, 0.22);
+  --uc-accent-fg:  #EDEDED;  --uc-accent-soft:  rgba(255, 255, 255, 0.12);
+
+  color: var(--uc-text);
+}
+
+/* =============================================================================
+   5. BASELINES, each surface paints its own background + text.
+   ========================================================================== */
+.uc-scope,
+.uc-content,
+.uc-chrome {
+  font-family: var(--uc-font-sans);
+  font-size: var(--uc-text-base);
+  line-height: var(--uc-leading-normal);
+  color: var(--uc-text);
+  background: var(--uc-surface-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+/* Portalled content mounts in <body>; carry font/tokens but no background. */
+.uc-portal {
+  font-family: var(--uc-font-sans);
+  font-size: var(--uc-text-base);
+  line-height: var(--uc-leading-normal);
+  color: var(--uc-text);
+  -webkit-font-smoothing: antialiased;
+}
+.uc-scope *, .uc-scope *::before, .uc-scope *::after,
+.uc-content *, .uc-content *::before, .uc-content *::after,
+.uc-chrome *, .uc-chrome *::before, .uc-chrome *::after,
+.uc-portal *, .uc-portal *::before, .uc-portal *::after {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uc-scope *, .uc-content *, .uc-chrome *, .uc-portal * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

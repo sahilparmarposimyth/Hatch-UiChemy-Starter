@@ -1,0 +1,1561 @@
+.uich-wpc-import-page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grey recessed group, the SAME `--tray` box the Figma / AI Agent tabs use
+   (see `.home-hub__panel .dash__grid`), so switching tabs reads as one
+   consistent surface. `--tray` is inherited from the dashboard panel this flow
+   renders inside; the fallback keeps it sane if ever rendered standalone. The
+   Static Pages group + Advanced Configurations sit inside as white card-in-card
+   panels, exactly like the Figma tab's white cards on grey. */
+.uich-wpc-import-page-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  padding: 20px;
+  background: var(--tray, var(--uich-wpc-color-background-stronger));
+  border-radius: 16px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    border-radius: 12px;
+  }
+}
+
+/* Inner content container */
+.uich-wpc-import-page-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    padding: 10px 0;
+  }
+}
+
+
+/* Step header, a modest section heading, NOT a page title. The dashboard page
+   already owns the H1 ("Howdy, …" + "Pick how you want…") above the tab bar, so
+   this stays small and un-chromed: no sticky bar, no full-width background, no
+   divider. Just a compact title + one line of helper text. */
+.uich-wpc-import-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--uich-wpc-space-8) var(--uich-wpc-space-16);
+  margin: 0 0 var(--uich-wpc-space-4);
+}
+
+/* Title + subtitle stack; sits opposite the selection badge in the header row. */
+.uich-wpc-import-page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* "X of N Pages Selected" now lives beside the title (top-right of the header). */
+.uich-wpc-import-selection-badge {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.uich-wpc-import-page-title {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-h6);       /* 18px (was 24px) */
+  line-height: var(--uich-wpc-line-height-h6);
+  font-weight: var(--uich-wpc-font-weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-import-page-subtitle {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: 13px;                                /* was 14px, quieter helper */
+  line-height: 18px;
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-weaker);
+}
+
+/* Advanced Config, last child inside .uich-wpc-import-groups-accordion */
+/* Advanced Config accordion (Figma node 1067:2787) */
+.uich-wpc-advanced-config {
+  margin: 0;
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-12);
+  background: var(--uich-wpc-color-background-weaker);
+  overflow: hidden;
+}
+
+.uich-wpc-advanced-config-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--uich-wpc-space-16);
+  text-align: left;
+  background: var(--uich-wpc-color-background-weaker);
+  border: none;
+  cursor: pointer;
+  outline: none;
+
+  &:hover {
+    background: var(--uich-wpc-color-background-default);
+  }
+}
+
+.uich-wpc-advanced-config-toggle-left {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-12);
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-body);
+  line-height: var(--uich-wpc-line-height-body);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-default);
+}
+
+/* Gear in a grey rounded box */
+.uich-wpc-advanced-config-gear {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+  padding: var(--uich-wpc-space-6);
+  border-radius: var(--uich-wpc-radius-8);
+  background: var(--uich-wpc-color-background-stronger);
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-advanced-config-chevron {
+  display: flex;
+  color: var(--uich-wpc-color-text-default);
+  transform: rotate(180deg); /* closed → chevron points down */
+  transition: transform 0.25s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &.is-open {
+    transform: rotate(0deg); /* open → chevron points up */
+  }
+}
+
+.uich-wpc-advanced-config-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-8);
+  padding: var(--uich-wpc-space-16);
+  border-top: 1px solid var(--uich-wpc-color-border-weak);
+  animation: uich-wpc-accordion-reveal 0.25s ease;
+}
+
+/* Each subsection is its own bordered card */
+.uich-wpc-advanced-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-12);
+  padding: var(--uich-wpc-space-16);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-12);
+  background: var(--uich-wpc-color-background-weaker);
+}
+
+.uich-wpc-advanced-config-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-8);
+}
+
+.uich-wpc-advanced-config-label {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+
+  &--configurations {
+    font-size: var(--uich-wpc-font-size-caption);
+    font-weight: var(--uich-wpc-font-weight-regular);
+    letter-spacing: 0;
+    color: var(--uich-wpc-color-text-default);
+  }
+}
+
+.uich-wpc-advanced-configurations-panel {
+  /* The parent section is the card now; this just holds the label + options + gating. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-12);
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  /* "Coming Soon" gating, dim the options so they read as preview/disabled
+   * while still legible; block pointer events so they can't be toggled. */
+  &.is-disabled {
+    opacity: 0.6;
+
+    .uich-wpc-advanced-config-options {
+      pointer-events: none;
+    }
+  }
+}
+
+/* Pill badge, sits next to the section title. Uses the global warning palette
+ * so it reads as "feature pending / not ready", consistent with `.uich-wpc-advanced-config-notice`.
+ * Sized to align with 14px label text. */
+.uich-wpc-coming-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  margin-left: 0;
+  font-size: 10px;
+  font-weight: var(--uich-wpc-font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--uich-wpc-color-warning);
+  background: var(--uich-wpc-color-warning-lightest);
+  border: 1px solid var(--uich-wpc-color-warning-lighter);
+  border-radius: 999px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Info icon with custom CSS-only tooltip.
+ *
+ * Trigger: span carries `data-tooltip="…"` (used in place of the native `title`
+ * attribute so we don't get the OS's delayed unstyled bubble). `aria-label`
+ * still exposes the same text to screen readers. `tabIndex={0}` + the keyboard
+ * focus selector below let the tooltip appear on keyboard navigation too.
+ *
+ * Rendering: ::after is the bubble, ::before is the small arrow. Both are
+ * absolutely positioned above the icon and centered horizontally. They fade
+ * + lift in on hover/focus via opacity + translateY. */
+.uich-wpc-advanced-config-info {
+  position: relative;
+  display: flex;
+  color: var(--uich-wpc-text-muted);
+  cursor: help;
+  outline: none;
+
+  /* Bubble */
+  &[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    z-index: 20;
+
+    min-width: 200px;
+    max-width: 260px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--uich-wpc-color-secondary);   /* DS inverse ink, readable on any panel */
+    color: var(--uich-wpc-color-text-white);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: none;            /* defensive: parent may be uppercase */
+    white-space: normal;
+    word-wrap: break-word;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  }
+
+  /* Arrow, sits between the icon and the bubble */
+  &[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translate(-50%, 4px) rotate(45deg);
+    z-index: 21;
+
+    width: 8px;
+    height: 8px;
+    background: var(--uich-wpc-color-secondary);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  }
+
+  /* Show on hover or keyboard focus */
+  &[data-tooltip]:hover::after,
+  &[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  &[data-tooltip]:hover::before,
+  &[data-tooltip]:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0) rotate(45deg);
+  }
+}
+
+.uich-wpc-advanced-config-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--uich-wpc-text-muted);
+}
+
+.uich-wpc-advanced-config-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uich-wpc-space-12);
+}
+
+.uich-wpc-advanced-config-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-5);
+  padding: var(--uich-wpc-space-6) var(--uich-wpc-space-12);
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+  background: var(--uich-wpc-color-background-default);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-8);
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* Sections are bordered cards now, no dividers between them */
+.uich-wpc-advanced-config-divider {
+  display: none;
+}
+
+.uich-wpc-advanced-config-theme-row {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-12);
+  cursor: pointer;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-advanced-config-theme-label {
+  user-select: none;
+}
+
+.uich-wpc-advanced-config-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-4);
+  padding: var(--uich-wpc-space-12);
+  box-sizing: border-box;
+  background: var(--uich-wpc-color-warning-lightest);
+  border: 1px solid var(--uich-wpc-color-warning-lighter);
+  border-radius: var(--uich-wpc-radius-8);
+  color: var(--uich-wpc-color-warning);
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--uich-wpc-font-size-label);
+    line-height: var(--uich-wpc-line-height-label);
+  }
+}
+
+/* Shared options grid for both the single "Reset content" card and the three
+   "Coming Soon" cards. auto-fit lets a lone option span the whole row (no dead
+   space beside it), while three options still lay out as an even three-across
+   that fills the width, so both subsections read as deliberate, balanced rows. */
+.uich-wpc-advanced-config-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 9px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.uich-wpc-advanced-config-option {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--uich-wpc-space-12);
+  padding: var(--uich-wpc-space-12);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-8);
+  background: var(--uich-wpc-color-background-weaker);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+  .uich-wpc-checkbox-custom-wrap {
+    margin-top: 2px;
+  }
+
+  &.is-checked {
+    border-color: var(--uich-wpc-color-border-default);
+  }
+
+  &:hover {
+    border-color: var(--uich-wpc-color-border-default);
+  }
+
+  /* Disabled state, used when the option is part of the "Coming Soon" panel.
+   * Suppress the hover affordance and reroute the cursor so users immediately
+   * understand the card isn't interactive. */
+  &.is-disabled {
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--uich-wpc-border-light);
+    }
+
+    .uich-wpc-advanced-config-option-icon,
+    .uich-wpc-advanced-config-option-title,
+    .uich-wpc-advanced-config-option-desc {
+      color: var(--uich-wpc-text-muted);
+    }
+  }
+}
+
+.uich-wpc-advanced-config-option-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-2);
+}
+
+.uich-wpc-advanced-config-option-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--uich-wpc-space-4);
+}
+
+.uich-wpc-advanced-config-option-icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--uich-wpc-color-text-default);
+
+  svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.uich-wpc-advanced-config-option-title {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-advanced-config-option-desc {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-weaker);
+}
+
+/* Import picker: filters, search, accordion */
+.uich-wpc-import-picker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Left group: tabs + the "X of N Pages Selected" count (Figma node 1052:22099) */
+.uich-wpc-import-toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--uich-wpc-space-12);
+}
+
+/* The category filter is the DS ToggleGroup (single-select). Only the per-item
+   count keeps a local style — a subtle tabular number after each label. */
+.uich-wpc-import-filter-count {
+  font-size: 11px;
+  font-weight: var(--uich-wpc-font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--uich-wpc-color-text-weakest);
+}
+
+.uich-wpc-import-toolbar-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.uich-wpc-import-selection-count {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-weaker);
+  white-space: nowrap;
+}
+
+/* Search uses the DS <Input>; the DS component owns the field + left-icon
+   padding, so width is constrained on this wrapper (the DS Input wraps its own
+   control in an internal span with no external class hook). */
+.uich-wpc-import-search-field {
+  width: 260px;
+  max-width: 100%;
+  flex: 0 0 auto;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.uich-wpc-import-groups-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.uich-wpc-import-page-group {
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-12);
+  background: var(--uich-wpc-color-background-weaker);
+  overflow: hidden;
+}
+
+.uich-wpc-import-page-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-12);
+  width: 100%;
+  padding: var(--uich-wpc-space-16);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    background: var(--uich-wpc-color-background-default);
+  }
+}
+
+.uich-wpc-import-group-checkbox-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.uich-wpc-import-page-group-title {
+  flex: 0 0 auto;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-body);
+  line-height: var(--uich-wpc-line-height-body);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-import-page-group-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uich-wpc-space-6);
+  min-height: 24px;
+  box-sizing: border-box;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-weaker);
+  padding: var(--uich-wpc-space-3) var(--uich-wpc-space-8);
+  background: var(--uich-wpc-bg-card);
+  border-radius: 999px;
+  border: 1px solid var(--uich-wpc-border-light);
+}
+
+.uich-wpc-import-page-group-chevron {
+  flex-shrink: 0;
+  display: flex;
+  margin-left: auto;
+  color: var(--uich-wpc-color-text-default);
+  transform: rotate(180deg); /* closed → chevron points down */
+  transition: transform 0.25s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &.is-open {
+    transform: rotate(0deg); /* open → chevron points up */
+  }
+}
+
+@keyframes uich-wpc-accordion-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.uich-wpc-import-page-group-body {
+  padding: var(--uich-wpc-space-16);
+  background: var(--uich-wpc-color-background-weaker);
+  animation: uich-wpc-accordion-reveal 0.25s ease;
+
+  .uich-wpc-pages-grid {
+    margin-top: 0;
+  }
+}
+
+/* Pages Grid, cards stretch to fill the full row width so the group reads as a
+   deliberate gallery with no dead space on the right. Three equal columns on
+   desktop, two on tablet, and the compact auto-pack on mobile. Scales to any
+   count: a lone page sits tidily in the first of three tracks, not a sliver. */
+.uich-wpc-pages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--uich-wpc-space-16);
+  margin-top: 10px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--uich-wpc-space-12);
+  }
+}
+
+/* Page Card */
+.uich-wpc-page-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-8);
+  cursor: pointer;
+
+  /* Selected: a minimal single 1px border in brand black — no extra ring, so the
+     grid of selected cards reads light rather than a wall of heavy 2px frames. */
+  &.selected {
+    .uich-wpc-page-preview {
+      border-color: var(--uich-wpc-color-secondary);
+    }
+  }
+}
+
+/* Page Preview Container */
+.uich-wpc-page-preview {
+  position: relative;
+  /* New stacking context so the z-indexed checkbox stays contained within the
+     card and can't render above the sticky header when scrolled under it. */
+  isolation: isolate;
+  aspect-ratio: 3 / 2;                 /* was fixed 164px, scales with card width */
+  border-radius: var(--uich-wpc-radius-8);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  overflow: hidden;
+  background: var(--uich-wpc-color-background-weaker);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Custom checkbox: hidden input + .uich-wpc-checkbox-custom (use with uich-wpc-checkbox-custom-wrap) */
+.uich-wpc-checkbox-custom-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+
+  input[type='checkbox'] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 2;
+    margin: 0;
+
+    &:focus-visible + .uich-wpc-checkbox-custom {
+      outline: 2px solid var(--uich-wpc-color-secondary);
+      outline-offset: 2px;
+    }
+
+    /* Checked = DS Checkbox look: near-black fill (--uc-inverse-bg, bridged as
+       --uich-wpc-color-secondary) + white tick. Matches the checkbox used
+       everywhere else in the product, orange is reserved for the primary CTA. */
+    &:checked + .uich-wpc-checkbox-custom {
+      background: var(--uich-wpc-color-secondary);
+      border-color: var(--uich-wpc-color-secondary);
+
+      .uich-wpc-checkbox-custom__check {
+        opacity: 1;
+      }
+    }
+
+    &:indeterminate + .uich-wpc-checkbox-custom {
+      background: var(--uich-wpc-color-secondary);
+      border-color: var(--uich-wpc-color-secondary);
+
+      .uich-wpc-checkbox-custom__check {
+        opacity: 0;
+      }
+    }
+  }
+
+  &:hover .uich-wpc-checkbox-custom {
+    border-color: var(--uich-wpc-color-text-default);
+  }
+
+  &--sm {
+    width: 18px;
+    height: 18px;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .uich-wpc-checkbox-custom {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+
+      .uich-wpc-checkbox-custom__check {
+        width: 11px;
+        height: 11px;
+      }
+    }
+  }
+}
+
+.uich-wpc-page-checkbox {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  z-index: 10;
+  width: 20px;
+  height: 20px;
+  transition: opacity 0.2s ease;
+
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .uich-wpc-checkbox-custom {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.uich-wpc-checkbox-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  background: var(--uich-wpc-color-background-weaker);
+  border: 1.5px solid var(--uich-wpc-color-border-default);
+  border-radius: 4px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  pointer-events: none;
+
+  .uich-wpc-checkbox-custom__check {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease;
+
+    /* Tick stroke is hardcoded white in the SVG markup. Override it with a
+       token that flips per theme: white in light mode (on the dark fill),
+       dark in dark mode (on the white fill). */
+    path {
+      stroke: var(--uich-wpc-color-background-weaker);
+    }
+  }
+}
+
+/* Page Thumbnail */
+.uich-wpc-page-thumbnail {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+/* Page Label */
+.uich-wpc-page-label {
+  margin: 0;
+  text-align: left;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-body);
+  line-height: var(--uich-wpc-line-height-body);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+}
+
+/* Page Overlay */
+.uich-wpc-page-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  background-color: #00000033;
+  transition: opacity 0.2s ease;
+}
+
+
+/* Inline import error message */
+.uich-wpc-import-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--uich-wpc-color-error-lightest);
+  border: 1px solid var(--uich-wpc-color-focus-ring-error);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--uich-wpc-color-error-darker);
+  margin-top: 4px;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* Footer Navigation, sits on the grey group with the Back / Import actions.
+   No sticky bar, no bg, no top divider: inside the recessed box the white cards
+   already read as distinct, so a separator line would be redundant chrome. */
+.uich-wpc-import-page-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--uich-wpc-space-8);
+  padding: 0;
+  background: transparent;
+  border: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+}
+
+.uich-wpc-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uich-wpc-space-6);
+  height: 38px;
+  padding: 0 var(--uich-wpc-space-16);
+  border-radius: var(--uich-wpc-radius-8);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: 1;
+  font-weight: var(--uich-wpc-font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.uich-wpc-btn-back {
+  background: var(--uich-wpc-color-background-weaker);
+  color: var(--uich-wpc-color-text-default);
+  border-color: var(--uich-wpc-color-border-weak);
+  box-shadow: var(--uich-wpc-elevation-xs);
+
+  &:hover {
+    background: var(--uich-wpc-color-background-stronger);
+  }
+}
+
+.uich-wpc-btn-next {
+  background: var(--uich-wpc-color-primary);
+  color: var(--uich-wpc-text-white);
+
+  &:hover:not(:disabled):not(.is-empty) {
+    background: var(--uich-wpc-color-primary-darker);
+  }
+
+  /* Greyed look for loading (truly disabled) and for "no pages selected"
+     (.is-empty stays clickable so clicking shows the "select a page" notice). */
+  &:disabled,
+  &.is-empty {
+    background: var(--uich-wpc-color-background-strongest);
+    color: var(--uich-wpc-color-text-weakest);
+    cursor: not-allowed;
+  }
+}
+
+/* Importing Screen */
+.uich-wpc-importing-container {
+  display: flex;
+  align-items: center;      /* vertical-center the compact card */
+  justify-content: center;  /* horizontal-center */
+  width: 100%;
+  /* Fill the screen height so the import card sits centred in the background,
+     not stranded top-left. Offset ≈ admin bar + dashboard header + tab bar. */
+  min-height: calc(100vh - 220px);
+  padding: 24px 0;
+
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 180px);
+  }
+}
+
+/* White card-in-card on the grey group, the same treatment as the picker's
+   Static Pages card, so the importing state reads consistently with the other
+   tabs (grey box → white card). */
+.uich-wpc-importing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 560px;         /* compact card, centred by the container */
+  padding: var(--uich-wpc-space-24);
+  background: var(--uich-wpc-color-background-weaker);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-16);
+}
+
+/* Header: title + subtitle + slim orange progress bar */
+.uich-wpc-importing-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Matches the picker's step header (.uich-wpc-import-page-title): 18px
+   semibold, not the old 24px bold, so the header stays consistent when the
+   screen transitions from "Select what to import" to "Importing your design". */
+.uich-wpc-importing-title {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-h6);
+  line-height: var(--uich-wpc-line-height-h6);
+  font-weight: var(--uich-wpc-font-weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-importing-sub {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--uich-wpc-color-text-weaker);
+}
+
+.uich-wpc-importing-meter {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-12);
+  margin-top: 12px;
+}
+
+.uich-wpc-importing-track {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--uich-wpc-radius-infinite);
+  background: var(--uich-wpc-color-background-stronger);
+  overflow: hidden;
+}
+
+.uich-wpc-importing-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--uich-wpc-radius-infinite);
+  background: var(--uich-wpc-color-primary);
+  transition: width 0.6s cubic-bezier(0.3, 0, 0, 1);
+}
+
+.uich-wpc-importing-pct {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-default);
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Retry button on a failed import step (Figma, primary small) */
+.uich-wpc-group-retry-btn {
+  align-self: flex-start;
+  margin-left: 9px; /* aligns under the body connector line */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--uich-wpc-space-8) var(--uich-wpc-space-16);
+  background: var(--uich-wpc-color-secondary);
+  color: var(--uich-wpc-color-text-white);
+  border: 0;
+  border-radius: var(--uich-wpc-radius-8);
+  cursor: pointer;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-medium);
+
+  &:hover {
+    background: var(--uich-wpc-color-secondary-darker);
+  }
+}
+
+.uich-wpc-sub-retry-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--uich-wpc-space-4) var(--uich-wpc-space-12);
+  background: var(--uich-wpc-color-secondary);
+  color: var(--uich-wpc-color-text-white);
+  border: 0;
+  border-radius: var(--uich-wpc-radius-8);
+  cursor: pointer;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  font-weight: var(--uich-wpc-font-weight-medium);
+
+  &:hover {
+    background: var(--uich-wpc-color-secondary-darker);
+  }
+}
+
+@keyframes miniSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* Success Screen */
+.uich-wpc-success-container {
+  display: block;
+  width: 100%;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* White card-in-card on the grey group, the same treatment as the picker /
+   importing states, so the success screen matches the rest of the flow and the
+   other tabs. Content is centered inside it (Mobbin success-screen pattern:
+   small check badge → headline → one line → CTAs). */
+.uich-wpc-success-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  text-align: center;
+  padding: 40px var(--uich-wpc-space-24);
+  background: var(--uich-wpc-color-background-weaker);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-12);
+}
+
+/* Restrained success badge, a compact animated confirm mark, not a 300px hero. */
+.uich-wpc-success-icon {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--uich-wpc-space-8);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+/* Time Saved Badge */
+.uich-wpc-time-saved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-6);
+  padding: var(--uich-wpc-space-8) var(--uich-wpc-space-12);
+  background: var(--uich-wpc-color-success-lightest, #e7ffe7);
+  border-radius: 50px;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption, 14px);
+  line-height: var(--uich-wpc-line-height-caption, 20px);
+  font-weight: var(--uich-wpc-font-weight-medium, 500);
+  color: var(--uich-wpc-color-success-darker, #0a842a);
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* Matches the flow's step header (18px semibold), not the old 24px. */
+.uich-wpc-success-title {
+  margin: 0;
+  font-size: var(--uich-wpc-font-size-h6);
+  font-weight: var(--uich-wpc-font-weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--uich-wpc-color-text-default);
+  line-height: var(--uich-wpc-line-height-h6);
+}
+
+.uich-wpc-success-subtitle {
+  margin: var(--uich-wpc-space-8) 0 0;
+  font-size: 14px;
+  font-weight: var(--uich-wpc-font-weight-regular, 400);
+  color: var(--uich-wpc-color-text-weaker, #737373);
+  line-height: 20px;
+  max-width: 460px;
+}
+
+/* Success Action Buttons, 32px below the subtitle, 16px between buttons */
+.uich-wpc-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--uich-wpc-space-12);
+  margin-top: var(--uich-wpc-space-24);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.uich-wpc-success-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uich-wpc-space-6);
+  height: 38px;
+  padding: 0 var(--uich-wpc-space-16);
+  border-radius: var(--uich-wpc-radius-8);
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption, 14px);
+  line-height: var(--uich-wpc-line-height-caption, 20px);
+  font-weight: var(--uich-wpc-font-weight-medium, 500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+
+  svg { flex-shrink: 0; }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.uich-wpc-btn-secondary {
+  background: transparent;
+  color: var(--uich-wpc-text-dark);
+  border: 1px solid var(--uich-wpc-border);
+
+  &:hover {
+    background: var(--uich-wpc-bg-hover);
+    border-color: var(--uich-wpc-border-hover);
+  }
+}
+
+.uich-wpc-btn-primary {
+  background: var(--uich-wpc-color-primary);
+  color: var(--uich-wpc-text-white);
+
+  &:hover {
+    background: var(--uich-wpc-color-primary-darker);
+  }
+}
+
+/* ── Accordion Import Groups ────────────────────────────────────────────────── */
+
+/* Import progress steps (Figma node 1082:2820), clean rows, no card backgrounds */
+.uich-wpc-import-groups {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Stepper: numbered medallion + connector line + body */
+.uich-wpc-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 14px;
+}
+
+.uich-wpc-step__rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.uich-wpc-step:not(:last-child) .uich-wpc-step__rail::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--uich-wpc-color-border-weak);
+  transition: background 0.4s ease;
+}
+.uich-wpc-step-completed .uich-wpc-step__rail::after {
+  background: var(--uich-wpc-color-secondary);
+}
+
+.uich-wpc-step__med {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-weakest);
+  background: var(--uich-wpc-color-background-weaker);
+  box-shadow: inset 0 0 0 1.5px var(--uich-wpc-color-border-weak);
+}
+.uich-wpc-step-completed .uich-wpc-step__med {
+  background: var(--uich-wpc-color-secondary);
+  color: var(--uich-wpc-color-text-white);
+  box-shadow: none;
+}
+.uich-wpc-step-failed .uich-wpc-step__med {
+  background: var(--uich-wpc-color-error);
+  color: var(--uich-wpc-color-text-white);
+  box-shadow: none;
+}
+.uich-wpc-step-active .uich-wpc-step__med {
+  color: var(--uich-wpc-color-text-default);
+  box-shadow: none;
+}
+.uich-wpc-step-active .uich-wpc-step__med::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: conic-gradient(var(--uich-wpc-color-primary) 0deg 90deg, var(--uich-wpc-color-border-weak) 90deg 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  animation: miniSpin 1s linear infinite;
+}
+
+.uich-wpc-step__body {
+  min-width: 0;
+  padding-bottom: 18px;
+}
+.uich-wpc-step:last-child .uich-wpc-step__body {
+  padding-bottom: 0;
+}
+
+.uich-wpc-step__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--uich-wpc-space-12);
+  padding-top: 2px;
+  user-select: none;
+}
+.uich-wpc-step__titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.uich-wpc-step__label {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-body);
+  line-height: 1.3;
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-default);
+}
+.uich-wpc-step-pending .uich-wpc-step__label {
+  color: var(--uich-wpc-color-text-weaker);
+}
+.uich-wpc-step__desc {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-text-weakest);
+}
+.uich-wpc-step__right {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-8);
+  padding-top: 1px;
+}
+.uich-wpc-step__state {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-text-weakest);
+  white-space: nowrap;
+}
+.uich-wpc-step-active .uich-wpc-step__state { color: var(--uich-wpc-color-primary); }
+.uich-wpc-step-completed .uich-wpc-step__state { color: var(--uich-wpc-color-text-weaker); }
+.uich-wpc-step-failed .uich-wpc-step__state { color: var(--uich-wpc-color-error); }
+.uich-wpc-step__chev {
+  flex: none;
+  color: var(--uich-wpc-color-text-weakest);
+  transition: transform 0.24s ease;
+}
+.uich-wpc-step.is-open .uich-wpc-step__chev { transform: rotate(180deg); }
+
+/* Inner steps, every item shown, no cap */
+.uich-wpc-import-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-4);
+  margin: 12px 0 2px;
+  padding: 0;
+}
+.uich-wpc-import-sub-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--uich-wpc-space-8);
+  padding: 6px 8px;
+  border-radius: var(--uich-wpc-radius-8);
+  transition: background 0.2s ease;
+}
+.uich-wpc-import-sub-item-active {
+  background: rgba(0, 0, 0, 0.025);
+}
+.uich-wpc-sub-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: var(--uich-wpc-line-height-caption);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.uich-wpc-sub-icon-completed .uich-wpc-sub-icon-check {
+  color: var(--uich-wpc-color-success-darker);
+  display: block;
+}
+.uich-wpc-sub-icon-failed { color: var(--uich-wpc-color-error); }
+.uich-wpc-import-sub-item-failed .uich-wpc-sub-icon { color: var(--uich-wpc-color-error); }
+.uich-wpc-sub-spinner {
+  display: block;
+  width: 13px;
+  height: 13px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='10' stroke='%23D4D4D4' stroke-width='2.5' stroke-linecap='round' stroke-dasharray='47 16'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: miniSpin 0.8s linear infinite;
+}
+.uich-wpc-import-sub-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Live counter under the active row while a job reports real progress. */
+.uich-wpc-import-sub-progress {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-text-weaker);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Failure copy under a sub-item. Boxed and tinted so a failed row reads as one
+   block (message + what-to-do + optional server text) rather than loose lines
+   trailing off under the label. */
+.uich-wpc-import-sub-failure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-4, 4px);
+  margin-top: var(--uich-wpc-space-4, 4px);
+  padding: var(--uich-wpc-space-8, 8px);
+  border-radius: var(--uich-wpc-radius-8);
+  border: 1px solid var(--uc-danger-border);
+  background: var(--uc-danger-soft);
+}
+.uich-wpc-import-sub-note {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-error-darker);
+  word-break: break-word;
+}
+/* The actionable half — deliberately not error-red: it is guidance, not more
+   alarm, and colouring it the same as the failure buries it. */
+.uich-wpc-import-sub-hint {
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-text-weaker);
+  word-break: break-word;
+}
+.uich-wpc-import-sub-detail-toggle {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-label);
+  line-height: var(--uich-wpc-line-height-label);
+  color: var(--uich-wpc-color-text-weaker);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.uich-wpc-import-sub-detail-toggle:hover,
+.uich-wpc-import-sub-detail-toggle:focus-visible {
+  color: var(--uich-wpc-color-text-default);
+}
+.uich-wpc-import-sub-detail-body {
+  margin: var(--uich-wpc-space-4, 4px) 0 0;
+  padding: var(--uich-wpc-space-8, 8px);
+  max-height: 140px;
+  overflow: auto;
+  border-radius: var(--uich-wpc-radius-8);
+  background: var(--uich-wpc-color-bg-subtle, rgba(0, 0, 0, 0.04));
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--uich-wpc-color-text-weaker);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.uich-wpc-import-sub-label {
+  font-family: var(--uich-wpc-font-family);
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  color: var(--uich-wpc-color-text-weaker);
+}
+.uich-wpc-import-sub-item-completed .uich-wpc-import-sub-label,
+.uich-wpc-import-sub-item-active .uich-wpc-import-sub-label {
+  color: var(--uich-wpc-color-text-default);
+}
+
+
+/* Next button inline spinner (shown while replaceProjectElementor API is in flight) */
+.uich-wpc-btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: uich-wpc-btn-spin 0.7s linear infinite;
+}
+
+@keyframes uich-wpc-btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Disabled state for Back/Next while API is loading */
+.uich-wpc-footer-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* DS-component adjustments in Advanced Configurations (buttons, checkboxes,
+   badges, alerts now come from the design system). */
+.uich-wpc-advanced-config-alert {
+  margin-top: var(--uich-wpc-space-12);
+}
+.uich-wpc-advanced-config-theme-label,
+.uich-wpc-advanced-config-option-copy {
+  cursor: pointer;
+}
+
+/* WordPress core (wp-admin/css/forms.css) sets `input[type="search"] { padding: 0 12px }`
+   at specificity (0,1,1), which OUTRANKS the DS Input's hashed `.hasLeft` class (0,1,0)
+   and collapses the left padding so the search icon overlaps the placeholder, but only
+   inside real wp-admin (the isolated dev-preview never loads forms.css, so it looks fine
+   there). Re-assert the DS 32px icon gap with a higher-specificity, !important rule so it
+   wins over core admin styles. Scoped to this field; do not remove without replacing. */
+.uich-wpc-import-search-field input[type='search'] {
+  padding-left: var(--uc-space-32, 32px) !important;
+}

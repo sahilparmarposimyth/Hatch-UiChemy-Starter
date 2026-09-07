@@ -1,0 +1,40 @@
+{
+    "name": "posimyth/uichemy-wordpress",
+    "description": "UiChemy WordPress plugin — Figma-to-Elementor conversion and MCP servers.",
+    "type": "wordpress-plugin",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": ">=7.4",
+        "wordpress/mcp-adapter": "0.5.0"
+    },
+    "require-dev": {
+        "brianhenryie/strauss": "^0.20"
+    },
+    "extra": {
+        "strauss": {
+            "target_directory": "vendor-prefixed",
+            "namespace_prefix": "UiChemy\\Deps\\",
+            "classmap_prefix": "UiChemy_Deps_",
+            "packages": [
+                "wordpress/mcp-adapter",
+                "wordpress/php-mcp-schema"
+            ],
+            "delete_vendor_files": false
+        }
+    },
+    "scripts": {
+        "post-install-cmd": ["@strauss"],
+        "post-update-cmd": ["@strauss"],
+        "strauss": [
+            "vendor/bin/strauss",
+            "bash scripts/copy-dep-licenses.sh"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "composer/installers": false
+        }
+    }
+}

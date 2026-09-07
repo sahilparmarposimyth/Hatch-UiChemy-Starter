@@ -1,0 +1,4 @@
+/* Separator, subtle hairline in either orientation. */
+.root { background: var(--uc-border-subtle); flex: none; }
+.root[data-orientation="horizontal"] { height: 1px; width: 100%; }
+.root[data-orientation="vertical"] { width: 1px; height: 100%; align-self: stretch; }

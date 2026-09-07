@@ -1,0 +1,247 @@
+/*
+ * shadcn/ui design tokens, shared by BOTH bundles.
+ *
+ * Split out of shadcn.css so the dashboard can reuse the tokens WITHOUT
+ * `@tailwind base`. Preflight is a global reset (bare `*`, `body`, `h1`…`p`
+ * selectors), so pulling shadcn.css into the dashboard bundle would reset the
+ * whole wp-admin page, WordPress's own admin menu and admin bar included.
+ * The composer bundle still loads preflight; it owns its panel.
+ *
+ * Deliberately UNLAYERED (the `@layer base { … }` wrapper was removed): an
+ * unlayered rule beats every layered one regardless of source order, and
+ * `@layer base` requires an `@tailwind base` for Tailwind to hoist it into –
+ * which is exactly what the dashboard bundle omits. UiChemy's own brand.css
+ * relies on the same unlayered-wins behaviour.
+ *
+ * Every declaration is scoped to `.uich-tw`, so these tokens only apply inside
+ * a Tailwind island and never touch the host page.
+ */
+/*
+ * shadcn/ui theme, zinc base, verbatim from the shadcn registry.
+ * Variables are declared on `.uich-tw` (not :root) so the theme travels with
+ * the composer host and portal roots without touching Elementor's document.
+ * Dark mode: add `dark` to the same element (or any ancestor inside the scope).
+ */
+.uich-tw {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 91%;              /* soft hairline, matches native rgba(0,0,0,.09) */
+  /* Input/control outline. shadcn's stock 90% is nearly invisible on the
+     white panel (inputs read as "unboxed" in light mode), so darken the
+     control outline specifically, dividers keep the softer --border above. */
+  --input: 240 5% 80%;
+  --ring: 240 10% 3.9%;
+  /* Corner rounding for shadcn controls (buttons, inputs, popovers, cards,
+     segmented tabs). Kept tight/modern, rounded-lg≈6px, md≈4px, sm≈2px –
+     rather than the earlier airy 0.8rem which read as over-rounded. */
+  --radius: 0.4rem;
+  /* Semantic category colors (construct markers etc.), Tailwind palette
+     hues at 600 for light backgrounds, per shadcn convention. */
+  --status-data: 221 83% 53%;      /* blue-600 */
+  --status-loop: 262 83% 58%;      /* violet-600 */
+  --status-condition: 32 95% 44%;  /* amber-600 */
+  --status-form: 142 76% 36%;      /* green-600 */
+}
+
+.uich-tw.dark,
+.uich-tw .dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  /* 500-grade hues read better on dark surfaces. */
+  --status-data: 217 91% 60%;      /* blue-500 */
+  --status-loop: 258 90% 66%;      /* violet-500 */
+  --status-condition: 38 92% 50%;  /* amber-500 */
+  --status-form: 142 71% 45%;      /* green-500 */
+}
+
+/*
+ * ELEMENTOR SKIN (shadcn tokens), matches the EDITOR ONE (Elementor v4)
+ * panel exactly. Values are the Editor One design tokens (--e-one-palette-*)
+ * from the installed plugin (v4.1.4):
+ *   light → elementor/assets/css/modules/editor-one/theme-light.css
+ *   dark  → elementor/assets/css/modules/editor-one/theme-dark.css
+ * Editor One uses translucent action/divider overlays rather than solid
+ * greys; where a shadcn token must be a solid HSL (borders, hover/selected
+ * surfaces), it carries the overlay composited over the panel background.
+ * Light: bg #fff · txt #3f444b · hi #0c0d0e · tertiary #69727d · border
+ *        #A7AAAD · divider #e0e0e0 · accent #f0abfc.
+ * Dark : bg #1f2124 · txt #babfc5 · hi #fff · tertiary #9da5ae · disabled
+ *        #515962 · divider≈#3a3c3e · selected≈#434547 · accent #f0abfc.
+ * Accent is the Editor One pink primary (#f0abfc) with dark contrast text
+ * (#0c0d0e). Applied via `.skin-elementor` on the same `.uich-tw` host that
+ * carries `.dark`, so it composes with the light/dark toggle. Radius = 3px.
+ */
+.uich-tw.skin-elementor {
+  --background: 0 0% 100%;         /* #ffffff background-default */
+  --foreground: 215 9% 27%;        /* #3f444b text-secondary */
+  --card: 0 0% 100%;
+  --card-foreground: 215 9% 27%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 9% 27%;
+  --primary: 291 93% 83%;          /* #f0abfc primary-main */
+  --primary-foreground: 210 8% 5%; /* #0c0d0e primary-contrast-text */
+  --secondary: 0 0% 96%;           /* #f5f5f5 action-hover over #fff */
+  --secondary-foreground: 215 9% 27%;
+  --muted: 0 0% 96%;               /* #f5f5f5 */
+  --muted-foreground: 213 9% 45%;  /* #69727d text-tertiary */
+  --accent: 0 0% 92%;              /* #ebebeb action-selected over #fff */
+  --accent-foreground: 210 8% 5%;  /* #0c0d0e text-primary */
+  --destructive: 0 72% 51%;        /* #dc2626 error-main */
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 88%;              /* #e0e0e0 divider (rgba(0,0,0,.12)) */
+  --input: 210 3% 67%;             /* #A7AAAD border (control outlines) */
+  --ring: 291 93% 83%;             /* #f0abfc */
+  --radius: 6px;  /* Editor One: rounded-md controls = 4px, rounded-lg = 6px */
+  --status-data: 217 78% 53%;      /* #2563eb info-main */
+  --status-loop: 291 93% 83%;      /* #f0abfc primary-main */
+  --status-condition: 24 73% 42%;  /* #bb5b1d warning-main (light) */
+  --status-form: 158 86% 28%;      /* #0a875a success-main */
+}
+
+.uich-tw.skin-elementor.dark {
+  --background: 216 7% 13%;        /* #1f2124 background-default */
+  --foreground: 213 9% 75%;        /* #babfc5 text-secondary */
+  --card: 216 7% 13%;              /* #1f2124 */
+  --card-foreground: 213 9% 75%;
+  --popover: 210 5% 20%;           /* #313336 action-hover over #1f2124 */
+  --popover-foreground: 213 9% 75%;
+  --primary: 291 93% 83%;          /* #f0abfc primary-main */
+  --primary-foreground: 210 8% 5%; /* #0c0d0e primary-contrast-text */
+  --secondary: 210 5% 20%;         /* #313336 */
+  --secondary-foreground: 213 9% 75%;
+  --muted: 210 5% 20%;             /* #313336 */
+  --muted-foreground: 212 9% 65%;  /* #9da5ae text-tertiary */
+  --accent: 210 5% 27%;            /* #434547 action-selected over #1f2124 */
+  --accent-foreground: 0 0% 100%;  /* #ffffff text-primary */
+  --destructive: 0 72% 51%;        /* #dc2626 error-main */
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 3% 24%;            /* #3a3c3e divider (rgba(255,255,255,.12)) */
+  --input: 210 5% 27%;             /* #434547 (rgba(255,255,255,.16)) */
+  --ring: 291 93% 83%;             /* #f0abfc */
+  --radius: 6px;  /* Editor One: rounded-md controls = 4px, rounded-lg = 6px */
+  --status-data: 217 78% 53%;      /* #2563eb info-main */
+  --status-loop: 291 93% 83%;      /* #f0abfc primary-main */
+  --status-condition: 38 92% 50%;  /* #f59e0b warning-main */
+  --status-form: 158 86% 28%;      /* #0a875a success-main */
+}
+
+/*
+ * Scoped replacement for Tailwind preflight (preflight is disabled globally
+ * so it can't reset Elementor's editor DOM).
+ */
+.uich-tw,
+.uich-tw *,
+.uich-tw *::before,
+.uich-tw *::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--border));
+}
+
+.uich-tw {
+  /* Unified with the dashboard shell: the island renders in the design-system
+     font (Zalando Sans via --uc-font-sans), not its own Plus Jakarta Sans, so
+     text looks the same across native and builder screens. The literal Zalando
+     fallback keeps it correct even if the token isn't in scope. */
+  font-family: var(--uc-font-sans, "Zalando Sans", ui-sans-serif, system-ui, sans-serif);
+  font-size: 13px;
+  line-height: 1.45;
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+}
+
+/* No semibold, for now: fold Tailwind's font-semibold utility to Medium so no
+   text in the island renders at 600. Routed through the DS weight token, so
+   flipping it back is a one-line change (see --uc-weight-semibold). */
+.uich-tw .font-semibold {
+  font-weight: var(--uc-weight-medium, 500) !important;
+}
+
+/* Elementor skin: match the Editor One panel type exactly, Roboto at 14px
+   base (--e-one-typography-fontFamily / fontSize). Deliberately kept on Roboto
+   (the editor panel stays as-is); only the Brand skin follows the unified font
+   above. Higher specificity than the base .uich-tw rule. */
+.uich-tw.skin-elementor {
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+.uich-tw h1, .uich-tw h2, .uich-tw h3, .uich-tw h4, .uich-tw h5, .uich-tw h6,
+.uich-tw p, .uich-tw ul, .uich-tw ol, .uich-tw figure, .uich-tw blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+.uich-tw ul, .uich-tw ol {
+  list-style: none;
+}
+
+.uich-tw button, .uich-tw input, .uich-tw optgroup, .uich-tw select, .uich-tw textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  /* NOTE: intentionally NOT zeroing `padding` here. This reset is (0,1,1)
+     specificity, which beat every custom component class (`.gp-type-tab`,
+     `.bp-dd-btn`, …) at (0,1,0) and silently stripped their left/right
+     padding, controls looked cramped in many places. Tailwind utility
+     buttons still get their padding (utilities are `.uich-tw`-scoped at
+     (0,2,0) via `important:'.uich-tw'`), and fixed-size icon buttons use
+     border-box + centered content, so leaving padding alone is safe. */
+  background: transparent;
+}
+
+.uich-tw button, .uich-tw [role='button'] {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.uich-tw button:disabled {
+  cursor: default;
+}
+
+.uich-tw img, .uich-tw svg, .uich-tw video, .uich-tw canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.uich-tw a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.uich-tw [hidden] {
+  display: none;
+}

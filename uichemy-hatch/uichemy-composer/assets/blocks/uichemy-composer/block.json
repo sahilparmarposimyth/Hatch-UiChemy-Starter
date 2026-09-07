@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "uichemy/composer",
+	"version": "1.0.0",
+	"title": "Composer",
+	"category": "uichemy",
+	"description": "Render and edit Figma-generated HTML/CSS/JS with editable text, link, image and SVG slots.",
+	"keywords": [ "uichemy", "composer", "html", "figma", "code" ],
+	"textdomain": "uichemy",
+	"editorStyle": "file:./editor.css",
+	"supports": {
+		"html": false,
+		"customClassName": false,
+		"anchor": false,
+		"reusable": true,
+		"align": [ "wide", "full" ]
+	},
+	"attributes": {
+		"uid": {
+			"type": "string",
+			"default": ""
+		},
+		"settings": {
+			"type": "object",
+			"default": {}
+		}
+	}
+}

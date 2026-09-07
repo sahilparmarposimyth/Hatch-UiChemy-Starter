@@ -1,0 +1,832 @@
+/* Visual dynamic-data builder (data picker / loop / condition) + binding chips.
+   Design tuned to match Elementor's dynamic-tag picker: clean card, categorized
+   tag list with bold section headers, bulleted rows, search with icon. */
+
+/* The picker mounts inside the composer's scoped shadcn host
+   (`.uich-portal-root`, which carries `.uich-tw` + the `dark`/`skin-elementor`
+   modifier classes — see uich-uichemy-dd-picker.js). That lets it style itself
+   with the SAME shadcn design tokens the rest of the composer uses
+   (`--popover`, `--border`, `--muted-foreground`, `--primary`, `--accent`,
+   `--ring`, `--radius` …), so it renders as a proper shadcn Popover + Command
+   surface and follows both the light/dark theme and the Brand/Elementor skin.
+   Legacy `--panel-*` fallbacks are kept only for the off-chance the scope host
+   isn't mounted. */
+.uich-dd-overlay {
+   position: fixed;
+   inset: 0;
+   background: hsl(var(--background, 0 0% 100%)/0.55);
+   z-index: 200000;
+   display: flex;
+   align-items: flex-start;
+   justify-content: center;
+   padding: 7vh 16px;
+   font-family: inherit
+}
+
+.uich-dd-modal {
+   width: 340px;
+   max-width: 94vw;
+   max-height: 62vh;
+   display: flex;
+   flex-direction: column;
+   overflow: hidden;
+   background: hsl(var(--popover, 0 0% 100%));
+   color: hsl(var(--popover-foreground, 240 10% 3.9%));
+   border: 1px solid hsl(var(--border, 240 5.9% 90%)) !important;
+   border-radius: calc(var(--radius, 0.4rem) + 2px);
+   box-shadow: 0 12px 32px -8px rgba(0, 0, 0, .32), 0 6px 14px -10px rgba(0, 0, 0, .28)
+}
+
+/* Anchored (dropdown) mode: no dimmed backdrop, box pinned to the trigger via
+   inline top/left set in JS. */
+.uich-dd-overlay.uich-dd-anchored {
+   background: transparent;
+   display: block;
+   padding: 0
+}
+
+.uich-dd-overlay.uich-dd-anchored .uich-dd-modal {
+   position: fixed;
+   max-height: min(62vh, 520px)
+}
+
+.uich-dd-head {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 10px;
+   padding: 12px 14px 8px;
+   flex: 0 0 auto
+}
+
+.uich-dd-head strong {
+   font-size: 13px;
+   font-weight: 600;
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   color: hsl(var(--foreground, 240 10% 3.9%))
+}
+
+.uich-dd-head strong:before {
+   content:"{ }";
+   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+   font-size: 10px;
+   font-weight: 700;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   width: 20px;
+   height: 20px;
+   flex: 0 0 auto;
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   background: hsl(var(--muted, 240 4.8% 95.9%))
+}
+
+.uich-dd-x {
+   border: 0;
+   background: transparent;
+   cursor: pointer;
+   font-size: 14px;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   line-height: 1;
+   width: 26px;
+   height: 26px;
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   transition: background .12s, color .12s
+}
+
+.uich-dd-x:hover {
+   background: hsl(var(--accent, 240 4.8% 95.9%));
+   color: hsl(var(--accent-foreground, 240 5.9% 10%))
+}
+
+.uich-dd-body {
+   padding: 0 10px 10px;
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+   flex: 1 1 auto;
+   min-height: 0;
+   overflow-y: auto;
+   overflow-x: hidden
+}
+
+.uich-dd-field {
+   display: flex;
+   flex-direction: column;
+   gap: 5px;
+   font-size: 12px;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   flex: 0 0 auto
+}
+
+.uich-dd-field>span {
+   font-weight: 500
+}
+
+/* The picker mounts inside `.uich-tw`, whose preflight (`.uich-tw input`,
+   `.uich-tw button` at specificity 0,1,1) forces `background:transparent` +
+   `color:inherit`. Scope the field/button rules that need a real background or
+   color under `.uich-dd-overlay` (0,2,0) so they win — otherwise the search
+   icon, select chevron and Insert-button fill get stripped. */
+.uich-dd-overlay .uich-dd-select,
+.uich-dd-overlay .uich-dd-input {
+   width: 100%;
+   box-sizing: border-box;
+   flex: 0 0 auto;
+   min-height: 34px;
+   line-height: 1.4;
+   padding: 7px 9px;
+   border: 1px solid hsl(var(--input, 240 5.9% 90%));
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   font-size: 13px;
+   background: hsl(var(--background, 0 0% 100%));
+   color: hsl(var(--foreground, 240 10% 3.9%));
+   transition: border-color .12s, box-shadow .12s
+}
+
+.uich-dd-input::placeholder {
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%))
+}
+
+.uich-dd-overlay .uich-dd-select {
+   appearance: none;
+   -webkit-appearance: none;
+   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888891' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+   background-repeat: no-repeat;
+   background-position: right 11px center;
+   padding-right: 32px
+}
+
+.uich-dd-select:focus,
+.uich-dd-input:focus {
+   outline: none;
+   border-color: hsl(var(--ring, 240 10% 3.9%));
+   box-shadow: 0 0 0 2px hsl(var(--ring, 240 10% 3.9%)/0.28)
+}
+
+.uich-dd-filters {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 6px;
+   align-items: center
+}
+
+.uich-dd-chip {
+   display: inline-flex;
+   align-items: center;
+   gap: 5px;
+   background: hsl(var(--secondary, 240 4.8% 95.9%));
+   color: hsl(var(--secondary-foreground, 240 5.9% 10%));
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   padding: 3px 5px 3px 9px;
+   font-size: 12px;
+   font-weight: 500
+}
+
+.uich-dd-chip-x {
+   border: 0;
+   background: transparent;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   cursor: pointer;
+   font-size: 14px;
+   line-height: 1;
+   transition: color .12s
+}
+
+.uich-dd-chip-x:hover {
+   color: hsl(var(--foreground, 240 10% 3.9%))
+}
+
+.uich-dd-foot {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 10px;
+   padding: 10px 12px;
+   border-top: 1px solid hsl(var(--border, 240 5.9% 90%));
+   background: hsl(var(--muted, 240 4.8% 95.9%)/0.4);
+   flex: 0 0 auto
+}
+
+.uich-dd-preview-wrap {
+   display: flex;
+   flex-direction: column;
+   gap: 3px;
+   min-width: 0;
+   flex: 1
+}
+
+.uich-dd-preview-wrap>span {
+   font-size: 9px;
+   text-transform: uppercase;
+   letter-spacing: .08em;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%))
+}
+
+.uich-dd-preview {
+   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+   font-size: 11px;
+   color: hsl(var(--status-form, 142 76% 36%));
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis
+}
+
+.uich-dd-overlay .uich-dd-insert {
+   border: 0;
+   background: hsl(var(--primary, 240 5.9% 10%));
+   color: hsl(var(--primary-foreground, 0 0% 98%));
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   height: 34px;
+   padding: 0 15px;
+   font-size: 13px;
+   font-weight: 500;
+   cursor: pointer;
+   white-space: nowrap;
+   transition: opacity .12s
+}
+
+.uich-dd-insert:hover {
+   opacity: .9
+}
+
+/* ── Command-style field list ─────────────────────────────────────────────── */
+.uich-dd-overlay .uich-dd-search {
+   width: 100%;
+   box-sizing: border-box;
+   flex: 0 0 auto;
+   height: 36px;
+   padding: 0 10px 0 32px;
+   border: 1px solid hsl(var(--input, 240 5.9% 90%));
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   font-size: 13px;
+   color: hsl(var(--foreground, 240 10% 3.9%));
+   background: hsl(var(--background, 0 0% 100%)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888891' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat 10px center;
+   transition: border-color .12s, box-shadow .12s
+}
+
+.uich-dd-search::placeholder {
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%))
+}
+
+.uich-dd-search:focus {
+   outline: none;
+   border-color: hsl(var(--ring, 240 10% 3.9%));
+   box-shadow: 0 0 0 2px hsl(var(--ring, 240 10% 3.9%)/0.28)
+}
+
+.uich-dd-list {
+   display: flex;
+   flex-direction: column;
+   flex: 1 1 auto;
+   min-height: 96px;
+   overflow: auto;
+   border: 0;
+   padding: 2px 0
+}
+
+.uich-dd-group {
+   font-size: 11px;
+   font-weight: 500;
+   letter-spacing: .02em;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   padding: 8px 8px 4px;
+   margin-top: 2px
+}
+
+.uich-dd-list>.uich-dd-group:first-child {
+   margin-top: 0;
+   padding-top: 4px
+}
+
+.uich-dd-crumbs+.uich-dd-group {
+   margin-top: 0
+}
+
+.uich-dd-row {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   width: 100%;
+   text-align: left;
+   border: 0;
+   background: transparent;
+   color: hsl(var(--foreground, 240 10% 3.9%));
+   font-size: 13px;
+   padding: 7px 8px;
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   cursor: pointer;
+   transition: background .1s, color .1s
+}
+
+.uich-dd-row:hover,
+.uich-dd-row:focus-visible {
+   background: hsl(var(--accent, 240 4.8% 95.9%));
+   color: hsl(var(--accent-foreground, 240 5.9% 10%));
+   outline: none
+}
+
+.uich-dd-row.is-active {
+   background: hsl(var(--accent, 240 4.8% 95.9%));
+   color: hsl(var(--accent-foreground, 240 5.9% 10%));
+   font-weight: 500
+}
+
+.uich-dd-row-label {
+   flex: 1;
+   min-width: 0;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap
+}
+
+.uich-dd-row-meta {
+   flex: 0 0 auto;
+   font-size: 11px;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%))
+}
+
+/* Free build: a dynamic tag that needs Pro. The row stays clickable (it opens the
+   pricing page) but reads as unavailable, and carries the same gradient PRO pill
+   the composer uses elsewhere (.pro-badge in composer.css). */
+.uich-dd-row.is-pro .uich-dd-row-label {
+   opacity: .6
+}
+
+.uich-dd-pro {
+   flex: 0 0 auto;
+   padding: 1px 5px;
+   border-radius: 999px;
+   font-size: 8px;
+   font-weight: 800;
+   letter-spacing: .06em;
+   line-height: 1.5;
+   text-transform: uppercase;
+   color: #fff;
+   background: linear-gradient(135deg, #6366f1 0%, #a855f7 55%, #ec4899 100%)
+}
+
+.uich-dd-row.is-chain .uich-dd-row-meta {
+   font-size: 15px;
+   line-height: 1;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%))
+}
+
+.uich-dd-row.is-chain:hover .uich-dd-row-meta {
+   color: hsl(var(--accent-foreground, 240 5.9% 10%))
+}
+
+.uich-dd-crumbs {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 2px;
+   padding: 4px 2px 8px;
+   border-bottom: 1px solid hsl(var(--border, 240 5.9% 90%));
+   margin-bottom: 2px
+}
+
+.uich-dd-crumb {
+   border: 0;
+   background: transparent;
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   font-size: 12px;
+   font-weight: 500;
+   cursor: pointer;
+   padding: 3px 6px;
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   transition: background .1s, color .1s
+}
+
+.uich-dd-crumb:hover {
+   background: hsl(var(--accent, 240 4.8% 95.9%));
+   color: hsl(var(--accent-foreground, 240 5.9% 10%))
+}
+
+.uich-dd-crumb-sep {
+   color: hsl(var(--muted-foreground, 240 3.8% 46.1%));
+   font-size: 12px;
+   opacity: .6
+}
+
+.uich-dd-opts {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   flex: 0 0 auto
+}
+
+.uich-dd-opts:empty {
+   display: none
+}
+
+/* Inline binding chip (for the layers/preview). */
+.uich-dd-token {
+   display: inline-flex;
+   align-items: center;
+   gap: 5px;
+   background: rgba(var(--accent-rgb, 108, 63, 245), .14);
+   color: rgb(var(--accent-rgb, 108, 63, 245));
+   border-radius: 6px;
+   padding: 1px 7px;
+   font-size: 12px;
+   font-weight: 600;
+   font-family: inherit;
+   cursor: pointer;
+   border: 1px solid rgba(var(--accent-rgb, 108, 63, 245), .3)
+}
+
+.uich-dd-token:before {
+   content:"{ }";
+   font-family: ui-monospace, monospace;
+   font-size: 10px;
+   opacity: .7
+}
+
+/* Toolbar button injected into the composer panel header. */
+.uich-dd-toolbtn {
+   display: inline-flex;
+   align-items: center;
+   gap: 5px;
+   border: 1px solid var(--panel-line, #d9d9e3);
+   background: var(--panel-bg, #fff);
+   color: rgb(var(--accent-rgb, 108, 63, 245));
+   border-radius: 7px;
+   padding: 5px 10px;
+   font-size: 12px;
+   font-weight: 600;
+   cursor: pointer;
+   margin-left: 6px
+}
+
+.uich-dd-toolbtn:hover {
+   background: rgba(var(--accent-rgb, 108, 63, 245), .12)
+}
+
+/* The single "+ Dynamic" dropdown menu in the popup tab bar. Follows the
+   composer theme via tokens (light fallbacks), not the OS color scheme. */
+.uich-dd-dropdown {
+   position: relative;
+   display: inline-block;
+   margin-left: 6px
+}
+
+.uich-dd-menu {
+   position: absolute;
+   top: calc(100% + 4px);
+   right: 0;
+   min-width: 168px;
+   background: var(--panel-bg, #fff);
+   border: 1px solid var(--panel-line, #e4e4ee);
+   border-radius: 8px;
+   padding: 4px;
+   display: none;
+   z-index: 200001;
+   box-shadow: 0 12px 32px rgba(0, 0, 0, .35)
+}
+
+.uich-dd-menu.open {
+   display: block
+}
+
+.uich-dd-menu-item {
+   display: block;
+   width: 100%;
+   text-align: left;
+   border: 0;
+   background: transparent;
+   color: var(--text, #1e1e2e);
+   font-size: 13px;
+   padding: 8px 10px;
+   border-radius: 6px;
+   cursor: pointer
+}
+
+.uich-dd-menu-item:hover {
+   background: rgba(var(--accent-rgb, 108, 63, 245), .12);
+   color: rgb(var(--accent-rgb, 108, 63, 245))
+}
+
+.uich-dd-hint {
+   font-size: 12px;
+   color: var(--text-mid, #8a8a9a);
+   line-height: 1.5
+}
+
+/* Contextual construct tab (Loop / Form) inside the popup. */
+.uich-construct-body {
+   padding: 14px 16px;
+   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
+}
+
+.uich-construct-head {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   font-size: 12px;
+   color: #8a8a9a;
+   margin-bottom: 14px
+}
+
+.uich-construct-head code {
+   font-family: ui-monospace, Menlo, monospace
+}
+
+.uich-construct-pill {
+   display: inline-flex;
+   align-items: center;
+   padding: 3px 9px;
+   border-radius: 6px;
+   font-size: 12px;
+   font-weight: 600
+}
+
+.uich-construct-pill.loop {
+   background: rgba(127, 119, 221, .15);
+   color: #8a82e6
+}
+
+.uich-construct-pill.condition {
+   background: rgba(186, 117, 23, .16);
+   color: #c08a34
+}
+
+.uich-construct-pill.form {
+   background: rgba(99, 153, 34, .18);
+   color: #8bbf52
+}
+
+.uich-construct-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 12px 16px
+}
+
+.uich-construct-fields {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 6px;
+   margin-top: 4px
+}
+
+.uich-construct-chip {
+   background: #efeafe;
+   color: #4a2bd0;
+   font-size: 12px;
+   padding: 3px 9px;
+   border-radius: 6px
+}
+
+.uich-construct-check {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   font-size: 14px;
+   margin-top: 8px;
+   color: inherit;
+   font-weight: 400
+}
+
+@media (prefers-color-scheme: dark) {
+   .uich-construct-chip {
+      background: #2f2a4a;
+      color: #c9beff
+   }
+}
+
+/* Front-end form message. */
+.uich-form-message {
+   margin-top: 10px;
+   padding: 10px 12px;
+   border-radius: 8px;
+   font-size: 14px
+}
+
+.uich-form-message.is-success {
+   background: #e8f7ef;
+   color: #1d8a5e
+}
+
+.uich-form-message.is-error {
+   background: #fdeaea;
+   color: #c0392b
+}
+
+/* Front-end loop pagination (numbered links rendered by loop_pagination()) */
+.uich-loop-pagination {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 6px;
+   align-items: center;
+   margin-top: 24px
+}
+
+.uich-loop-pagination .page-numbers {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-width: 36px;
+   height: 36px;
+   padding: 0 10px;
+   border: 1px solid currentColor;
+   border-radius: 6px;
+   text-decoration: none;
+   line-height: 1;
+   opacity: .75
+}
+
+.uich-loop-pagination .page-numbers.current {
+   opacity: 1;
+   font-weight: 600
+}
+
+.uich-loop-pagination a.page-numbers:hover {
+   opacity: 1
+}
+
+/* Front-end loop "Load more" (rendered by loop_load_more()). Deliberately
+   matches .page-numbers so a loop reads the same whichever mode is chosen.
+   It is an <a>, not a <button>, so it still navigates with JS off. */
+.uich-loop-more-slot {
+   display: flex;
+   justify-content: center;
+   margin-top: 24px
+}
+
+.uich-loop-more {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 36px;
+   padding: 0 18px;
+   border: 1px solid currentColor;
+   border-radius: 6px;
+   text-decoration: none;
+   line-height: 1;
+   cursor: pointer;
+   opacity: .75
+}
+
+.uich-loop-more:hover {
+   opacity: 1
+}
+
+/* Mid-fetch: keep the control in place but make it clearly inert, so a second
+   click cannot queue a duplicate page. */
+.uich-loop--busy .uich-loop-more,
+.uich-loop--busy .uich-loop-pagination {
+   opacity: .45;
+   pointer-events: none
+}
+
+/* Skeleton placeholders shown while a page/batch is fetched. These are clones of
+   real items, so they already have the right size and grid placement — all that
+   is needed is to mask their content and shimmer. */
+.uich-loop-skeleton {
+   position: relative;
+   overflow: hidden;
+   pointer-events: none;
+   user-select: none;
+   /* The clone arrives carrying the item's OWN styling, so a white card stayed a
+      white box on a white page — invisible. Force a neutral card, with
+      !important because the item's own rules are just as specific and come from
+      the theme. */
+   background: #f2f3f5 !important;
+   background-image: none !important;
+   border: 1px solid rgba(0, 0, 0, .08) !important;
+   box-shadow: none !important;
+   border-radius: 10px
+}
+
+/* Paint the clone's own structure as grey bars instead of hiding it, so the
+   placeholder reads as a card with an image and a few lines of text rather than
+   one flat rectangle. Keeping the elements in flow (rather than
+   visibility:hidden) is what preserves each bar's real size and position. */
+.uich-loop-skeleton *,
+.uich-loop-skeleton *::before,
+.uich-loop-skeleton *::after {
+   color: transparent !important;
+   background-image: none !important;
+   border-color: transparent !important;
+   box-shadow: none !important;
+   text-decoration: none !important
+}
+
+/* Anything carrying text or acting as a media box becomes a bar. :not(:empty)
+   keeps genuinely empty wrappers from adding stray blocks. */
+.uich-loop-skeleton p,
+.uich-loop-skeleton h1,
+.uich-loop-skeleton h2,
+.uich-loop-skeleton h3,
+.uich-loop-skeleton h4,
+.uich-loop-skeleton h5,
+.uich-loop-skeleton h6,
+.uich-loop-skeleton span:not(:empty),
+.uich-loop-skeleton li,
+.uich-loop-skeleton time,
+.uich-loop-skeleton strong,
+.uich-loop-skeleton em {
+   background-color: rgba(0, 0, 0, .11) !important;
+   border-radius: 4px
+}
+
+/* Media keeps its real box — that is what gives the card its height — but the
+   bitmap is flattened to a uniform grey. contrast(0) collapses every pixel to
+   mid-grey and brightness lifts it to a light placeholder tone, so the image
+   area reads as a solid block while occupying exactly the space the real image
+   will. (Hiding the image instead would collapse it to 0px and take the card's
+   height with it.) */
+.uich-loop-skeleton img,
+.uich-loop-skeleton picture > img {
+   filter: grayscale(1) contrast(0) brightness(1.82) !important;
+   border-radius: 6px;
+   opacity: 1 !important;
+   visibility: visible !important
+}
+
+.uich-loop-skeleton svg,
+.uich-loop-skeleton video,
+.uich-loop-skeleton iframe {
+   background-color: rgba(0, 0, 0, .13) !important;
+   border-radius: 6px
+}
+
+.uich-loop-skeleton::after {
+   content: "";
+   position: absolute;
+   inset: 0;
+   transform: translateX(-100%);
+   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+   animation: uich-loop-shimmer 1.2s infinite
+}
+
+@keyframes uich-loop-shimmer {
+   100% {
+      transform: translateX(100%)
+   }
+}
+
+/* Respect a reduced-motion preference: keep the placeholder, drop the sweep. */
+@media (prefers-reduced-motion: reduce) {
+   .uich-loop-skeleton::after {
+      animation: none
+   }
+}
+
+/* Dynamic-value picker scrollbar. The popup portals to .uich-portal-root
+   (outside .panel), so the composer's `.panel ::-webkit-scrollbar` never
+   reached its list. In the Elementor editor the host's scrollbar styling
+   filled the gap; on the front end the theme doesn't, leaving the wide
+   default OS bar. Give the popup its own thin bar so the editor and the
+   front end render identically. */
+.uich-dd-modal ::-webkit-scrollbar {
+   width: 8px;
+   height: 8px
+}
+
+.uich-dd-modal ::-webkit-scrollbar-thumb {
+   background: var(--panel-line-2, #434547);
+   border-radius: 4px
+}
+
+.uich-dd-modal ::-webkit-scrollbar-track {
+   background: transparent
+}
+
+/* Theme-reset guard. The rows are <button type="button">, and Hello Elementor's
+   reset.css `[type="button"]{display:inline-block;text-align:center;width:auto;
+   padding:.5rem 1rem;border:1px solid;border-radius:3px;color:#c36}` (specificity
+   0,1,0) TIES the single-class `.uich-dd-row` rules and wins by load order on the
+   front end (uich-dd.css is enqueued before the theme reset), collapsing the flex
+   rows so the label and type badge run together ("Titletext"). Re-assert the row
+   layout with higher specificity (0,2,0) so it holds regardless of load order or
+   host theme. */
+.uich-dd-modal .uich-dd-row {
+   display: flex;
+   width: 100%;
+   text-align: left;
+   padding: 7px 8px;
+   border: 0;
+   border-radius: calc(var(--radius, 0.4rem) - 2px);
+   color: hsl(var(--foreground, 240 10% 3.9%))
+}
+
+.uich-dd-modal .uich-dd-row:hover,
+.uich-dd-modal .uich-dd-row:focus-visible {
+   color: hsl(var(--accent-foreground, 240 5.9% 10%))
+}
+
+.uich-dd-modal .uich-dd-row-label {
+   flex: 1 1 auto;
+   min-width: 0
+}
+
+.uich-dd-modal .uich-dd-row-meta {
+   flex: 0 0 auto
+}

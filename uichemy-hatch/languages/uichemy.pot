@@ -1,0 +1,5388 @@
+# Copyright (C) 2026 POSIMYTH
+# This file is distributed under the GPLv3.
+msgid ""
+msgstr ""
+"Project-Id-Version: UiChemy — Figma Converter for Elementor, Gutenberg and Bricks 5.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/uichemy\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-31T17:23:33+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: uichemy\n"
+
+#. Plugin Name of the plugin
+#: uichemy.php
+msgid "UiChemy — Figma Converter for Elementor, Gutenberg and Bricks"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: uichemy.php
+msgid "https://uichemy.com"
+msgstr ""
+
+#. Description of the plugin
+#: uichemy.php
+msgid "Convert Figma Design to 100% Editable WordPress websites in Elementor Website Builder and Gutenberg aka WordPress Block Editor."
+msgstr ""
+
+#. Author of the plugin
+#: uichemy.php
+msgid "POSIMYTH"
+msgstr ""
+
+#. Author URI of the plugin
+#: uichemy.php
+msgid "https://posimyth.com"
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1338
+#: includes/admin/class-uich-api.php:1414
+#: includes/admin/class-uich-api.php:1823
+msgid "No JSON data found."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1356
+msgid "Elementor is required. Please install and activate it."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1506
+#: includes/admin/class-uich-api.php:1691
+#: includes/admin/class-uich-api.php:1893
+msgid "Post ID not provided for Updating."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1515
+#: includes/admin/class-uich-api.php:1700
+#: includes/admin/class-uich-api.php:1902
+msgid "Post does not exist with given ID & Type."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1565
+msgid "This post doesn't have Elementor data."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1624
+msgid "No data was provided to import."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1963
+msgid "Could not update the data."
+msgstr ""
+
+#: includes/admin/class-uich-api.php:1981
+msgid "All Good."
+msgstr ""
+
+#: includes/admin/class-uich-atomic-imgs.php:200
+#: includes/admin/class-uich-bricks-imgs.php:11
+#: includes/new-dashboard/class-uich-nd-app-password.php:353
+#: includes/new-dashboard/class-uich-nd-auth.php:215
+#: includes/webpage/class-uich-webpage-import.php:1129
+msgid "Insufficient permissions."
+msgstr ""
+
+#: includes/admin/class-uich-copy-images.php:53
+msgid "You do not have permission to do this."
+msgstr ""
+
+#: includes/admin/class-uich-copy-images.php:59
+msgid "Empty Content."
+msgstr ""
+
+#: includes/admin/class-uich-elementor.php:106
+#: assets/js/uich-atomic-custom-css.js:192
+msgid "UiChemy : Custom CSS"
+msgstr ""
+
+#: includes/admin/class-uich-elementor.php:113
+#: assets/js/uich-atomic-custom-css.js:164
+#: assets/js/uich-atomic-custom-css.js:171
+msgid "CSS Code"
+msgstr ""
+
+#: includes/admin/class-uich-rest-permissions.php:35
+#: uichemy-composer/includes/admin/class-uichemy-rest-permissions.php:35
+msgid "Sorry, only administrators can use UiChemy endpoints."
+msgstr ""
+
+#: includes/class-uich-brand.php:59
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:114
+#: uichemy-composer/includes/admin/class-uichemy-composer-manager.php:118
+#: uichemy-composer/includes/blocks/class-uichemy-gutenberg-composer.php:100
+#: uichemy-composer/includes/mcp/v2/class-uichemy-abilities.php:1254
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:86
+msgid "UiChemy"
+msgstr ""
+
+#: includes/composer/class-uich-composer-loader.php:152
+msgid "UiChemy now includes Composer, so the standalone Protuno (or Protuno Pro) plugin is being retired automatically. If this message keeps appearing, deactivate that plugin manually. Until then Composer stays disabled to avoid a conflict."
+msgstr ""
+
+#: includes/composer/class-uich-composer-migration.php:1060
+msgid "UiChemy is updating content from your previous plugin."
+msgstr ""
+
+#. translators: %d: number of Elementor rows left to rewrite.
+#: includes/composer/class-uich-composer-migration.php:1064
+#, php-format
+msgid "Widgets built with the previous plugin are being renamed to the Composer widget. %d items left."
+msgstr ""
+
+#: includes/composer/class-uich-composer-migration.php:1067
+msgid "Finish now"
+msgstr ""
+
+#: includes/composer/class-uich-composer-migration.php:1105
+msgid "You are not allowed to do that."
+msgstr ""
+
+#: includes/composer/class-uich-composer-takeover.php:398
+msgid "UiChemy now includes Composer."
+msgstr ""
+
+#. translators: %s: plugin file(s) that were deactivated, e.g. protuno/protuno.php
+#: includes/composer/class-uich-composer-takeover.php:402
+#, php-format
+msgid "The standalone plugin (%s) was deactivated because UiChemy now bundles Composer, and your existing sections are being migrated to the Composer widget. Your pages keep working. Nothing needs to be done."
+msgstr ""
+
+#. translators: %s: plugin file, e.g. uichemy/uichemy.php
+#: includes/composer/class-uich-composer-takeover.php:426
+#, php-format
+msgid "UiChemy finished migrating your Protuno content but could not remove the old plugin files (%s), because this site does not allow direct file writes. You can safely delete it from the Plugins screen."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-api.php:204
+msgid "No UiChemy account is connected to this site."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-api.php:276
+#: includes/new-dashboard/class-uich-nd-installer.php:81
+msgid "Unknown builder."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-api.php:297
+msgid "Unknown mode."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-app-password.php:212
+#: includes/new-dashboard/class-uich-nd-app-password.php:291
+msgid "Application Passwords need WordPress 5.6+."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-app-password.php:230
+msgid "Application Passwords are disabled for this user. Enable them, then try again."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-app-password.php:302
+msgid "Application Passwords are already available for your account."
+msgstr ""
+
+#. translators: %s: name of the plugin blocking Application Passwords.
+#: includes/new-dashboard/class-uich-nd-app-password.php:322
+#, php-format
+msgid "%s is still blocking Application Passwords, so we rolled the override back. Turn its setting off and try again."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-app-password.php:323
+msgid "Something on this site is still blocking Application Passwords, so we rolled the override back."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-app-password.php:339
+msgid "No UiChemy override is active for your account."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:76
+msgid "Gutenberg is built into WordPress."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:102
+msgid "Install Elementor from WordPress.org, then come back."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:110
+msgid "Elementor is already active."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:113
+msgid "Elementor activated."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:158
+msgid "Default Kit"
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:209
+msgid "Activation needs to finish in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:210
+msgid "Click to activate in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:242
+msgid "Bricks is a premium theme. Install it from bricksbuilder.io, then come back."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:249
+msgid "Bricks theme is already active."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:254
+msgid "Bricks theme activated."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:288
+msgid "UiChemy is already active."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:296
+#: includes/new-dashboard/class-uich-nd-installer.php:336
+#: includes/new-dashboard/class-uich-nd-installer.php:756
+msgid "UiChemy download URL is not configured."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:309
+msgid "UiChemy was installed but could not be located. Activate it from the Plugins screen."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:352
+msgid "Could not remove the old UiChemy before updating."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:368
+msgid "UiChemy was updated but could not be located. Activate it from the Plugins screen."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:375
+#: includes/new-dashboard/class-uich-nd-installer.php:377
+msgid "UiChemy updated to the latest version."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:391
+msgid "UiChemy installed and activated."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:413
+msgid "UiChemy installed. Finish activation in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:414
+msgid "UiChemy installed. Click to activate in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:500
+msgid "UiChemy Pro is already active."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:502
+msgid "UiChemy Pro activated."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:510
+#: includes/new-dashboard/class-uich-nd-installer.php:562
+msgid "The UiChemy Pro download link has not been set up yet. Add it in the plugin settings, then try again."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:525
+msgid "UiChemy Pro was installed but could not be found. Activate it from the Plugins screen."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:530
+msgid "UiChemy Pro installed and activated."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:580
+msgid "UiChemy Pro was updated but could not be found. Activate it from the Plugins screen."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:589
+#: includes/new-dashboard/class-uich-nd-installer.php:592
+msgid "UiChemy Pro updated to the latest version."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:628
+msgid "UiChemy Pro is installed. Finish activating it in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:629
+msgid "UiChemy Pro is installed. Click to activate it in WP-Admin."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:677
+msgid "WordPress plugin installer is unavailable."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:704
+msgid "UiChemy installation failed."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:779
+#, php-format
+msgid "UiChemy download failed (HTTP %d)."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:786
+msgid "UiChemy download returned an empty package."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:791
+msgid "Could not create a temporary file for the download."
+msgstr ""
+
+#: includes/new-dashboard/class-uich-nd-installer.php:796
+msgid "Could not write the downloaded package."
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:86
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:189
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:190
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/components/WebShell.jsx:88
+#: new-dashboard/src/components/WebShell.jsx:96
+#: new-dashboard/src/dashboard/tabs.js:91
+msgid "Settings"
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:87
+msgid "Need Help?"
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:110
+msgid "Video Tutorials"
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:111
+#: new-dashboard/src/screens/dashboard/panels.jsx:321
+msgid "Join Community"
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:112
+msgid "What's New?"
+msgstr ""
+
+#: includes/notices/class-uich-plugin-page.php:113
+msgid "Request Feature"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:85
+msgid "User is not authenticated."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:134
+msgid "Your UiChemy session has expired. Please reconnect."
+msgstr ""
+
+#. translators: %d: HTTP response code
+#: includes/webpage/class-uich-webpage-api.php:144
+#, php-format
+msgid "UiChemy API error: %d"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:318
+msgid "projectId and a non-empty pagesList are required."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:327
+msgid "pagesList must be an array of non-empty page name strings (e.g. sitemap page objects must be reduced to their pageName first)."
+msgstr ""
+
+#. translators: %d: maximum allowed concept number
+#: includes/webpage/class-uich-webpage-api.php:341
+#, php-format
+msgid "conceptNumber must be an integer between 1 and %d."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:475
+msgid "Replacement job not found or expired."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-api.php:483
+#: includes/webpage/class-uich-webpage-import.php:1954
+msgid "You do not have access to this job."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:423
+msgid "You do not have permission to connect a UiChemy account."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:450
+msgid "Your connection session expired. Please open UiChemy › Import and start the connection again."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:471
+#: includes/webpage/class-uich-webpage-auth.php:1122
+msgid "Failed to connect to the UiChemy app. Please try again."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:500
+msgid "Invalid or expired identity token from the UiChemy app. Please try signing in again."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:531
+msgid "Failed to authenticate with the UiChemy app. Please try again."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-auth.php:1139
+msgid "Logged out successfully."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:793
+msgid "original_slug and plugin_slug are required."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:816
+msgid "Plugin is active."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:816
+msgid "Plugin installation failed."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:849
+msgid "Theme is active."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:849
+msgid "Theme installation failed."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:899
+msgid "No pro plugin URLs to download."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:914
+msgid "Could not create download directory."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:928
+msgid "Could not initialize filesystem."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:945
+#: includes/webpage/class-uich-webpage-import.php:2199
+msgid "Invalid URL."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:961
+msgid "This plugin download URL is not from a trusted host."
+msgstr ""
+
+#. translators: %d is the HTTP status code returned by the server.
+#: includes/webpage/class-uich-webpage-import.php:1032
+#, php-format
+msgid "HTTP %d"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1042
+msgid "Empty response."
+msgstr ""
+
+#. translators: %s is the content-type header returned by the server.
+#: includes/webpage/class-uich-webpage-import.php:1054
+#, php-format
+msgid "Response is not a zip (content-type: %s). Check URL/auth."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1064
+msgid "Could not save file."
+msgstr ""
+
+#. translators: 1: installed count, 2: skipped count, 3: total
+#: includes/webpage/class-uich-webpage-import.php:1109
+#, php-format
+msgid "%1$d of %3$d pro plugin(s) installed and activated, %2$d skipped (already active)."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1126
+msgid "Zip file not found."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1154
+#: includes/webpage/class-uich-webpage-import.php:1157
+msgid "Installation failed."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1170
+msgid "Could not detect installed plugin."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1178
+msgid "Plugin installed but could not be activated."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1540
+msgid "All requirements installed and activated."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1541
+msgid "Some requirements failed to install."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1571
+#: includes/webpage/class-uich-webpage-import.php:1607
+msgid "downloadUrls array is required."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1689
+#: includes/webpage/class-uich-webpage-import.php:3490
+#: includes/webpage/class-uich-webpage-import.php:11350
+#: includes/webpage/class-uich-webpage-import.php:11397
+msgid "No replacement data found. Run fetch-replacement-json first."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:1946
+msgid "Import job not found or expired."
+msgstr ""
+
+#. translators: %s: the rejected URL
+#: includes/webpage/class-uich-webpage-import.php:2207
+#, php-format
+msgid "Refusing to fetch from a non-UiChemy host: %s"
+msgstr ""
+
+#. translators: %1$s is the error message, %2$s is the requested URL.
+#: includes/webpage/class-uich-webpage-import.php:2240
+#, php-format
+msgid "Could not fetch URL: %1$s (%2$s)"
+msgstr ""
+
+#. translators: %1$d is the HTTP status code, %2$s is the requested URL.
+#: includes/webpage/class-uich-webpage-import.php:2256
+#, php-format
+msgid "Failed to fetch %2$s (HTTP %1$d)"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:2277
+msgid "Empty response when loading Gutenberg page URL."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:2301
+msgid "Could not find Gutenberg block markup (<!-- wp:...) in the URL response. Use an export or REST URL that includes raw blocks."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:2314
+msgid "Empty Gutenberg markup."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:2330
+msgid "Block editor functions are not available."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:2335
+msgid "Could not parse Gutenberg blocks from markup."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:3199
+msgid "Downloaded file looks like JSON but could not be parsed as Elementor page data."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:3205
+msgid "Elementor import expects JSON from this URL."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:3216
+msgid "Downloaded file looks like JSON but could not be parsed as page data."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:3246
+msgid "No valid download URLs were found to fetch. downloadUrls must contain at least one URL string (flat array or grouped buckets of URL strings)."
+msgstr ""
+
+#. translators: 1: template title, 2: error message
+#: includes/webpage/class-uich-webpage-import.php:4938
+#: includes/webpage/class-uich-webpage-import.php:4967
+#, php-format
+msgid "%1$s skipped: %2$s"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5304
+msgid "Invalid page JSON structure."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5332
+msgid "Could not encode page data."
+msgstr ""
+
+#. translators: 1: section type, 2: elementor-style type
+#: includes/webpage/class-uich-webpage-import.php:5636
+#, php-format
+msgid "Could not map this template to a UiChemy type (section \"%1$s\", type \"%2$s\")."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5647
+msgid "UiChemy Theme Builder is not active. Install and activate the UiChemy plugin."
+msgstr ""
+
+#. translators: %s: template type, e.g. archive
+#: includes/webpage/class-uich-webpage-import.php:5673
+#, php-format
+msgid "Skipped \"%s\" templates. They need UiChemy Pro."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5713
+#: includes/webpage/class-uich-webpage-import.php:5827
+msgid "UiChemy Theme Builder did not handle the template creation request."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5721
+msgid "UiChemy Theme Builder returned no template id."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5727
+#: includes/webpage/class-uich-webpage-import.php:6093
+#: includes/webpage/class-uich-webpage-import.php:6188
+#: includes/webpage/class-uich-webpage-import.php:12145
+#: includes/webpage/class-uich-webpage-import.php:12268
+msgid "Invalid template JSON structure."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:5841
+msgid "UiChemy Theme Builder returned no template ID."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:6149
+#: includes/webpage/class-uich-webpage-import.php:6236
+#: includes/webpage/class-uich-webpage-import.php:12238
+#: includes/webpage/class-uich-webpage-import.php:12318
+msgid "Could not encode template data."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:6173
+#: includes/webpage/class-uich-webpage-import.php:12118
+msgid "Nexter Extension is not active."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:7305
+msgid "UiChemy Import"
+msgstr ""
+
+#. translators: %d: gradient slot
+#: includes/webpage/class-uich-webpage-import.php:9029
+#, php-format
+msgid "Gradient %d"
+msgstr ""
+
+#. translators: %d: shadow slot
+#: includes/webpage/class-uich-webpage-import.php:9208
+#, php-format
+msgid "Shadow %d"
+msgstr ""
+
+#. translators: %d: spacing slot
+#: includes/webpage/class-uich-webpage-import.php:9272
+#, php-format
+msgid "Spacing %d"
+msgstr ""
+
+#. translators: %d: border slot
+#: includes/webpage/class-uich-webpage-import.php:9318
+#, php-format
+msgid "Border %d"
+msgstr ""
+
+#. translators: %d: radius slot
+#: includes/webpage/class-uich-webpage-import.php:9384
+#, php-format
+msgid "Radius %d"
+msgstr ""
+
+#. translators: %d: animation slot
+#: includes/webpage/class-uich-webpage-import.php:9450
+#, php-format
+msgid "Animation %d"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:10002
+msgid "Typography"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11199
+msgid "No widgets found."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11208
+msgid "The Plus Addons for Elementor is not active."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11225
+msgid "Widgets enabled successfully."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11238
+msgid "Failed to enable widgets."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11300
+msgid "Blocks enabled successfully."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11312
+msgid "Failed to enable blocks."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11345
+#: includes/webpage/class-uich-webpage-import.php:11390
+msgid "pageName is required."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11537
+msgid "Skipped Cookie Policy. It needs Nexter Extension, which this import no longer installs."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11571
+msgid "Invalid template JSON for Elementor."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:11600
+msgid "Invalid theme template JSON for Elementor."
+msgstr ""
+
+#. translators: %s: page type identifier.
+#: includes/webpage/class-uich-webpage-import.php:11698
+#, php-format
+msgid "Unknown page type: %s"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:12263
+msgid "Elementor is not active."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:12526
+msgid "Could not create blog posts."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:12639
+msgid "Blog post title is required."
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:13181
+msgid "No Gutenberg extras to enable"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:13404
+msgid "The Plus Addons for Elementor not active"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:13405
+msgid "TPAE plugin is required to enable widgets"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:13412
+msgid "No widgets to enable"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-import.php:13441
+msgid "No Nexter blocks to enable"
+msgstr ""
+
+#: includes/webpage/class-uich-webpage-nexter-settings.php:96
+msgid "Performance/security settings skipped: Nexter Extension is not installed/active (these options are only read by Nexter Extension, not the free Nexter theme)."
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:135
+msgid "Dashboard"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:146
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:147
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:5
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/dashboard/tabs.js:57
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:462
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:30
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:16
+msgid "Theme Builder"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:161
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:162
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:510
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/tabs.js:65
+msgid "Form Submissions"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:171
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:172
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/dashboard/tabs.js:73
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:35
+msgid "Role Manager"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:180
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:181
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/dashboard/tabs.js:82
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:144
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:174
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:40
+msgid "White Label"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:202
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:203
+msgid "Activate License"
+msgstr ""
+
+#. translators: %s: white-labelled plugin name.
+#: uichemy-composer/includes/admin/class-uichemy-admin-menu.php:249
+#, php-format
+msgid "%s Pro"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-composer-manager.php:9045
+msgid "Edit Header"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-composer-manager.php:9046
+msgid "Edit Footer"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-rest-permissions.php:60
+msgid "This is a UiChemy Pro feature."
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-rest-permissions.php:76
+msgid "Sorry, you are not allowed to use this UiChemy feature."
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-sl-plugin-updater.php:281
+#, php-format
+msgid "There is a new version of %1$s available. %2$sView version %3$s details%4$s."
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-sl-plugin-updater.php:298
+#, php-format
+msgid "There is a new version of %1$s available. %2$sView version %3$s details%4$s or %5$supdate now%6$s."
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-sl-plugin-updater.php:553
+msgid "You do not have permission to install plugin updates"
+msgstr ""
+
+#: uichemy-composer/includes/admin/class-uichemy-sl-plugin-updater.php:553
+msgid "Error"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:50
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:701
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:98
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:108
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:871
+msgid "Composer"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:117
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:264
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:215
+msgid "Text"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:168
+msgid "No text found"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:368
+msgid "Links"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:418
+msgid "No link found"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:443
+msgid "Link Text"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:460
+msgid "URL"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:483
+msgid "Media"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:537
+msgid "No images or \"icons\" found"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:562
+msgid "Choose Image"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:581
+msgid "Alt"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:594
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:630
+msgid "Choose SVG"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:679
+msgid "Background Image"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:709
+msgid "Edit Layer"
+msgstr ""
+
+#. translators: %d: numeric submission ID.
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:712
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:723
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:554
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:690
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:720
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:15
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:333
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:215
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:374
+msgid "Edit"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:720
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:766
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:836
+msgid "Edit Code"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:731
+msgid "Edit With AI"
+msgstr ""
+
+#: uichemy-composer/includes/admin/widgets/class-uichemy-composer-widget.php:734
+msgid "Chat"
+msgstr ""
+
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:124
+msgid "Loading Composer…"
+msgstr ""
+
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:161
+#, php-format
+msgid "Text %d"
+msgstr ""
+
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:172
+#, php-format
+msgid "Image %d"
+msgstr ""
+
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:225
+msgid "Add HTML/CSS/JS via the UiChemy panel to render this element."
+msgstr ""
+
+#: uichemy-composer/includes/bricks/class-uichemy-bricks-composer.php:228
+msgid "Open Composer"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/class-uich-filters.php:137
+msgid "ago"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/dynamic-tags/class-uich-dynamic-tags.php:79
+msgid "UiChemy Â· Post"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/dynamic-tags/tags/class-uich-dt-post.php:36
+msgid "Post Title"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/dynamic-tags/tags/class-uich-dt-post.php:64
+msgid "Post Content"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/dynamic-tags/tags/class-uich-dt-post.php:97
+msgid "Post Permalink"
+msgstr ""
+
+#: uichemy-composer/includes/dynamic/dynamic-tags/tags/class-uich-dt-post.php:126
+msgid "Featured Image"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:47
+msgid "ID"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:48
+msgid "Form Name"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:49
+msgid "Page"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:50
+#: uichemy-composer/includes/forms/class-uich-forms.php:424
+msgid "Email"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:51
+msgid "Status"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:52
+msgid "Submitted At"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:53
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:601
+msgid "Actions"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:66
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:349
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:666
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:294
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:375
+msgid "Delete"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:67
+msgid "Export"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:68
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:323
+msgid "Mark as Read"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:69
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:336
+msgid "Mark as Unread"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:98
+#: new-dashboard/build/index.js:10
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:197
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1652
+msgid "All"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:99
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:289
+msgid "Unread"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:100
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:291
+msgid "Read"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:309
+msgid "View"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:349
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:666
+msgid "Delete this submission permanently?"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:376
+msgid "All Forms"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:382
+msgid "All Pages"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:392
+msgid "All Time"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:393
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:39
+msgid "Today"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:394
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:40
+msgid "Yesterday"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:395
+msgid "Last 7 Days"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:396
+msgid "Last 30 Days"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:397
+msgid "Custom"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:410
+msgid "Apply"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:418
+msgid "Search submissions"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:439
+msgid "Export CSV"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:444
+msgid "No submissions found."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:532
+msgid "Submission not found."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:544
+msgid "Form Submission Details"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:545
+msgid "Back to Submissions"
+msgstr ""
+
+#. translators: %d: numeric submission ID.
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:553
+#, php-format
+msgid "Submission #%d"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:591
+msgid "No form data found."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:610
+msgid "Success"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:610
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:362
+msgid "Failed"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:621
+msgid "Additional Info"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:624
+msgid "Form:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:634
+#: uichemy-composer/includes/forms/class-uich-forms.php:510
+msgid "Page:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:641
+msgid "Create Date:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:644
+msgid "Update Date:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:645
+msgid "Never updated"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:647
+msgid "User Name:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:648
+msgid "Guest"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:650
+msgid "User IP:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:651
+msgid "User Agent:"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:667
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:721
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:724
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:728
+msgid "Update"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:685
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:157
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:281
+#: new-dashboard/src/uichemy-webpage/components/BuilderModal.jsx:74
+msgid "Cancel"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:701
+msgid "Saving..."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:740
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:764
+#: uichemy-composer/includes/forms/class-uich-forms-dashboard.php:298
+msgid "Permission denied."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:745
+msgid "Invalid submission data."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-admin.php:753
+msgid "Submission updated successfully."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-dashboard.php:303
+msgid "This export link has expired. Reload the dashboard and try again."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms-dashboard.php:310
+msgid "Forms are disabled."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:290
+msgid "Security check failed. Please refresh and try again."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:301
+msgid "Thank you!"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:346
+msgid "Please fill in the form."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:394
+msgid "Could not save submission."
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:406
+msgid "Collect Submissions"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:433
+msgid "Email 2"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:442
+msgid "Webhook"
+msgstr ""
+
+#: uichemy-composer/includes/forms/class-uich-forms.php:463
+msgid "Thank you! Your submission has been received."
+msgstr ""
+
+#. translators: %s form name
+#: uichemy-composer/includes/forms/class-uich-forms.php:502
+#, php-format
+msgid "New submission: %s"
+msgstr ""
+
+#: uichemy-composer/includes/mcp/v2/class-uichemy-abilities.php:1255
+msgid "UiChemy pipeline: Figma-to-HTML conversion, Elementor globals, and full WordPress site building."
+msgstr ""
+
+#. translators: %s: plugin name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:89
+#, php-format
+msgid "Edit Header (%s)"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:90
+#, php-format
+msgid "Edit Footer (%s)"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:93
+#, php-format
+msgid "Edit Single Template (%s)"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:96
+#, php-format
+msgid "Edit 404 Template (%s)"
+msgstr ""
+
+#. translators: %s: plugin name (white-labelled when configured).
+#: uichemy-composer/includes/theme-builder/class-uichemy-locations.php:120
+#, php-format
+msgid "%s Templates"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:114
+msgctxt "post type general name"
+msgid "Templates"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:115
+msgctxt "post type singular name"
+msgid "Template"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:116
+msgctxt "admin menu"
+msgid "Theme Builder"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:117
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:487
+msgid "Add New"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:118
+msgid "Add New Template"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:119
+msgid "Edit Template"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:120
+msgid "New Template"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:121
+msgid "View Template"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-cpt.php:122
+msgid "Search Templates"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:598
+msgid "Header (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:600
+msgid "Footer (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:602
+msgid "Single Post or Page (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:604
+msgid "Archive (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:606
+msgid "Single Product (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:608
+msgid "Products Archive (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:610
+msgid "Search Results (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:612
+msgid "404 Page (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-template-store.php:614
+msgid "Template (UiChemy)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:210
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:45
+msgid "Header"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:211
+#: new-dashboard/build/index.js:9
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:46
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1248
+msgid "Footer"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:214
+msgid "Front Page"
+msgstr ""
+
+#. translators: %s: post type singular name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:220
+#, php-format
+msgid "Single %s"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:222
+msgid "Any Singular (fallback)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:225
+msgid "Blog Home"
+msgstr ""
+
+#. translators: %s: taxonomy singular name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:231
+#, php-format
+msgid "%s Archive"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:233
+msgid "Author Archive"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:234
+msgid "Date Archive"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:235
+msgid "Any Archive (fallback)"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:238
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:51
+msgid "Search Results"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:239
+#: new-dashboard/build/index.js:9
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:52
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1249
+msgid "404 Page"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:591
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:36
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:65
+msgid "Entire site"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:593
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:32
+msgid "Search results"
+msgstr ""
+
+#. translators: %s: post type plural name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:597
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:641
+#, php-format
+msgid "All %s"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:601
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:147
+msgid "Any author"
+msgstr ""
+
+#. translators: %s: taxonomy singular name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:614
+#, php-format
+msgid "Any %s"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:636
+msgid "Front page"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:643
+msgid "All posts & pages"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:649
+msgid "Blog home"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:651
+msgid "Author archives"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:653
+msgid "Date archives"
+msgstr ""
+
+#. translators: %s: taxonomy singular name.
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:658
+#, php-format
+msgid "%s archives"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/class-uichemy-theme-builder-admin.php:660
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:29
+msgid "All archives"
+msgstr ""
+
+#: uichemy-composer/includes/theme-builder/views/preview.php:23
+msgid "Template Preview UiChemy"
+msgstr ""
+
+#: assets/js/index.js:1
+msgid " We have detected errors in your CSS code. Click the button below to override the CSS."
+msgstr ""
+
+#: assets/js/index.js:1
+msgid "Override CSS"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:186
+#: new-dashboard/src/components/WizardShell.jsx:75
+msgid "Profile"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:217
+msgid "Switch License"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/components/DashShell.jsx:274
+#: new-dashboard/src/components/WebShell.jsx:222
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:507
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:213
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:338
+msgid "Upgrade to Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:227
+#: new-dashboard/src/components/WizardShell.jsx:95
+msgid "Signing out…"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:227
+#: new-dashboard/src/components/WizardShell.jsx:95
+msgid "Sign Out"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:530
+#: new-dashboard/src/components/WebShell.jsx:9
+#: new-dashboard/src/dashboard/health.js:32
+#: new-dashboard/src/lib/app-password.js:96
+msgid "Your WordPress version is too old (App Passwords need 5.6+)."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:533
+#: new-dashboard/src/components/WebShell.jsx:10
+#: new-dashboard/src/dashboard/health.js:33
+msgid "For security, WordPress enables App Passwords only when your site is set up with HTTPS."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:534
+#: new-dashboard/src/components/WebShell.jsx:11
+#: new-dashboard/src/dashboard/health.js:34
+msgid "A plugin, theme, or wp-config snippet on this site is blocking App Passwords."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:535
+#: new-dashboard/src/components/WebShell.jsx:12
+#: new-dashboard/src/dashboard/health.js:35
+#: new-dashboard/src/lib/app-password.js:99
+msgid "Your account is allowed but a site-level rule is blocking App Passwords."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:783
+#: new-dashboard/src/components/WizardShell.jsx:8
+msgid "Page Builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:806
+#: new-dashboard/src/components/WizardShell.jsx:8
+msgid "Mode"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:832
+#: new-dashboard/src/components/WizardShell.jsx:8
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:54
+msgid "Connect"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WizardShell.jsx:24
+#, js-format
+msgid "Step %1$s / %2$s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WizardShell.jsx:114
+msgid "Docs"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WizardShell.jsx:115
+msgid "Help"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:360
+#: new-dashboard/src/components/WizardShell.jsx:124
+#: new-dashboard/src/dashboard/use-builder-setup.js:76
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:333
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:335
+msgid "Continue"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:12
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/components/WizardShell.jsx:146
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:430
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1978
+msgid "Back"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:10
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:11
+msgid "Update needed"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:10
+msgid "WordPress is a little out of date"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:10
+msgid "UiChemy needs WordPress 6.9 or newer. Update from Dashboard → Updates and re-run the check."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:104
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:10
+msgid "Update WordPress"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:110
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:11
+msgid "Your PHP version is too old"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:111
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:11
+msgid "UiChemy needs PHP 7.4 or newer. Your host can switch the PHP version in seconds."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:112
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:11
+msgid "Contact your host"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:118
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:12
+msgid "A PHP extension is missing"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:12
+msgid "UiChemy needs the JSON and mbstring extensions to be enabled. Ask your host to enable them."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:120
+#: new-dashboard/src/dashboard/health.js:128
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:12
+msgid "Show me how"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:86
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:13
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:17
+msgid "Heads up"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:126
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:13
+msgid "Low memory"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:13
+msgid "You can keep going, but conversions of large designs may fail. Bumping memory_limit to 256M is recommended."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:13
+msgid "Continue anyway"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:31
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:14
+msgid "Access required"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:32
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:14
+msgid "Administrator access required"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:33
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:14
+msgid "You'll need an Administrator account to set up UiChemy. Ask your site admin to finish this step."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:34
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:14
+msgid "OK"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:84
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:85
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:17
+msgid "Action needed"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:39
+msgid "Your version"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:181
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:46
+msgid "Required"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:48
+msgid "6.9 or newer"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/EnvBlocked.jsx:48
+msgid "7.4 or newer"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:15
+msgid "Design in Figma, send it straight to WordPress"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:16
+msgid "Native Elementor, Gutenberg or Bricks, fully editable"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:17
+msgid "AI website generation and conversions, on tap"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:24
+msgid "Welcome"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:25
+msgid "Welcome to UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:27
+msgid "Turn your Figma designs into native, editable WordPress pages, no rebuilds. Let’s get you set up in about a minute."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/WelcomeScreen.jsx:41
+msgid "Takes about a minute · you can change anything later"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:15
+msgid "Designer"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:16
+msgid "I design in Figma and want it live in WordPress."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:22
+msgid "Agency / Freelancer"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:23
+msgid "I build sites for clients and need to ship fast."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:29
+msgid "Developer"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:30
+msgid "I build with AI tools like Claude, Cursor or Codex."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:36
+msgid "No-code / Founder"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/personas.js:37
+msgid "I want AI to generate a full site for me."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:19
+msgid "Elementor widgets you can open and edit."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:20
+msgid "The built-in WordPress editor. Clean blocks."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:21
+msgid "Bricks elements that stay clean and lightweight."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:74
+#, js-format
+msgid "Couldn't complete %1$s: %2$s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:93
+msgid "Detected"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:19
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:196
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:357
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:95
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:162
+msgid "Active"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:197
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:357
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:97
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:164
+msgid "Inactive"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:98
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:166
+msgid "Not installed"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:15
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:312
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:112
+#, js-format
+msgid "Activate %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:110
+#, js-format
+msgid "Get %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:111
+#, js-format
+msgid "Install %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:349
+#: new-dashboard/src/dashboard/use-builder-setup.js:71
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:141
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:207
+msgid "Working…"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:172
+#, js-format
+msgid "Update available · Beta v%s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:173
+msgid "Update available"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/BuilderScreen.jsx:197
+msgid "We install UiChemy, the UiChemy editing layer. It keeps every converted design fully editable inside your builder."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/ToolLogos.jsx:13
+msgid "Claude"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/ToolLogos.jsx:14
+msgid "Cursor"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/ToolLogos.jsx:15
+msgid "Codex"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:21
+msgid "UiChemy Figma Plugin"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:23
+msgid "Recommended"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:24
+msgid "For designers"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:25
+msgid "Design in Figma, send it straight to WordPress. This is all you need."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:31
+msgid "AI Agent to WordPress"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:35
+#: new-dashboard/src/screens/dashboard/panels.jsx:367
+msgid "Optional"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:36
+msgid "Prefer building with AI tools like Claude or Cursor? Generate pages by chatting with them."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/dashboard/modes.js:49
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:28
+msgid "AI Website Creator"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/dashboard/modes.js:51
+#: new-dashboard/src/dashboard/modes.js:52
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:28
+msgid "New"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/dashboard/modes.js:53
+msgid "No design to start from? Bring in a website you generated with AI, fully built out."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/wizard/ModeScreen.jsx:49
+msgid "Not available for this builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/lib/app-password.js:97
+msgid "This site runs on HTTP and isn't flagged as local/dev, so WordPress blocks App Passwords by default."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/lib/app-password.js:98
+msgid "A plugin, theme, or wp-config snippet on this site is blocking App Passwords (a filter is returning false)."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:74
+#: new-dashboard/src/lib/app-password.js:144
+msgid "Could not update Application Passwords."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/MCPConfigTabs.jsx:283
+#: new-dashboard/src/components/MCPConfigTabs.jsx:294
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:85
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:189
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:205
+#: new-dashboard/src/screens/dashboard/panels.jsx:66
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:100
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:53
+msgid "Copied"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/MCPConfigTabs.jsx:283
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:85
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:189
+#: new-dashboard/src/screens/dashboard/panels.jsx:66
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:100
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:43
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:69
+msgid "Copy"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:95
+#: new-dashboard/src/screens/dashboard/panels.jsx:96
+msgid "Hide"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:95
+#: new-dashboard/src/screens/dashboard/panels.jsx:96
+msgid "Reveal"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:100
+#: new-dashboard/src/components/WebShell.jsx:109
+#: new-dashboard/src/screens/dashboard/panels.jsx:134
+#: new-dashboard/src/screens/dashboard/panels.jsx:148
+msgid "Force-enable Application Passwords"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:103
+#: new-dashboard/src/screens/dashboard/panels.jsx:137
+msgid "UiChemy is overriding the site to allow App Passwords for your account."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/WebShell.jsx:104
+#: new-dashboard/src/screens/dashboard/panels.jsx:138
+msgid "Application Passwords are currently unavailable on this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:202
+msgid "Connection"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:108
+#: new-dashboard/src/screens/dashboard/panels.jsx:207
+msgid "Connected"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:207
+msgid "Not connected"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/Import.jsx:37
+#: new-dashboard/src/screens/dashboard/panels.jsx:218
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:44
+msgid "Page builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:219
+msgid "Designs convert into editable elements here."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:225
+msgid "Change"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:240
+msgid "Connection link"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:242
+msgid "A self-authenticating link your AI client uses to reach this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:243
+msgid "Paste this into the UiChemy plugin in Figma."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:248
+msgid "Keep this private. Anyone with the link can send designs to your site."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:258
+msgid "Application password"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:259
+msgid "Used by your AI client to authenticate with WordPress."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:262
+#, js-format
+msgid "Active · %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:278
+msgid "Connect your site to your AI client"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:279
+msgid "Connect your site to start converting"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:283
+msgid "Generate a secure link, then add it to Claude, Cursor or Codex below."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:284
+msgid "Generate a secure link and paste it into the UiChemy plugin in Figma."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:287
+msgid "Generate connection link"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:194
+msgid "Generating…"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:289
+msgid "How MCP works"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:289
+msgid "Where’s the plugin?"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:297
+msgid "Install the UiChemy plugin in Figma"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:298
+msgid "Paste your connection link"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/panels.jsx:299
+msgid "Select a frame and hit Send"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/MCPConfigTabs.jsx:32
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:37
+msgid "Prompt"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:38
+msgid "Config"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:86
+msgid "Could not generate the connection."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:103
+msgid "Generate your connection"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:104
+msgid "Issue a secure Application Password so your AI tool can reach this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:111
+msgid "Generate connection"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/components/MCPConfigTabs.jsx:264
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:116
+msgid "Regenerate"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:129
+msgid "Pick your AI tool"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:130
+msgid "We’ll give you the exact config to add."
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:154
+msgid "Add the MCP server"
+msgstr ""
+
+#: new-dashboard/build/index.js:1
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:157
+msgid "Paste this prompt into your AI tool. It adds the config for you."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:159
+#, js-format
+msgid "Paste this prompt into %s. It edits its own config file for you."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:160
+msgid "Copy this into your tool’s config file."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:163
+msgid "Generate the connection above to reveal your real config."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:176
+msgid "Setup method"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/components/MCPConfigTabs.jsx:271
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:199
+msgid "Add to Cursor"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:203
+msgid "Copy a one-line terminal command that adds this to Claude Desktop automatically. Needs Node.js 18+."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/components/MCPConfigTabs.jsx:294
+#: new-dashboard/src/components/MCPConfigTabs.jsx:317
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:205
+msgid "Auto Connect"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:214
+msgid "The prompt points at:"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/components/MCPConfigTabs.jsx:317
+#: new-dashboard/src/components/MCPConfigTabs.jsx:319
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:214
+msgid "Save to:"
+msgstr ""
+
+#. translators: %s: detected OS name.
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:216
+#, js-format
+msgid "(detected %s)"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:225
+msgid "Restart & start building"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/dashboard/McpSetup.jsx:226
+msgid "Restart your AI tool, then ask it to build or edit a page. It works through UiChemy on this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:82
+msgid "Now playing. Watch it in the help center."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:126
+msgid "We couldn't reach your site"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:127
+msgid "Something interrupted the connection. Your site is safe. Just try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:54
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:78
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:129
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:429
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:443
+msgid "Retry"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/components/ErrorBoundary.jsx:38
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:131
+msgid "Contact support"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:135
+msgid "Still stuck after a couple of tries? We usually reply within a few hours."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:162
+msgid "Generating your Application Password…"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:163
+msgid "Waiting for Application Password…"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:172
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:199
+msgid "Connection Link"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:173
+msgid "One self-authenticating link. Your WP login and Application Password are already embedded."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:180
+msgid "Connect in three steps"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:186
+msgid "Install the"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:188
+#, js-format
+msgid "UiChemy → %s plugin"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:190
+msgid "in Figma."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:195
+msgid "Open it and go to"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:195
+msgid "Site Connection"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:199
+msgid "Paste your"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:199
+msgid ", then click"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:199
+msgid "Connect."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:205
+msgid "Your site's connected. Here's what's next."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:206
+msgid "A 60-second walkthrough, from connection to your first export."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:227
+msgid "Added the MCP here's what to do next"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/screens/wizard/ConnectScreen.jsx:228
+msgid "Connect from Claude or Cursor and run your first conversion."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:81
+msgid "Update UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:83
+msgid "UiChemy Pro is active"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:85
+msgid "Activate UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:357
+#: new-dashboard/src/components/DashShell.jsx:245
+#: new-dashboard/src/dashboard/use-builder-setup.js:73
+#: new-dashboard/src/dashboard/use-pro-setup.js:86
+msgid "Install & Activate"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:123
+msgid "UiChemy Pro updated"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:124
+msgid "UiChemy Pro is already active"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:125
+msgid "UiChemy Pro activated"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:126
+msgid "UiChemy Pro installed and activated"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:131
+#, js-format
+msgid "Version %s is ready. Pro features are unlocked on this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:132
+msgid "Pro features are unlocked on this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/use-pro-setup.js:137
+msgid "Could not set up UiChemy Pro. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/tabs.js:36
+msgid "Manage"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/tabs.js:44
+msgid "Home"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:102
+msgid "WordPress is out of date"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:103
+msgid "UiChemy needs WordPress 6.9 or newer. Update from Dashboard → Updates, then re-check."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:119
+msgid "UiChemy needs the JSON and mbstring extensions enabled. Ask your host to turn them on."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:127
+msgid "You can keep working, but conversions of large designs may fail. Bumping memory_limit to 256M is recommended."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:136
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:13
+msgid "REST API is blocked"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:137
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:14
+msgid "A plugin or your host is blocking WordPress's REST API. UiChemy can't connect until it's reachable."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:138
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:15
+msgid "Show me how to fix"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:146
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:26
+msgid "WP_ENVIRONMENT_TYPE is not set to “local”"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/src/dashboard/health.js:147
+msgid "You're on a localhost site. Add the line below to wp-config.php, then re-check."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:149
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:28
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:161
+msgid "Re-check"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:563
+#: new-dashboard/src/dashboard/health.js:47
+msgid "In WP-Admin, go to Wordfence → <a>All Options</a>."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:566
+#: new-dashboard/src/dashboard/health.js:50
+msgid "In WP-Admin, go to Wordfence → All Options."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:650
+#: new-dashboard/src/dashboard/health.js:52
+msgid "Wordfence is blocking Application Passwords"
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:651
+#: new-dashboard/src/dashboard/health.js:53
+msgid "Wordfence has “Disable WordPress application passwords” switched on, which is its default, so WordPress won't let UiChemy connect. Enable it for your account in one click, or turn the option off in Wordfence."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:570
+#: new-dashboard/src/dashboard/health.js:56
+msgid "Find Brute Force Protection and expand its advanced options."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:571
+#: new-dashboard/src/dashboard/health.js:57
+msgid "Uncheck “Disable WordPress application passwords”."
+msgstr ""
+
+#: new-dashboard/build/index.js:2
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:572
+#: new-dashboard/src/dashboard/health.js:58
+msgid "Save the change, then click Re-check below."
+msgstr ""
+
+#. translators: %s: name of the plugin blocking Application Passwords.
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:658
+#: new-dashboard/src/dashboard/health.js:65
+#, js-format
+msgid "%s is blocking Application Passwords"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:659
+#: new-dashboard/src/dashboard/health.js:66
+msgid "WordPress Application Passwords are switched off on this site, which is what UiChemy connects with. Enable them for your account in one click, or change the setting in that plugin."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:665
+#: new-dashboard/src/dashboard/health.js:70
+msgid "Application Passwords are being blocked"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:666
+#: new-dashboard/src/dashboard/health.js:71
+msgid "Something on this site is switching off WordPress Application Passwords, which is what UiChemy connects with. Enabling them for your account usually resolves it."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:160
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:19
+msgid "Application Passwords are disabled"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:161
+msgid "WordPress Application Passwords are turned off on this site. UiChemy needs them to connect the Figma plugin or an MCP client."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:552
+#: new-dashboard/src/dashboard/health.js:165
+msgid "You can still enable it for your account with the button below."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:652
+#: new-dashboard/src/App.jsx:660
+#: new-dashboard/src/App.jsx:667
+#: new-dashboard/src/dashboard/health.js:169
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:21
+msgid "Enable for my account"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:653
+#: new-dashboard/src/App.jsx:661
+#: new-dashboard/src/App.jsx:668
+#: new-dashboard/src/dashboard/health.js:169
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:22
+msgid "Enabling…"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:634
+#: new-dashboard/src/dashboard/health.js:182
+msgid "UiChemy is installed but not active"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:183
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:38
+msgid "UiChemy is not installed"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:185
+msgid "UiChemy powers the Composer widget and the MCP server that lets AI tools build on your site. Activate it to get started."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:186
+msgid "UiChemy powers the Composer widget and the MCP server that lets AI tools build on your site. Install it to get started."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:636
+#: new-dashboard/src/components/DashShell.jsx:256
+#: new-dashboard/src/dashboard/health.js:189
+msgid "Activate UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/dashboard/health.js:189
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:40
+msgid "Install & Activate UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:347
+#: new-dashboard/src/App.jsx:637
+#: new-dashboard/src/components/DashShell.jsx:249
+#: new-dashboard/src/dashboard/health.js:190
+#: new-dashboard/src/dashboard/use-builder-setup.js:69
+msgid "Activating…"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:346
+#: new-dashboard/src/components/DashShell.jsx:249
+#: new-dashboard/src/dashboard/health.js:190
+#: new-dashboard/src/dashboard/use-builder-setup.js:68
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:41
+msgid "Installing…"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:20
+msgid "WordPress Application Passwords are turned off on this site. UiChemy needs them to connect the Figma plugin or MCP client."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:27
+msgid "You're on a localhost site. Add the line below to wp-config.php, then click Re-check."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:37
+msgid "Setup required"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:39
+msgid "UiChemy powers the Composer widget, which turns your prototype into fully editable Elementor sections. Its MCP server lets AI tools like Claude, Cursor and Codex convert Figma designs and build whole pages on your site. Install it to get started."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:45
+msgid "Pretty permalinks are required"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:46
+msgid "This site is using plain permalinks, so UiChemy’s REST routes can’t resolve. Set permalinks to “Post name” (or any option other than Plain) and save."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:47
+msgid "Open Permalink settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:52
+msgid "We couldn’t reach your site"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:53
+msgid "This site’s REST API didn’t respond. It may be in maintenance mode, behind a firewall, or temporarily offline. Check that it’s publicly reachable, then retry."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:58
+msgid "Sign-in couldn’t be verified"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:59
+msgid "We didn’t get a valid sign-in token from UiChemy. Sign in again to reconnect this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:60
+msgid "Sign in again"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:64
+msgid "Finish choosing a page builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:65
+msgid "UiChemy needs an active page builder before it can convert designs. Pick one to continue."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:66
+msgid "Choose a builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:70
+msgid "Your license session needs attention"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:71
+msgid "We couldn’t register a session for your license on this site. Pick a license again to continue."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:72
+msgid "Choose a license"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:76
+msgid "The MCP endpoint isn’t reachable"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:77
+msgid "Your AI client couldn’t reach this site’s MCP server. Confirm the site is public and the connection link is current, then retry."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:103
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:129
+msgid "Why it's off"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:113
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:140
+msgid "Or fix it at the source:"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:121
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:151
+msgid "These active plugins are hooked on the Application Passwords check, so one of them is the likely cause:"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/errors/ErrorCard.jsx:177
+msgid "Still stuck? Contact support"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:588
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:32
+msgid "Could not enable Application Passwords."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:608
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:47
+msgid "Could not install UiChemy. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:200
+msgid "+1 more"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:200
+msgid "more"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:213
+msgid "Hide details"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/screens/dashboard/HealthNotices.jsx:213
+msgid "Show details"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/components/DashShell.jsx:119
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:324
+msgid "Finish setup"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:121
+msgid "Get set up"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/components/DashShell.jsx:210
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:44
+msgid "Could not start the sign-in. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:219
+msgid "UiChemy Pro update"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:222
+#: new-dashboard/src/components/ScreenHead.jsx:23
+#, js-format
+msgid "v%s"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:224
+msgid "A newer UiChemy Pro is available. Your licence and settings are kept."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:225
+#: new-dashboard/src/screens/dashboard/panels.jsx:451
+msgid "Update now"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:348
+#: new-dashboard/src/components/DashShell.jsx:228
+#: new-dashboard/src/dashboard/use-builder-setup.js:70
+#: new-dashboard/src/screens/dashboard/panels.jsx:450
+msgid "Updating…"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:238
+msgid "UiChemy Pro Plugin"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:241
+msgid "Free"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:243
+msgid "It’s already installed on this site, it just needs switching on."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:244
+msgid "Unlock Theme Builder, Role Manager and White Label. We’ll install it for you."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:245
+#: new-dashboard/src/components/DashShell.jsx:258
+msgid "Activate"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:275
+msgid "Get more AI credits, extra seats, priority support and advanced tools like Role Manager and White Label."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:276
+msgid "Upgrade Now"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:257
+msgid "Sign in & Activate UiChemy to get the best out of it."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/components/DashShell.jsx:261
+msgid "Opening…"
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/uichemy-webpage/lib/api.js:125
+msgid "The server stopped responding part-way through this step."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/uichemy-webpage/lib/api.js:133
+msgid "The background worker was killed before it finished — usually a PHP memory limit or a hard process timeout on your host. Retry the step, and check the PHP error log if it happens again."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/uichemy-webpage/lib/api.js:583
+msgid "The server stopped part-way through this step."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/uichemy-webpage/lib/api.js:584
+msgid "This is almost always a hosting limit rather than your design — PHP ran out of time or memory. Retry the step; if it keeps failing, raise max_execution_time and memory_limit (or ask your host to) and check the PHP error log."
+msgstr ""
+
+#: new-dashboard/build/index.js:4
+#: new-dashboard/src/uichemy-webpage/lib/api.js:591
+msgid "The server returned an unexpected response."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/api.js:642
+#, js-format
+msgid "The server rejected this request (HTTP %d)."
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:31
+msgid "Could not start the connection. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:59
+msgid "Connect your UiChemy account"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:62
+msgid "Sign in to load the websites you generated, then import one into this site. Theme, plugins, pages and settings are included."
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:80
+msgid "Connecting…"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:80
+msgid "Log in to continue"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:100
+msgid "AI-generated sites"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:109
+msgid "One-click import"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/LoginScreen.jsx:118
+msgid "Fully editable"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/components/ProjectCard.jsx:91
+msgid "Loading"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:56
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:59
+msgid "Search projects"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:77
+msgid "No projects found"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:78
+msgid "No projects yet"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:82
+msgid "Try a different search term."
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ProjectsScreen.jsx:83
+msgid "Create your first project to get started."
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:14
+msgid "Static Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:15
+msgid "Blog Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:17
+msgid "Shop Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:18
+msgid "Extra Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:19
+msgid "Legal Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:426
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:979
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1845
+msgid "Nexter WP Theme"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:433
+msgid "Free plugin"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:50
+msgid "Blog Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:51
+msgid "Blog"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:52
+msgid "Blog Detail Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:53
+msgid "Search Results Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:54
+msgid "Author Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:55
+msgid "Category Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:56
+msgid "Tag Featured Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:5
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:57
+msgid "Cookie Policy"
+msgstr ""
+
+#. translators: 1: files downloaded so far, 2: total files.
+#: new-dashboard/build/index.js:6
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:175
+#, js-format
+msgid "Downloading %1$d of %2$d files"
+msgstr ""
+
+#: new-dashboard/build/index.js:6
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:180
+msgid "Saving downloaded content"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: new-dashboard/build/index.js:7
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:185
+#, js-format
+msgid "Installing %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:7
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:188
+msgid "Installing required plugins"
+msgstr ""
+
+#: new-dashboard/build/index.js:7
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:190
+msgid "Applying global styles"
+msgstr ""
+
+#. translators: 1: templates imported so far, 2: total templates.
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:195
+#, js-format
+msgid "Importing templates (%1$d of %2$d)"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:199
+msgid "Importing templates"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:201
+msgid "Downloading images"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:203
+msgid "Checking which widgets are used"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:205
+msgid "Finishing up"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:225
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:653
+msgid "This step failed. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:266
+msgid "Installing Plugins & Theme"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:267
+msgid "Installed Plugins & Theme"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:274
+msgid "Importing Site Content"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:275
+msgid "Imported Site Content"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:282
+msgid "Setting Up Pages & Layout"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:283
+msgid "Imported Pages & Layout"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:290
+msgid "Finalizing Settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:291
+msgid "Settings Finalized"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:295
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1266
+msgid "Applying plugin settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:296
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1267
+msgid "Applying theme settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:342
+msgid "Adding the theme and required plugins"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:343
+msgid "Bringing in media, posts, menus and styles"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:344
+msgid "Building each page from your design"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:345
+msgid "Applying plugin and theme configuration"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:361
+msgid "Done"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:363
+msgid "In progress"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:364
+msgid "Waiting"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:480
+msgid "Hide technical details"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:481
+msgid "Show technical details"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:185
+msgid "Untitled Page"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:173
+#: new-dashboard/src/uichemy-webpage/lib/project-pages.js:219
+msgid "Pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:585
+msgid "Choose the pages and setup options you want to import."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:806
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1041
+msgid "Could not download this plugin."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:830
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1065
+msgid "Installation did not finish successfully."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:911
+msgid "Please select at least one page to import."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:935
+msgid "Failed to reset existing content. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1106
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1516
+msgid "Failed to start import. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1133
+msgid "Global Settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1135
+msgid "Plugin Settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1137
+msgid "Theme Settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:8
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1139
+msgid "Site Content"
+msgstr ""
+
+#. translators: %s: comma-separated page names.
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1223
+#, js-format
+msgid "These pages were downloaded but missing from the API page list, importing them anyway: %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1233
+msgid "Creating Blog Posts"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1235
+#, js-format
+msgid "Page %1$s"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1247
+msgid "Navbar (Header)"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1253
+msgid "Importing pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1261
+msgid "Enabling used widgets"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1262
+msgid "Enabling used blocks"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1268
+msgid "Applying Nexter settings"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1303
+msgid "Could not apply plugin settings. Check site permissions or try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1320
+msgid "Could not apply theme settings. Try again or apply them manually in the Customizer."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1346
+msgid "Could not apply Nexter settings. Try again or configure them manually."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1445
+msgid "Template skipped."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1553
+#, js-format
+msgid "%1$s saved"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1555
+msgid "Your website is ready and live"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1557
+msgid "Your design is imported. Pages, styles, and settings are in place. Review it live and keep building."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1564
+msgid "Back to Projects"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1567
+msgid "Visit Site"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1583
+msgid "Importing your design"
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1585
+msgid "Building your site, one step at a time."
+msgstr ""
+
+#: new-dashboard/build/index.js:9
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1620
+msgid "Select What to Import"
+msgstr ""
+
+#. translators: 1: selected count, 2: total pages
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1629
+#, js-format
+msgid "%1$d of %2$d Pages Selected"
+msgstr ""
+
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1638
+msgid "No pages found in this project."
+msgstr ""
+
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1649
+msgid "Page categories"
+msgstr ""
+
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1678
+msgid "Search pages…"
+msgstr ""
+
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1679
+msgid "Search pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:10
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1698
+msgid "No pages match your search."
+msgstr ""
+
+#. translators: %s: group label
+#: new-dashboard/build/index.js:11
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1723
+#, js-format
+msgid "Select all pages in %s"
+msgstr ""
+
+#. translators: 1: selected in group, 2: total in group
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1735
+#, js-format
+msgid "%1$d/%2$d pages"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1797
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1909
+msgid "Advanced Configurations"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1810
+msgid "Required Plugins"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1811
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1812
+msgid "Plugins that will be installed or verified before import."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1821
+msgid "No required plugins listed for this project."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1848
+msgid "For the best experience, the Nexter WP Theme is recommended. Feel free to skip it if you're already running a lightweight, bloat-free theme."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1860
+msgid "Reset Previous Content Before Import"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1861
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1862
+msgid "If enabled, your existing pages, posts, and Theme Builder content move to draft. Nothing is deleted. You can restore them anytime, or remove them manually later."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1887
+msgid "Reset my previous content before importing"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1889
+msgid "Your current content moves to draft, not deleted."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1896
+msgid "Your current content moves to draft, not deleted. On a live or active site, take a full backup before you continue. You can restore everything from drafts anytime."
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1910
+msgid "Coming Soon"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1923
+msgid "SEO"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1925
+msgid "Basic SEO setup"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1937
+msgid "Performance"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1939
+msgid "PageSpeed optimized"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1951
+msgid "Security"
+msgstr ""
+
+#: new-dashboard/build/index.js:12
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1953
+msgid "Basic protection"
+msgstr ""
+
+#. translators: %d: number of pages to import
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1995
+#, js-format
+msgid "Import %d page"
+msgid_plural "Import %d pages"
+msgstr[0] ""
+msgstr[1] ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/screens/ImportScreen.jsx:1998
+msgid "Import"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:309
+#: new-dashboard/src/uichemy-webpage/components/Modal.jsx:54
+msgid "Close"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/components/BuilderModal.jsx:69
+msgid "Choose Your Builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/components/BuilderModal.jsx:70
+msgid "Select the builder you want to import this website into."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/components/BuilderModal.jsx:77
+msgid "Next"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/components/BuilderModal.jsx:84
+msgid "Export builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:35
+#: new-dashboard/src/uichemy-webpage/index.jsx:37
+msgid "Recently"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:41
+msgid "days ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:44
+msgid "week ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:44
+msgid "weeks ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:48
+msgid "month ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:48
+msgid "months ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:51
+msgid "year ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:51
+msgid "years ago"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:144
+msgid "Could not load your projects."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:171
+msgid "Untitled Project"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/uichemy-webpage/index.jsx:232
+msgid "Loading your projects…"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:785
+#: new-dashboard/src/screens/dashboard/Import.jsx:40
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:46
+msgid "Your design converts into editable elements in the builder you pick."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Import.jsx:85
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:27
+msgid "Figma Plugin"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Import.jsx:86
+msgid "Design in Figma and send it straight to WordPress."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Import.jsx:112
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:29
+msgid "AI Agent (MCP)"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Import.jsx:113
+msgid "Build pages by chatting with Claude, Cursor, Codex and more."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Import.jsx:136
+msgid "The AI Agent (MCP) connection runs on Elementor. Select it below to connect Claude, Cursor or Codex."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:45
+#, js-format
+msgid "Howdy, %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:21
+msgid "there"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:48
+msgid "Pick how you want to bring your design into WordPress."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/Welcome.jsx:58
+msgid "Create with"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:22
+msgid "Branding"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:23
+msgid "Plugins screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:24
+msgid "Widget"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:25
+msgid "Advanced"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:41
+msgid "One widget for your website. Build pages, posts, templates and layouts with AI."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:76
+msgid "Deactivate"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:79
+msgid "Version"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:79
+msgid "By"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:80
+msgid "Visit plugin site"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:98
+msgid "Heading"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:99
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:291
+msgid "Image"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:110
+msgid "Your row on the Plugins screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:113
+msgid "How the widget appears in Elementor"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:116
+msgid "Your plugin in the WordPress admin menu"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:120
+msgid "Live preview"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:112
+msgid "Remove"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:137
+msgid "Choose post type"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:145
+msgid "Author"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:157
+msgid "Taxonomy"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:161
+msgid "Any term, search to narrow…"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:167
+msgid "Search page / post…"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:30
+msgid "Taxonomy archive"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:31
+msgid "Author archive"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:37
+msgid "All of a post type"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:38
+msgid "In a taxonomy term"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:39
+msgid "By author"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:40
+msgid "Specific page / post"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:362
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:368
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:369
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:246
+msgid "Display conditions"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:247
+#, js-format
+msgid "Choose where “%s” appears. Rules stack, an Exclude always wins."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:252
+msgid "Could not load the post types, taxonomies and authors to choose from, so only site-wide rules can be set right now. Reload and try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:349
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:264
+msgid "Include"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:349
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:265
+msgid "Exclude"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:273
+msgid "Remove condition"
+msgstr ""
+
+#: new-dashboard/build/index.js:13
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:276
+msgid "Add condition"
+msgstr ""
+
+#. translators: %s: comma-separated list of condition names.
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:222
+#, js-format
+msgid "Choose a value for: %s, or remove the rule. Nothing is saved until then."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:236
+msgid "Could not save the conditions. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderConditions.jsx:282
+msgid "Save Conditions"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:94
+msgid "Structural"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:95
+msgid "Singular"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:96
+msgid "Archives"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:97
+msgid "Special"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:198
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:321
+msgid "Missing"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:199
+msgid "Empty"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:200
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:319
+msgid "Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:216
+msgid "Create"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:223
+#, js-format
+msgid "Drag to move · %s templates are part of UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:225
+msgid "Drag to move · click to manage templates"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:226
+msgid "Drag to move · click to set up this slot"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:326
+#, js-format
+msgid "%1$d/%2$d active"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:528
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:327
+msgid "No templates yet"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:335
+#, js-format
+msgid "%s templates are a Pro feature"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:336
+msgid "Upgrade to design this part of your site with UiChemy, along with Archives, WooCommerce and Search templates."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:345
+msgid "No template here. Visitors get the active theme’s default."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:346
+msgid "No template assigned to this slot yet."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:487
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:349
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:384
+msgid "Creating…"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:349
+msgid "Create template"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:94
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:272
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:355
+msgid "(untitled)"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:384
+msgid "Add another template"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:411
+msgid "Failed to load the site map."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:574
+msgid "Loading site map…"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:611
+msgid "Your site"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:615
+#, js-format
+msgid "%d slots missing"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:615
+#, js-format
+msgid "%d slot missing"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:616
+msgid "All key slots filled"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:639
+#, js-format
+msgid "%d slots available in UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:639
+#, js-format
+msgid "%d slot available in UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:534
+msgid "Could not create the template."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:683
+msgid "Exit full screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:683
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:688
+msgid "Full screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:421
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:688
+msgid "Exit"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:692
+msgid "Zoom in"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:693
+msgid "Zoom out"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilderCanvas.jsx:694
+msgid "Fit to screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:47
+msgid "Single (Post / Page)"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:48
+msgid "Archive"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:49
+msgid "Single Product"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:50
+msgid "Products Archive"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:94
+#, js-format
+msgid "Preview, %s"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:104
+msgid "Open in a new tab"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:107
+msgid "Close preview"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:133
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:181
+msgid "Template preview"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:150
+msgid "Delete this template?"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:152
+msgid "This template"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:152
+msgid "will be permanently deleted. This can’t be undone. It does not go to Trash."
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:158
+msgid "Delete permanently"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:188
+msgid "No preview"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:276
+msgid "More actions"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:279
+msgid "Edit in Elementor"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:284
+msgid "Shortcode copied"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:284
+msgid "Copy shortcode"
+msgstr ""
+
+#: new-dashboard/build/index.js:14
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:290
+msgid "Preview"
+msgstr ""
+
+#. translators: %s: template title
+#: new-dashboard/build/index.js:15
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:312
+#, js-format
+msgid "Deactivate %s"
+msgstr ""
+
+#. translators: %d: number of display conditions in force.
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:342
+#, js-format
+msgid "%d display condition"
+msgid_plural "%d display conditions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:364
+msgid "Conditions"
+msgstr ""
+
+#: new-dashboard/build/index.js:16
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:15
+msgid "Not wired up yet."
+msgstr ""
+
+#. translators: %s: tab name.
+#: new-dashboard/build/index.js:18
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:17
+#, js-format
+msgid "%s is not connected yet"
+msgstr ""
+
+#: new-dashboard/build/index.js:18
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:18
+msgid "The builder is merged into UiChemy, but this particular screen still needs wiring into the dashboard."
+msgstr ""
+
+#: new-dashboard/build/index.js:18
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:21
+msgid "Not built yet."
+msgstr ""
+
+#. translators: %s: tab name.
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:23
+#, js-format
+msgid "%s is coming"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:24
+msgid "This screen is not available yet. It will appear here once it ships."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/Placeholder.jsx:31
+msgid "This screen"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/BuilderScreenHost.jsx:90
+msgid "This screen could not be loaded."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/BuilderScreenHost.jsx:93
+msgid "The builder screen is missing from this build. Rebuilding the dashboard usually fixes it."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:31
+msgid "Build headers, footers and archive templates once, and use them across the whole site."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:36
+msgid "Decide who on your team can edit what, down to individual builder controls."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:41
+msgid "Put your own name and logo on the builder before you hand a site to a client."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:45
+msgid "Custom CSS & JS"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:46
+msgid "Write your own CSS and JavaScript straight into any Composer widget."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:57
+msgid "Switch UiChemy Pro on for this site"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:59
+msgid "Download the UiChemy Pro package"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:60
+msgid "Install it on this site"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:61
+msgid "Switch it on, ready to use"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:71
+msgid "UiChemy Pro is active on this site."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:72
+msgid "Everything below is unlocked. Continue to the last step."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:80
+msgid "Add UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:83
+msgid "Pro is already on this site, it just needs switching on."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:84
+msgid "We will set it up for you as part of this step, no downloads to hunt for and no zip to upload."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:88
+msgid "Installed"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:107
+msgid "Press Activate below and it is ready. Nothing else on your site changes."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:108
+msgid "Press Install & Activate below and we handle all three. It usually takes a few seconds, and nothing you set up in the earlier steps changes."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:113
+msgid "The UiChemy Pro download is not set up in this build, so it cannot be installed from here yet. Continue for now, you can add Pro any time from the dashboard."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/wizard/ProScreen.jsx:140
+msgid "Everything you set up in the earlier steps works without Pro."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:25
+msgid "Convert Figma designs into WordPress"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:26
+msgid "Editable in Elementor, Gutenberg & Bricks"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:27
+msgid "Build & edit pages with AI"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:74
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:127
+msgid "Redirecting…"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:75
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:128
+msgid "Sign in with UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:78
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:131
+msgid "Secured by UiChemy · you stay in control"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:100
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:137
+msgid "No account yet?"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:101
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:138
+msgid "Get UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:114
+msgid "Connect this site to UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:116
+msgid "Sign in to link your UiChemy account. Every design you convert publishes here as a draft, ready to review and go live."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/auth/LoginScreen.jsx:145
+msgid "What you can do"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:761
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:34
+msgid "About you"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:762
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:35
+msgid "What best describes you?"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:763
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:36
+msgid "We’ll tailor the setup to how you work. You can change anything later."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:39
+msgid "How you’ll use it"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:807
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:40
+msgid "How will you use UiChemy?"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:808
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:41
+msgid "Most designers pick the Figma plugin. You can switch anytime."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:784
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:45
+msgid "Which builder do you build in?"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:49
+msgid "UiChemy Pro"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:50
+msgid "Want the Pro features too?"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:51
+msgid "Optional, and you can add it later. We’ll set it up for you if you want it now."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:833
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:55
+msgid "Connect your WordPress site"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:56
+msgid "Pair this site with UiChemy to start converting."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:59
+msgid "Sign in"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:60
+msgid "Sign in to UiChemy"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:61
+msgid "The AI Website Creator builds against your UiChemy account, so this is the last thing it needs."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:358
+#: new-dashboard/src/dashboard/use-builder-setup.js:74
+msgid "Activate & Continue"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:359
+#: new-dashboard/src/dashboard/use-builder-setup.js:75
+msgid "Update & Continue"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:224
+#: new-dashboard/src/App.jsx:406
+#: new-dashboard/src/dashboard/use-builder-setup.js:116
+msgid "Finishing activation in WP-Admin…"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:410
+#: new-dashboard/src/dashboard/use-builder-setup.js:120
+#, js-format
+msgid "Could not %s Elementor."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:440
+#: new-dashboard/src/dashboard/use-builder-setup.js:137
+msgid "Finishing UiChemy activation in WP-Admin…"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:447
+#: new-dashboard/src/dashboard/use-builder-setup.js:144
+msgid "Elementor and UiChemy are ready."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:450
+#: new-dashboard/src/dashboard/use-builder-setup.js:148
+msgid "Could not finish setup. Please try again."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:331
+msgid "Skip for now"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:341
+msgid "This option"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:411
+#, js-format
+msgid "%s isn’t available for this builder. Pick one it supports."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:751
+#: new-dashboard/src/screens/dashboard/SetupFlow.jsx:424
+msgid "Get Started"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:144
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:175
+msgid "Rebrand UiChemy everywhere it shows."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:147
+msgid "White Label settings are locked"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:148
+msgid "Force Disable is on, so these options are hidden from all administrators. To unlock them, deactivate and reactivate the plugin."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:181
+msgid "Enable white label"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:182
+msgid "Apply the branding below across the admin, Plugins screen and Elementor."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:206
+msgid "Plugin / brand name"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:206
+msgid "Shown in place of “UiChemy” in the menu and dashboard."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:207
+msgid "e.g. Studio Builder"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:209
+msgid "Brand logo"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:209
+msgid "Replaces the composer mark. Square PNG/SVG works best."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:156
+msgid "Select brand logo"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:156
+msgid "Use this logo"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:212
+msgid "Upload"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:213
+msgid "Clear"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:216
+msgid "Author / agency name"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:217
+msgid "e.g. Your Agency"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:219
+msgid "Author URL"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:227
+msgid "Plugin description"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:227
+msgid "The text under the plugin on the Plugins list."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:228
+msgid "One widget for your website…"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:230
+msgid "Plugin site URL"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:230
+msgid "The “Visit plugin site” link."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:233
+msgid "Hide from other admins"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:233
+msgid "Only show the menu to the current administrator."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:239
+msgid "Widget name"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:239
+msgid "Label in the Elementor Elements panel and the “Edit …” header."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:242
+msgid "Widget category"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:242
+msgid "Category heading in the Elementor Elements panel."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:245
+msgid "Widget icon"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:245
+msgid "Pick from the WordPress Dashicons library, or keep the default."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:248
+msgid "Search icons…"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:249
+msgid "Default"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:275
+msgid "Hide all help links"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:275
+msgid "Hide every link (except the brand name) from the plugin’s row on the Plugins page."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:276
+msgid "Hide plugin update news"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:276
+msgid "Hide future news and update banners shown by the plugin."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:277
+msgid "Hide recommended-plugin ads"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:277
+msgid "Hide the “recommended plugins” promotions shown by the plugin."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:278
+msgid "Enable Force Disable"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:278
+msgid "Remove the White Label page entirely so clients can’t change these. To restore it, deactivate and reactivate the plugin, then save again."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:291
+msgid "Saved"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/WhiteLabel.jsx:291
+msgid "Save changes"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:390
+msgid "Failed to load templates."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:448
+msgid "Grid"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:449
+msgid "Canvas"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:463
+msgid "Build and manage your site’s templates with UiChemy."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:471
+msgid "Heads up:"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:471
+msgid "your active theme doesn’t expose header/footer locations, so Header and Footer templates may not appear on the front end. Single and 404 templates work on any theme."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:476
+msgid "Another theme builder is active"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:476
+msgid "Avoid activating a UiChemy header/footer at the same time to prevent a duplicate."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:416
+msgid "Could not create template."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:504
+#, js-format
+msgid "Unlock %s templates"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:505
+#, js-format
+msgid "%s templates are part of UiChemy Pro, upgrade to design and use them on your site."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:512
+msgid "Renders only when WooCommerce is active. You can design it now."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:528
+#, js-format
+msgid "No %s templates yet"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:529
+#, js-format
+msgid "Use Add New above to create your first %s."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/screens/dashboard/ThemeBuilder.jsx:529
+msgid "template"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:223
+msgid "Could not activate Elementor."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:225
+msgid "Elementor installed and activated successfully."
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:285
+#: new-dashboard/src/App.jsx:289
+msgid "Elementor"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:286
+msgid "Bricks"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:287
+msgid "Gutenberg"
+msgstr ""
+
+#: new-dashboard/build/index.js:20
+#: new-dashboard/src/App.jsx:635
+msgid "UiChemy powers the Composer widget, which turns your prototype into fully editable Elementor sections. Its MCP server lets AI tools like Claude, Cursor and Codex convert Figma designs and build whole pages on your site. Activate it to get started."
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:683
+msgid "Continue setup"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:710
+msgid "Re-run checks"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:818
+#: new-dashboard/src/App.jsx:839
+msgid "Open Dashboard"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:833
+msgid "Connect your AI agent"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:835
+msgid "Copy your Connection Link and paste it into the UiChemy plugin in Figma."
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/App.jsx:836
+msgid "Drop this config into Claude, Cursor or Codex to start converting."
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/screens/dashboard/TBConditionLauncher.jsx:58
+msgid "Conditions saved"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/screens/dashboard/TBConditionLauncher.jsx:58
+msgid "Edit Condition"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/components/ErrorBoundary.jsx:33
+msgid "Something went wrong in the dashboard"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/components/ErrorBoundary.jsx:34
+msgid "Unknown error"
+msgstr ""
+
+#: new-dashboard/build/index.js:22
+#: new-dashboard/src/components/ErrorBoundary.jsx:36
+msgid "Reload"
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:215
+msgid "Could not generate Application Password."
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:264
+msgid "Generate"
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:268
+msgid "Open Cursor and install the server"
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:286
+msgid "Copy & paste this command into your terminal to automatically add the Claude Desktop MCP. Needs Node.js 18+."
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:313
+msgid "Generate an Application Password to reveal and copy the real config."
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:315
+msgid "Paste this prompt into Claude Desktop, Cursor, Codex or Antigravity. The AI will add the config for you."
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:317
+msgid "Or click"
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:317
+msgid "paste in your terminal, and restart Claude Desktop."
+msgstr ""
+
+#: new-dashboard/src/components/MCPConfigTabs.jsx:319
+msgid "Then restart the client."
+msgstr ""
+
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:98
+msgid "All Page Builder"
+msgstr ""
+
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:106
+#, js-format
+msgid "%s session"
+msgid_plural "%s sessions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:107
+msgid "Connect this site to your UiChemy license."
+msgstr ""
+
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:120
+msgid "No usable licenses were found on your account."
+msgstr ""
+
+#: new-dashboard/src/screens/auth/LicensePickerScreen.jsx:124
+msgid "Get a license"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/DashboardApp.jsx:98
+msgid "Back to Home"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:318
+msgid "Read Docs"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:318
+msgid "Guides & how-tos"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:319
+msgid "Watch Videos"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:319
+msgid "Watch & learn"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:320
+msgid "Discord Channel"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:320
+msgid "Chat and get help"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:321
+msgid "Facebook Community"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:338
+msgid "Resources"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:346
+msgid "AI tokens"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:347
+msgid "tokens"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:348
+msgid "You start with 0 tokens. Get yours to begin converting."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:350
+msgid "Get more"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:365
+msgid "AI clients (MCP)"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:365
+msgid "Generate your Application Password, then pick your AI client below. Copy the snippet into its config, or paste the Prompt tab into any AI to add it for you."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:376
+msgid "Can I switch builder or mode later?"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:376
+msgid "Yes, anytime from this dashboard. Your Application Password stays the same."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:377
+msgid "Is my Application Password safe to share?"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:377
+msgid "Keep it private. Anyone with it can connect to this site. You can rotate it whenever you like."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:378
+msgid "My site is local. Can I still use UiChemy?"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:378
+msgid "Direct send needs a public URL, but you can use JSON export to move designs from a local site."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:393
+msgid "Frequently asked"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:428
+msgid "Could not update UiChemy. Please try again."
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:440
+msgid "UiChemy update available"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:441
+#, js-format
+msgid "Beta v%s"
+msgstr ""
+
+#: new-dashboard/src/screens/dashboard/panels.jsx:444
+msgid "A newer beta version of UiChemy is ready with the latest Composer widget."
+msgstr ""
+
+#: new-dashboard/src/uichemy-webpage/index.jsx:84
+msgid "Account options"
+msgstr ""
+
+#: new-dashboard/src/uichemy-webpage/index.jsx:92
+msgid "Connected as"
+msgstr ""
+
+#: new-dashboard/src/uichemy-webpage/index.jsx:93
+msgid "Account connected"
+msgstr ""
+
+#: new-dashboard/src/uichemy-webpage/index.jsx:101
+msgid "Disconnecting…"
+msgstr ""
+
+#: new-dashboard/src/uichemy-webpage/index.jsx:101
+msgid "Disconnect"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:243
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:299
+msgid "Insert dynamic value"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:271
+msgid "Replace"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:271
+msgid "Select image"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:376
+msgid "Content"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:761
+msgid "Edit Layers"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:771
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:831
+msgid "Edit with AI"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:877
+msgid "Describe a change and let AI build it, or drop in your own HTML, CSS and JS."
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/index.js:882
+msgid "Render and edit Figma-generated HTML/CSS/JS with editable slots."
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block title"
+msgid "Composer"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block description"
+msgid "Render and edit Figma-generated HTML/CSS/JS with editable text, link, image and SVG slots."
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block keyword"
+msgid "uichemy"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block keyword"
+msgid "composer"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block keyword"
+msgid "html"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block keyword"
+msgid "figma"
+msgstr ""
+
+#: uichemy-composer/assets/blocks/uichemy-composer/block.json
+msgctxt "block keyword"
+msgid "code"
+msgstr ""

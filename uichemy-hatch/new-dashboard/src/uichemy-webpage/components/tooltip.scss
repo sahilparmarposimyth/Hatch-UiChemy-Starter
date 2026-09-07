@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Tooltip (Figma node 3460:20227)
+   Dark bubble + white label + caret. Shows on hover / focus-within.
+   ========================================================================== */
+
+.uich-wpc-tooltip {
+  position: relative;
+  display: inline-flex;
+
+  &__bubble {
+    position: absolute;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    max-width: 240px;
+    padding: var(--uich-wpc-space-6) var(--uich-wpc-space-8);
+    box-sizing: border-box;
+    background: var(--uich-wpc-color-background-dark);
+    border-radius: var(--uich-wpc-radius-8);
+    color: var(--uich-wpc-color-text-white);
+    font-family: var(--uich-wpc-font-family);
+    font-size: var(--uich-wpc-font-size-label);
+    line-height: var(--uich-wpc-line-height-label);
+    font-weight: var(--uich-wpc-font-weight-medium);
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  &:hover &__bubble,
+  &:focus-within &__bubble {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Caret, a small triangle made with borders, in the bubble colour */
+  &__arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-color: transparent;
+  }
+
+  /* ---- Placement: top (bubble above trigger, caret points down) ---- */
+  &--top &__bubble {
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &--top &__arrow {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px 6px 0 6px;
+    border-top-color: var(--uich-wpc-color-background-dark);
+  }
+
+  /* ---- Placement: bottom (bubble below, caret points up) ---- */
+  &--bottom &__bubble {
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &--bottom &__arrow {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 6px 5px 6px;
+    border-bottom-color: var(--uich-wpc-color-background-dark);
+  }
+
+  /* ---- Placement: left (bubble to the left, caret points right) ---- */
+  &--left &__bubble {
+    right: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &--left &__arrow {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 5px;
+    border-left-color: var(--uich-wpc-color-background-dark);
+  }
+
+  /* ---- Placement: right (bubble to the right, caret points left) ---- */
+  &--right &__bubble {
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  &--right &__arrow {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px 5px 6px 0;
+    border-right-color: var(--uich-wpc-color-background-dark);
+  }
+}

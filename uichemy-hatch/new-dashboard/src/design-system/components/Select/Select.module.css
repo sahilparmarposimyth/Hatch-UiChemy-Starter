@@ -1,0 +1,86 @@
+/* Select, Radix behavior, uc- token look. */
+.trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--uc-space-8);
+  height: var(--uc-control-h-md);
+  min-width: 180px;
+  padding: 0 var(--uc-space-12);
+  font-size: var(--uc-text-base);
+  color: var(--uc-text-strong);
+  background: var(--uc-surface-control);
+  background-image: var(--uc-sheen);
+  border-radius: var(--uc-radius-md);
+  box-shadow: inset 0 0 0 1px var(--uc-border-subtle), var(--uc-shadow-raised);
+  cursor: pointer;
+  transition: box-shadow var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.trigger:hover:not(:focus-visible):not([data-state="open"]) { box-shadow: inset 0 0 0 1px var(--uc-text-subtle), var(--uc-shadow-raised); }
+/* Focus / open = OFFSET brand ring (matches the Input): subtle border kept,
+   then a 2px transparent gap, then the brand outline outside the trigger. */
+.trigger:focus-visible,
+.trigger[data-state="open"] {
+  box-shadow: inset 0 0 0 1px var(--uc-border-subtle), var(--uc-shadow-raised);
+  outline: 2px solid var(--uc-brand);
+  outline-offset: 2px;
+}
+.trigger[data-placeholder] { color: var(--uc-text-subtle); }
+.trigger:disabled { opacity: 0.5; cursor: not-allowed; }
+.chevron { color: var(--uc-text-muted); flex: none; }
+
+/* trigger sizes (md is the base above) */
+.sm { height: var(--uc-control-h-sm); font-size: var(--uc-text-sm); padding: 0 var(--uc-space-8); }
+.lg { height: var(--uc-control-h-lg); font-size: var(--uc-text-md); padding: 0 var(--uc-space-16); }
+
+.content {
+  min-width: var(--radix-select-trigger-width);
+  background: var(--uc-surface-overlay);
+  border-radius: var(--uc-radius-md);
+  box-shadow: var(--uc-shadow-4);
+  padding: var(--uc-space-4);
+  z-index: var(--uc-z-dropdown);
+  overflow: hidden;
+  animation: uc-select-in var(--uc-dur-enter) var(--uc-ease-emphasized);
+}
+.viewport { position: relative; }
+.highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: var(--uc-radius-sm);
+  background: var(--uc-surface-control);
+  /* transform is animated via the Web Animations API (see useSlidingHighlight);
+     only width/height use a CSS transition. */
+  transition: width var(--uc-dur-base) var(--uc-ease-emphasized),
+    height var(--uc-dur-base) var(--uc-ease-emphasized);
+  pointer-events: none;
+  z-index: 0;
+}
+.item {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--uc-control-h-md);
+  padding: 0 var(--uc-space-32) 0 var(--uc-space-12);
+  border-radius: var(--uc-radius-sm);
+  font-size: var(--uc-text-base);
+  color: var(--uc-text);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+}
+.itemSm { height: var(--uc-control-h-sm); font-size: var(--uc-text-sm); }
+.itemLg { height: var(--uc-control-h-lg); font-size: var(--uc-text-md); }
+.item[data-highlighted] { color: var(--uc-text-strong); }
+.item[data-disabled] { color: var(--uc-text-subtle); pointer-events: none; }
+.indicator { position: absolute; right: var(--uc-space-12); display: inline-flex; color: var(--uc-text-strong); }
+
+@keyframes uc-select-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

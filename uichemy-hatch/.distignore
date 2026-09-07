@@ -1,0 +1,80 @@
+# ============================================================
+# .distignore — files/folders EXCLUDED from the distributed
+# WordPress.org plugin package. Keep them locally for dev;
+# they are stripped when building the release zip.
+# (Used by `wp dist-archive` and similar packaging tools.)
+# ============================================================
+
+# Version control & project meta
+/.git
+/.github
+/.gitignore
+/.gitattributes
+/.editorconfig
+/.distignore
+
+# AI / IDE / local tooling
+/.claude
+/.vscode
+/.idea
+/.sandbox
+/.mcp.json
+/skills-lock.json
+
+# Build scripts (not needed at runtime; documented in Source-Readme.txt)
+/scripts
+*.sh
+
+# Dev composer toolchain — runtime uses vendor-prefixed/, NOT vendor/.
+# composer.json / composer.lock are KEPT so the prefixed dependency is documented for review.
+/vendor
+
+# Node / front-end source — NOT shipped (only the compiled new-dashboard/build/ ships).
+/node_modules
+/new-dashboard/node_modules
+/new-dashboard/src
+/new-dashboard/tools
+/new-dashboard/build-harness
+/new-dashboard/package.json
+/new-dashboard/package-lock.json
+/new-dashboard/webpack.config.js
+/new-dashboard/babel.config.js
+/new-dashboard/tailwind.config.js
+/new-dashboard/postcss.config.js
+/new-dashboard/.babelrc
+/new-dashboard/README.md
+# Dev-only preview/check harness pages at the new-dashboard root.
+/new-dashboard/*.html
+/new-dashboard/find-grey.js
+/new-dashboard/find-overlap.js
+
+# ── Merged Hatch runtime (hatch/) ────────────────────────────────────────────
+# Same rule as new-dashboard above: the COMPILED admin bundle (hatch/build/)
+# ships, the React source and the toolchain that produced it do not.
+#
+# NOT excluded, despite looking like source — both are read from disk at
+# RUNTIME and a zip without them is broken in ways activation does not reveal:
+#   /hatch/blocks-src  hatch.php registers blocks from the block.json metadata
+#                      under blocks-src/blocks/ (see hatch.php:733).
+#   /hatch/agent       class-frontend-installer-route.php serves agent.js and
+#                      install-template.sh to the VPS installer.
+/hatch/node_modules
+/hatch/admin-react
+/hatch/docs
+/hatch/package.json
+/hatch/package-lock.json
+/hatch/tailwind.config.js
+/hatch/wizard-screenshots.mjs
+/hatch/.gitignore
+# Hatch's own plugin-level meta. It is not the plugin any more — this one is —
+# so a second readme/changelog in a subdirectory only confuses a reviewer.
+/hatch/readme.txt
+/hatch/CHANGELOG.md
+/hatch/design.md
+
+# OS / logs / misc
+.DS_Store
+Thumbs.db
+*.log
+*.map
+/*.md

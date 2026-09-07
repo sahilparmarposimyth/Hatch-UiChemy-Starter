@@ -1,0 +1,158 @@
+/* Project card (Figma node 1097:30072) */
+.uich-wpc-project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--uich-wpc-space-12);
+  width: 100%;
+  padding: var(--uich-wpc-space-6);
+  margin: 0;
+  box-sizing: border-box;
+  background: var(--uich-wpc-color-background-weaker);   /* white DS surface */
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-12);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--uich-wpc-font-family);
+  appearance: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  /* Flat at rest (DS idiom); hover firms the hairline + a whisper of lift. */
+  &:hover {
+    border-color: var(--uich-wpc-color-border-default);
+    box-shadow: var(--uich-wpc-elevation-sm);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--uich-wpc-color-primary);
+    box-shadow: 0 0 0 3px var(--uich-wpc-color-secondary-lightest);
+  }
+
+  /* Website-preview thumbnail */
+  &__thumb {
+    width: 100%;
+    aspect-ratio: 243 / 160;
+    border-radius: var(--uich-wpc-radius-8);
+    overflow: hidden;
+    background: var(--uich-wpc-color-background-stronger, #f1f1f7);
+  }
+
+  &__preview {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: top center;
+    pointer-events: none;
+  }
+
+  /* Shown when a project has no thumbnail from the API. Replaces the sample
+     preview image the standalone plugin bundled, so no binary asset has to be
+     copied into this plugin just for an empty state. */
+  &__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(
+        135deg,
+        var(--uich-wpc-color-background-stronger, #f1f1f7) 0%,
+        var(--uich-wpc-color-secondary-lightest, #f0f0f0) 100%
+      );
+  }
+
+  /* Title + meta */
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uich-wpc-space-6);
+    padding: 0 var(--uich-wpc-space-8) var(--uich-wpc-space-8);
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--uich-wpc-space-8);
+  }
+
+  &__name {
+    min-width: 0;
+    font-size: var(--uich-wpc-font-size-caption);
+    line-height: var(--uich-wpc-line-height-caption);
+    font-weight: var(--uich-wpc-font-weight-medium);
+    color: var(--uich-wpc-color-text-default);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--uich-wpc-space-6);
+  }
+
+  &__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--uich-wpc-space-4);
+    font-size: var(--uich-wpc-font-size-label);
+    line-height: var(--uich-wpc-line-height-label);
+    font-weight: var(--uich-wpc-font-weight-regular);
+    color: var(--uich-wpc-color-text-weaker);
+    white-space: nowrap;
+
+    /* Icons are inline SVG stroked with currentColor, so they take this row's
+       muted text colour directly, no opacity fudge or dark-mode invert needed
+       (the standalone plugin loaded them as <img> and had to do both). */
+    svg {
+      display: block;
+      flex-shrink: 0;
+    }
+  }
+
+  &__dot {
+    flex-shrink: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--uich-wpc-color-background-strongest, #e3e3ed);
+  }
+
+  /* Loading state when a project is being selected */
+  &.is-loading {
+    cursor: default;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: var(--uich-wpc-radius-12);
+      pointer-events: none;
+    }
+  }
+
+  &__spinner {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    margin: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid rgba(23, 23, 23, 0.2);
+    border-top-color: var(--uich-wpc-color-secondary);
+    animation: uich-wpc-project-card-spin 0.7s linear infinite;
+    background: transparent;
+  }
+}
+
+@keyframes uich-wpc-project-card-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

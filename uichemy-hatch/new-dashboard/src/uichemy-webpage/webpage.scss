@@ -1,0 +1,113 @@
+/* ==========================================================================
+   AI Website Creator, stylesheet entry.
+
+   Imported once from index.jsx so the cascade order is explicit: tokens first,
+   then primitives, then screens. Everything is scoped under `.uich-wpc`, so
+   none of it reaches the dashboard around it or WP-Admin.
+   ========================================================================== */
+
+@import './styles/tokens.scss';
+
+/* Primitives */
+@import './components/button.scss';
+@import './components/input.scss';
+@import './components/radio.scss';
+@import './components/tooltip.scss';
+@import './components/modal.scss';
+@import './components/project-card.scss';
+@import './components/builder-modal.scss';
+@import './components/feedback.scss';
+
+/* Screens */
+@import './screens/login.scss';
+@import './screens/projects.scss';
+@import './screens/import.scss';
+
+/* --------------------------------------------------------------------------
+   Chrome the flow supplies for itself.
+
+   The standalone plugin got these from a full-page black shell (AppShell) with
+   its own top bar and user menu. Inside the Import tab there is no such shell –
+   the dashboard already owns the page frame, so what is left is the account
+   strip and the shared loading/error state.
+   -------------------------------------------------------------------------- */
+
+.uich-wpc {
+  /* Sits in normal document flow inside the Import tab's content area. */
+  width: 100%;
+  color: var(--uich-wpc-color-text-default, #0a0a0a);
+}
+
+.uich-wpc-account {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--uich-wpc-space-12, 12px);
+  /* No horizontal padding, inside `.uich-wpc--grouped` the grey group supplies
+     the inset, so the account row aligns with the search + card grid. */
+  padding: 0 0 var(--uich-wpc-space-12, 12px);
+
+  /* ⋯ overflow trigger, a white icon-box button (matches the DS search field's
+     border), firming on hover / when the menu is open. */
+  &__more {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: var(--uich-wpc-color-background-weaker);
+    border: 1px solid var(--uich-wpc-color-border-default);
+    border-radius: var(--uich-wpc-radius-8, 8px);
+    color: var(--uich-wpc-color-text-weaker, #737373);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:hover,
+    &[data-state='open'] {
+      border-color: var(--uich-wpc-color-secondary);
+      color: var(--uich-wpc-color-text-default);
+    }
+
+    svg { display: block; }
+  }
+}
+
+.uich-wpc-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uich-wpc-space-12, 12px);
+  min-height: 320px;
+  padding: var(--uich-wpc-space-32, 32px);
+  text-align: center;
+
+  &__text {
+    margin: 0;
+    font-size: var(--uich-wpc-font-size-caption, 14px);
+    line-height: var(--uich-wpc-line-height-caption, 20px);
+    color: var(--uich-wpc-color-text-weaker, #737373);
+  }
+
+  &__error {
+    margin: 0;
+    font-size: var(--uich-wpc-font-size-caption, 14px);
+    line-height: var(--uich-wpc-line-height-caption, 20px);
+    color: var(--uich-wpc-color-error-darker, #d12d37);
+  }
+}
+
+/* Empty states inside the import picker (no pages in project / no search hit).
+   The only rule kept from the standalone plugin's dashboard stylesheet, the
+   rest of that file styled a loading/error state belonging to its full-page
+   shell, which `.uich-wpc-state` above replaces. */
+.uich-wpc-dashboard-empty {
+  margin: 0;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--uich-wpc-text-muted, #737373);
+}

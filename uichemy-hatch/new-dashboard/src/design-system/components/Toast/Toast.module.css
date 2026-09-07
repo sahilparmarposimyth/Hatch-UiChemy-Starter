@@ -1,0 +1,121 @@
+/* Toast, rebuilt on uc- tokens. ONE card — border, shadow and rounded corners
+   live on the outer `.tray` only, `overflow: hidden` so the footer's own
+   background is clipped to the same radius — with an internal divider line
+   separating the icon/title/description row from the optional live
+   "closes in N sec" countdown footer. Built on Sonner (see Toast.tsx). */
+
+.tray {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden; /* clips .footer's background to the shared radius */
+  border-radius: var(--uc-radius-xl);
+  border: 1px solid var(--uc-border-subtle);
+  background: var(--uc-surface-raised);
+  box-shadow: var(--uc-shadow-4);
+}
+
+.card {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: var(--uc-space-12);
+  padding: var(--uc-space-16);
+}
+.main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  gap: var(--uc-space-12);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  /* The icon (24px) is taller than the title's line box (20px); top-aligning
+     both leaves the icon sitting ~2px low against the title's optical
+     center. Nudge up to match. */
+  margin-top: -2px;
+}
+.icon svg { width: 24px; height: 24px; display: block; }
+.iconSuccess { color: var(--uc-success); }
+.iconDanger { color: var(--uc-danger); }
+.iconInfo,
+.iconLoading { color: var(--uc-text-strong); }
+.spin { animation: uc-toast-spin 0.6s linear infinite; }
+
+.text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--uc-space-4);
+}
+.title {
+  margin: 0; /* <p> — kill the default block margin, or it stacks on .text's gap */
+  font-size: var(--uc-text-base);
+  line-height: 20px;
+  font-weight: var(--uc-weight-medium);
+  color: var(--uc-text-strong);
+  word-break: break-word;
+}
+.desc {
+  margin: 0; /* <p> — same */
+  font-size: var(--uc-text-base);
+  line-height: 20px;
+  color: var(--uc-text-muted);
+  word-break: break-word;
+}
+
+.close {
+  flex-shrink: 0;
+  align-self: flex-start;
+  border-radius: var(--uc-radius-sm);
+  border: 1px solid var(--uc-border-subtle);
+  background: var(--uc-surface-raised);
+  padding: 3px var(--uc-space-8);
+  font-size: var(--uc-text-xs);
+  line-height: 16px;
+  color: var(--uc-text-strong);
+  cursor: pointer;
+  box-shadow: var(--uc-shadow-raised);
+  transition:
+    background var(--uc-dur-fast) var(--uc-ease-standard),
+    box-shadow var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.close:hover { background: var(--uc-surface-sunken); }
+.close:active { box-shadow: var(--uc-shadow-1); }
+.close:focus-visible { outline: 2px solid var(--uc-ring); outline-offset: 2px; }
+
+.footer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--uc-space-8) var(--uc-space-16);
+  border-top: 1px solid var(--uc-border-subtle);
+  background: var(--uc-surface-sunken);
+}
+.countdown {
+  margin: 0; /* <p> — same default-margin fix as .title/.desc */
+  font-size: var(--uc-text-sm);
+  line-height: 16px;
+  color: var(--uc-text-muted);
+  text-align: left;
+}
+/* Emphasis, not alarm — danger-red on a routine countdown read as an error
+   on an otherwise-successful toast. */
+.countSec { color: var(--uc-text-strong); font-weight: var(--uc-weight-medium); }
+
+/* Sonner container: our card owns the look, we only set its width. */
+.sonnerToast {
+  width: 426px;
+  max-width: calc(100vw - var(--uc-space-32));
+}
+
+@keyframes uc-toast-spin { to { transform: rotate(360deg); } }

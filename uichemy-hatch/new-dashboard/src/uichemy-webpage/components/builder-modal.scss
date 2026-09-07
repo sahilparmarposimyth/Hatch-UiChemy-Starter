@@ -1,0 +1,61 @@
+/* Choose Your Builder modal (Figma node 1114:32917), content only.
+   The popup shell (dialog / panel / header / footer) lives in Modal.scss. */
+.uich-wpc-builder-modal__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uich-wpc-builder-modal__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  background: var(--uich-wpc-color-background-weaker);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  border-radius: var(--uich-wpc-radius-8);
+  cursor: pointer;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+
+  &:hover {
+    border-color: var(--uich-wpc-color-border-default);
+  }
+
+  &.is-selected {
+    border-color: var(--uich-wpc-color-border-default);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--uich-wpc-color-border-default);
+    box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring);
+  }
+
+  /* The radio mirrors the row state and is not separately focusable. */
+  .uich-wpc-radio {
+    pointer-events: none;
+  }
+}
+
+.uich-wpc-builder-modal__option-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uich-wpc-builder-modal__badge {
+  display: block;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.uich-wpc-builder-modal__option-label {
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-default);
+}

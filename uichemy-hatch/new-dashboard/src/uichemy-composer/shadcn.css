@@ -1,0 +1,14 @@
+/*
+ * Tailwind entry for the COMPOSER bundle.
+ *
+ * Preflight (`@tailwind base`) is kept here on purpose: the composer panel owns
+ * its own host, a floating shell and, in Elementor, a preview iframe, so a
+ * global reset inside that document is wanted.
+ *
+ * The design tokens moved to shadcn-tokens.css so the dashboard bundle can load
+ * them without preflight (see admin-island.css). Import order matters: tokens
+ * are unlayered and must come after the directives.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

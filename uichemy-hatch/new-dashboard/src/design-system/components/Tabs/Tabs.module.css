@@ -1,0 +1,102 @@
+/* Tabs, Radix behavior, uc- token look. Two variants: pill and underline.
+   The active marker is a single sliding indicator that animates between tabs. */
+.root { display: flex; flex-direction: column; gap: var(--uc-space-16); }
+
+/* ---- pill (segmented) ----------------------------------------------------- */
+.listPill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--uc-tab-track-pad, 3px);
+  background: var(--uc-tab-track-bg, var(--uc-surface-sunken));
+  border-radius: var(--uc-tab-track-radius, var(--uc-radius-md));
+  box-shadow: var(--uc-tab-track-stroke, inset 0 0 0 1px var(--uc-border-subtle));
+  width: max-content;
+}
+.indicatorPill {
+  position: absolute;
+  top: var(--uc-tab-track-pad, 3px);
+  bottom: var(--uc-tab-track-pad, 3px);
+  left: 0;
+  width: 0;
+  opacity: 0;
+  border-radius: var(--uc-tab-radius, var(--uc-radius-sm));
+  background: var(--uc-surface-raised);
+  background-image: var(--uc-sheen);
+  box-shadow: var(--uc-shadow-control);
+  transition: transform var(--uc-dur-base) var(--uc-ease-emphasized),
+    width var(--uc-dur-base) var(--uc-ease-emphasized);
+  z-index: 0;
+  pointer-events: none;
+}
+.triggerPill {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  height: var(--uc-tab-h, 26px);
+  padding: 0 var(--uc-tab-px, var(--uc-space-12));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uc-space-8);
+  font-size: var(--uc-text-base);
+  font-weight: var(--uc-weight-medium);
+  color: var(--uc-text-muted);
+  border-radius: var(--uc-tab-radius, var(--uc-radius-sm));
+  cursor: pointer;
+  transition: color var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.triggerPill:hover { color: var(--uc-text-strong); }
+.triggerPill[data-state="active"] { color: var(--uc-text-strong); }
+.triggerPill:focus-visible { outline: 2px solid var(--uc-ring); outline-offset: 2px; }
+.triggerPill:disabled { opacity: 0.5; cursor: not-allowed; }
+.triggerPillSm { height: 22px; padding: 0 var(--uc-space-8); font-size: var(--uc-text-sm); }
+.triggerPillLg { height: 32px; padding: 0 var(--uc-space-16); font-size: var(--uc-text-md); }
+/* icon-only pill trigger, square (width tracks the size's height via
+   aspect-ratio), no side padding, glyph centered. Pairs with `iconOnly` on
+   TabsTrigger for segmented icon toggles (e.g. a light/dark switch). */
+.triggerPillIcon { padding: 0; gap: 0; aspect-ratio: 1; justify-content: center; }
+
+/* ---- underline ------------------------------------------------------------ */
+.listLine {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uc-space-20);
+  border-bottom: 1px solid var(--uc-border);
+}
+.indicatorLine {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  opacity: 0;
+  border-radius: 2px;
+  background: var(--uc-text-strong); /* neutral underline, tab indicators aren't CTAs */
+  transition: transform var(--uc-dur-base) var(--uc-ease-emphasized),
+    width var(--uc-dur-base) var(--uc-ease-emphasized);
+  pointer-events: none;
+}
+.triggerLine {
+  all: unset;
+  box-sizing: border-box;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--uc-space-8);
+  font-size: var(--uc-text-base);
+  font-weight: var(--uc-weight-medium);
+  color: var(--uc-text-muted);
+  cursor: pointer;
+  transition: color var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.triggerLine:hover { color: var(--uc-text-strong); }
+.triggerLine[data-state="active"] { color: var(--uc-brand-fg); }
+.triggerLine:focus-visible { outline: 2px solid var(--uc-ring); outline-offset: 2px; }
+.triggerLine:disabled { opacity: 0.5; cursor: not-allowed; }
+.triggerLineSm { height: 30px; font-size: var(--uc-text-sm); }
+.triggerLineLg { height: 40px; font-size: var(--uc-text-md); }
+
+.content:focus-visible { outline: none; }

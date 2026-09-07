@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Input / text field (Figma node 1087:17713)
+   States: Empty / Placeholder / Value / Focus / Error / Error Focus / Disabled
+   Sizes:  Regular (36) / Large (40) / Small (32) / Mini (24)
+   ========================================================================== */
+
+.uich-wpc-input {
+  display: flex;
+  align-items: center;
+  gap: var(--uich-wpc-space-8);
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--uich-wpc-color-background-weaker);
+  border: 1px solid var(--uich-wpc-color-border-weak);
+  box-shadow: var(--uich-wpc-elevation-xs);
+  font-family: var(--uich-wpc-font-family);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  /* ---- Sizes ---- */
+  &--regular {
+    min-height: 36px;
+    padding: 6.5px var(--uich-wpc-space-12);
+    border-radius: var(--uich-wpc-radius-6);
+  }
+  &--large {
+    min-height: 40px;
+    padding: 9.5px var(--uich-wpc-space-16);
+    border-radius: var(--uich-wpc-radius-6);
+  }
+  &--small {
+    min-height: 32px;
+    padding: 5.5px var(--uich-wpc-space-8);
+    border-radius: var(--uich-wpc-radius-8);
+  }
+  &--mini {
+    min-height: 24px;
+    padding: 3px var(--uich-wpc-space-6);
+    border-radius: var(--uich-wpc-radius-4);
+    gap: var(--uich-wpc-space-4);
+  }
+
+  /* ---- Field ----
+     Selector is `.uich-wpc-input .uich-wpc-input__field` (two classes) on
+     purpose, so it OVERRIDES WordPress admin's forms.css `input[type=text]`
+     rules, which otherwise force min-height:40px, padding, border, background
+     and a focus box-shadow onto the field and break the design. */
+  & &__field {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    /* !important defends against wp-admin's global input rules
+       (forms.css + .wp-core-ui / body.wp-admin selectors) which otherwise
+       force min-height, padding, line-height, border, bg and box-shadow onto
+       the field and break sizing + vertical centering. */
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: inherit;
+    font-size: var(--uich-wpc-font-size-caption) !important;
+    line-height: var(--uich-wpc-line-height-caption) !important;
+    font-weight: var(--uich-wpc-font-weight-regular);
+    color: var(--uich-wpc-color-text-default);
+
+    &:focus {
+      outline: none;
+      border: 0;
+      box-shadow: none;
+    }
+
+    &::placeholder {
+      color: var(--uich-wpc-color-text-weakest);
+      opacity: 1;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      color: var(--uich-wpc-color-text-disabled);
+      -webkit-text-fill-color: var(--uich-wpc-color-text-disabled);
+    }
+  }
+
+  &--mini &__field {
+    font-size: var(--uich-wpc-font-size-label) !important;
+    line-height: var(--uich-wpc-line-height-label) !important;
+  }
+
+  /* Optical centering nudge: the text line box sits ~2px high, so push the
+     field down 2px (paired with the reduced 6.5px wrapper padding above to
+     keep the 36px height). */
+  &--regular &__field {
+    padding-top: 2px !important;
+  }
+
+  /* ---- Multiline (textarea) ---- */
+  &--multiline {
+    align-items: stretch;
+  }
+  &--multiline &__field {
+    width: 100%;
+    min-height: 84px !important;
+    padding-top: 0 !important;
+    resize: none;
+
+    /* Keep scrolling for long content but hide the scrollbar chrome. */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE / old Edge */
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none; /* Chrome / Safari */
+    }
+  }
+
+  /* ---- Decoration icons ---- */
+  &__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--uich-wpc-color-text-weakest);
+
+    svg,
+    img {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &--mini &__icon {
+    width: 16px;
+    height: 16px;
+
+    svg,
+    img {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* ---- Focus (purple border + ring) ---- */
+  &:focus-within:not(.is-disabled):not(.uich-wpc-input--error) {
+    border-color: var(--uich-wpc-color-secondary);
+    box-shadow: 0 0 0 3px var(--uich-wpc-color-secondary-lightest);
+  }
+
+  /* ---- Error (red border, no shadow) ---- */
+  &--error {
+    border-color: var(--uich-wpc-color-error-darker);
+    box-shadow: none;
+
+    &:focus-within:not(.is-disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring-error);
+    }
+  }
+
+  /* ---- Disabled ---- */
+  &.is-disabled {
+    cursor: not-allowed;
+  }
+}

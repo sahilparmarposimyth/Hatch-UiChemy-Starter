@@ -1,0 +1,204 @@
+/*
+ * UiChemy brand skin, ADMIN DASHBOARD ONLY.
+ *
+ * Imported after shadcn.css in src/admin/index.jsx, so it compiles into
+ * build/admin.css only and NEVER into the composer bundle (build/index.css).
+ * That's the whole isolation strategy: the composer keeps the neutral zinc
+ * shadcn theme; the admin dashboard is re-skinned to the marketing-site brand
+ * (Ink + Canvas + warm Surface, Composer Red as a signal, Inter type).
+ *
+ * These rules are intentionally UNLAYERED. shadcn.css declares its tokens inside
+ * `@layer base`, and unlayered rules beat every layered rule regardless of
+ * source order, so this reliably overrides the base `.uich-tw` tokens without
+ * an !important arms race. Only CSS custom properties are overridden here;
+ * Tailwind utilities read them through `hsl(var(--token))`, so the whole
+ * component system follows automatically.
+ *
+ * Palette source of truth: UICHEMY-DASHBOARD-BRANDING.md. Values that shadcn
+ * consumes as `hsl(var(--x))` are stored here as "H S% L%" triplets; brand
+ * helpers that we author by hand use the raw hex `--ptn-*` vars below.
+ */
+
+/* Raw brand vars, available to every admin node (shadcn islands + legacy
+   .ptn- White Label markup, which React renders inside this root). */
+#uichemy-dashboard-root,
+.uich-tw {
+  /* UiChemy brand signal (was Composer Red). Var name kept so every existing
+     consumer, the .ptn-dot-red motif, the focus ring, recolours in one place. */
+  --ptn-red: #171717;        /* MONOCHROME: brand signal is now near-black */
+  --ptn-red-deep: #000000;   /* hover / pressed */
+  --ptn-red-aa: #171717;     /* dark that passes AA as small text on light */
+  --ptn-ink: #111111;
+  --ptn-canvas: #FFFFFF;
+  --ptn-surface: #FAF8F6;
+
+  /* Pastels (category + status), never flip, always mixed with #fff. */
+  --ptn-mint: #BDEFE7;   --ptn-mint-deep: #0E7C6B;
+  --ptn-lilac: #E7DDF9;  --ptn-lilac-deep: #5C3DBE;
+  --ptn-blue: #D8E8FF;   --ptn-blue-deep: #2C63D6;
+  --ptn-lime: #EAF3A8;   --ptn-lime-deep: #5E6B0F;
+  --ptn-peach: #FBE0D0;  --ptn-peach-deep: #B4603A;
+  --ptn-coral: #FCDBD5;  --ptn-coral-deep: #C4302B;
+}
+
+/*
+ * shadcn token remap → UiChemy design system (light). Aligns the builder-runtime
+ * island with the rest of the new dashboard (design-system/styles/tokens.css):
+ *   background / card / popover = white surfaces (cards lift off the grey ground)
+ *   primary = monochrome near-black (#171717), matches the dashboard's primary CTAs
+ *   secondary / muted / accent = cool DS grey fills (#F1F1F7, was warm cream)
+ *   border / input = DS neutral greys (#E5E5E5 / #D4D4D4, was warm)
+ *   ring = near-black (dark focus ring, was orange)
+ */
+.uich-tw {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;             /* #171717, uc-text */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 16 98% 60%;             /* #FD6A35, brand orange (island main CTAs) */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;             /* #F5F5F5, neutral grey (matches DS, no cool tint) */
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96%;                 /* #F5F5F5, neutral grey */
+  --muted-foreground: 0 0% 45%;      /* #737373, uc-text-muted */
+  --accent: 0 0% 96%;                /* #F5F5F5, neutral grey */
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 68% 53%;          /* danger stays red */
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 90%;                /* #E5E5E5, uc-border-subtle */
+  --input: 0 0% 83%;                 /* #D4D4D4, uc-border */
+  --ring: 0 0% 9%;                   /* dark focus ring (was orange) */
+  /* Matches the DS radius-lg (12px) so island cards/controls round the same as
+     the native dashboard's --r-card (rounded-lg = 12px, md = 10px, sm = 8px). */
+  --radius: 0.75rem;
+
+  /* Zalando Sans everywhere, the brand typeface used across the dashboard
+     (design-system/styles/tokens.css --uc-font-sans). */
+  font-family: 'Zalando Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The recurring red "period" that ends one heading per view, the brand motif. */
+.ptn-dot-red { color: var(--ptn-red); }
+
+/* Toggles: match the main dashboard's monochrome design-system/Switch (ON =
+   near-black inverse fill, OFF = the same dimmed, white thumb) instead of the
+   shadcn switch's brand-orange `bg-primary`. Scoped here because brand.css ships
+   ONLY in the dashboard bundle, the composer's own switches are untouched. The
+   Radix switch root carries role="switch"; ANDing the data-state attribute
+   outspecs the Tailwind `data-[…]:bg-primary/bg-input` utilities, and brand.css
+   loads after them, so no !important is needed. */
+.uich-tw [role="switch"][data-state="checked"] { background-color: hsl(var(--foreground)); }
+.uich-tw [role="switch"][data-state="unchecked"] { background-color: hsl(var(--foreground) / 0.3); }
+
+/* Thumb slide, monochrome DS-Switch behaviour. The shadcn thumb moves with
+   Tailwind's `translate-x-*`; in this no-preflight island that revived once the
+   --tw-* vars were seeded, so leaving our own move in place COMPOUNDED them
+   (thumb shot 32px and hung off the right edge as a "notch"). Kill Tailwind's
+   transform on the thumb and drive the slide with a single explicit `translate`.
+   16px = 32px inner track − 16px thumb. */
+.uich-tw [role="switch"] > span {
+  transform: none !important;
+  transition: translate 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+.uich-tw [role="switch"] > span[data-state="unchecked"] { translate: 0 !important; }
+.uich-tw [role="switch"] > span[data-state="checked"] { translate: 16px !important; }
+
+/* Focus accent is carried by shadcn's own ring (via --ring = Composer Red above)
+   and the legacy .ptn-text:focus rule, so no extra outline is layered here. */
+
+/* "Saved" confirmation text → brand mint-deep instead of raw emerald. (Role
+   Manager access-level chips use on-brand pastel utilities inline.) */
+.uich-tw .ptn-saved { color: var(--ptn-mint-deep); }
+
+/* ── Upgrade card, animated conic-gradient border ──────────────────────────
+   Ported from Google AI Studio's "upgrade" card technique and recoloured to the
+   UiChemy palette. A 1px-padded wrapper carries a conic-gradient background; the
+   opaque inner card (bg-background, 15px radius) covers the centre, so the
+   gradient shows ONLY as a thin 1px ring. The gradient's start angle is an
+   @property-registered <angle> so it can be animated, the keyframe drives it
+   0deg → 360deg over 40s, sweeping the coloured arcs slowly around the border.
+   Base arcs use the neutral --border token; the accents are Composer Red plus warm
+   (coral/peach) and one cool (lilac) brand tone, mirroring AI Studio's multi-hue
+   sweep while keeping red as the dominant signal. */
+@property --ptn-upgrade-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.uich-tw .ptn-upgrade-card {
+  --ptn-conic-red: rgba(23, 23, 23, 0.55);    /* MONOCHROME sweep, near-black */
+  --ptn-conic-coral: rgba(82, 82, 82, 0.50);  /* mid grey */
+  --ptn-conic-peach: rgba(115, 115, 115, 0.45); /* light grey */
+  --ptn-conic-lilac: rgba(38, 38, 38, 0.40);  /* dark grey */
+  position: relative;
+  padding: 1px;
+  border-radius: 16px;
+  background: conic-gradient(
+    from var(--ptn-upgrade-angle) at 50% 50%,
+    hsl(var(--border)) 0deg,
+    hsl(var(--border)) 69deg,
+    var(--ptn-conic-red) 115deg,
+    var(--ptn-conic-peach) 193deg,
+    hsl(var(--border)) 270deg,
+    var(--ptn-conic-coral) 291deg,
+    var(--ptn-conic-lilac) 322deg,
+    hsl(var(--border)) 1turn
+  );
+  box-shadow:
+    0 3px 3px -1.5px rgba(10, 13, 18, 0.04),
+    0 8px 8px -4px rgba(10, 13, 18, 0.03),
+    0 20px 24px -4px rgba(10, 13, 18, 0.08);
+  animation: ptn-rotate-upgrade-border 40s linear infinite;
+}
+
+@keyframes ptn-rotate-upgrade-border {
+  to { --ptn-upgrade-angle: 360deg; }
+}
+
+/* Respect reduced-motion: keep the ring, drop the rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .uich-tw .ptn-upgrade-card { animation: none; }
+}
+
+/* Pro badge ring, the same animated conic-gradient border as the upgrade card,
+   sized for the small sidebar "PRO" badge in the Pro build (tighter 8px radius,
+   no drop shadow). Reuses @property --ptn-upgrade-angle and the @keyframes above.
+   The inner badge must be OPAQUE so only the 1px ring shows. */
+.uich-tw .ptn-pro-badge {
+  --ptn-conic-red: rgba(23, 23, 23, 0.65);    /* MONOCHROME sweep, near-black */
+  --ptn-conic-coral: rgba(82, 82, 82, 0.55);  /* mid grey */
+  --ptn-conic-peach: rgba(115, 115, 115, 0.5); /* light grey */
+  --ptn-conic-lilac: rgba(38, 38, 38, 0.45);  /* dark grey */
+  position: relative;
+  padding: 1px;
+  border-radius: 8px;
+  background: conic-gradient(
+    from var(--ptn-upgrade-angle) at 50% 50%,
+    hsl(var(--border)) 0deg,
+    hsl(var(--border)) 69deg,
+    var(--ptn-conic-red) 115deg,
+    var(--ptn-conic-peach) 193deg,
+    hsl(var(--border)) 270deg,
+    var(--ptn-conic-coral) 291deg,
+    var(--ptn-conic-lilac) 322deg,
+    hsl(var(--border)) 1turn
+  );
+  animation: ptn-rotate-upgrade-border 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uich-tw .ptn-pro-badge { animation: none; }
+}
+
+/* Dialog header spacing, the island's reset doesn't zero the browser's
+   default heading / paragraph margins, so DialogTitle picked up ~0.83em
+   top+bottom and the header read loose and uneven. Match the DS global Dialog:
+   spacing is owned by the flex gap, never by element margins. */
+.uich-tw[role="dialog"] :is(h1, h2, h3, p),
+.uich-tw [role="dialog"] :is(h1, h2, h3, p) {
+  margin: 0;
+}

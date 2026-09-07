@@ -1,0 +1,3350 @@
+/* ── Right-dock mode ─────────────────────────────────────────────────────────
+   The composer can dock to the RIGHT side of the preview as a vertical panel
+   (Elementor-panel-like) instead of the default bottom sheet. The outer shell
+   `#uichemy-composer-floating-panel` gets `.uich-dock-right` (from React), the
+   inner <section> gets `.panel.dock-right`. Everything vertical-specific lives
+   in this file so the bottom-dock design stays untouched. */
+
+/* ---- Outer shell: right sidebar instead of bottom sheet ---- */
+#uichemy-composer-floating-panel.uich-dock-right,
+.uichemy-composer-floating-panel.uich-dock-right {
+  top: 47px;
+  bottom: 0;
+  left: auto;
+  right: 0;
+  /* Default 332px, drag-resizable between DOCK_MIN (280) and DOCK_MAX (720)
+     in composer-app.jsx. `width` here is just the initial value — the resize
+     handle drives it afterwards via an inline style on this element, which
+     wins over this rule. min/max-width must stay in step with the JS
+     constants or the handle will visibly stop working before its intended
+     limit. */
+  width: 332px;
+  min-width: 280px;
+  max-width: 720px;
+  height: auto !important;
+  /* beats legacy 430px + any stale inline height */
+  min-height: 0;
+  max-height: none !important;
+  border-left: 1px solid var(--panel-line, #2a2c33);
+  /* Flat canvas-facing (left) edge: the right dock reads as a flush sidebar
+     (just the left border), so no corner rounding. */
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  transform: translateX(105%);
+  /* Slide the drawer in/out smoothly. Only `transform` transitions, the
+     width-drag resize changes `width` (not transform) so it stays lag-free, and
+     this eases in lockstep with the front-end page-push (body margin-right). */
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  #uichemy-composer-floating-panel.uich-dock-right,
+  .uichemy-composer-floating-panel.uich-dock-right {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* Front end (live preview): the WordPress admin bar is fixed over the top of
+   the viewport, so a top:0 drawer gets its titlebar clipped underneath it.
+   Start the drawer below the admin bar. Scoped to body.admin-bar so it never
+   affects the Elementor editor (which has no admin bar). */
+body.admin-bar #uichemy-composer-floating-panel.uich-dock-right,
+body.admin-bar .uichemy-composer-floating-panel.uich-dock-right {
+  top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+
+  body.admin-bar #uichemy-composer-floating-panel.uich-dock-right,
+  body.admin-bar .uichemy-composer-floating-panel.uich-dock-right {
+    top: 46px;
+  }
+}
+
+#uichemy-composer-floating-panel.uich-dock-right.active,
+.uichemy-composer-floating-panel.uich-dock-right.active {
+  transform: translateX(0);
+}
+
+#uichemy-composer-floating-panel.uich-dock-right.minimized,
+.uichemy-composer-floating-panel.uich-dock-right.minimized {
+  transform: translateX(calc(100% - 50px));
+}
+
+/* Let the edge toggle stick out of the drawer. */
+#uichemy-composer-floating-panel.uich-dock-right,
+.uichemy-composer-floating-panel.uich-dock-right {
+  overflow: visible !important;
+}
+
+/* Collapsed = drawer slides fully off-screen (Elementor-style); only the
+   edge toggle (left: -22px) stays visible to reopen it. */
+#uichemy-composer-floating-panel.uich-dock-right.active.uich-dock-slid,
+.uichemy-composer-floating-panel.uich-dock-right.active.uich-dock-slid {
+  transform: translateX(100%);
+}
+
+/* Elementor's OWN editor dropdowns/popovers (e.g. the Publish "save options"
+   menu beside the Publish button) open at the top-right, right where the docked
+   composer panel (z-index:9999) sits, so the panel covers them and they look
+   like they never open. Lift Elementor's menu containers above the panel.
+   Scoped to Elementor's edit mode and to Elementor's own menu classes only, so
+   it never affects composer UI (which uses .uich-tw, not these). */
+body.elementor-editor-active .elementor-panel-saver-menu,
+body.elementor-editor-active #elementor-panel-saver-menu,
+body.elementor-editor-active .elementor-panel-footer-sub-menu-wrapper,
+body.elementor-editor-active .MuiPopover-root,
+body.elementor-editor-active .MuiMenu-root,
+body.elementor-editor-active .MuiModal-root {
+  z-index: 100050 !important;
+}
+
+/* Inner panel: match the shell's flush (square) left edge. */
+.panel.dock-right {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  /* The bottom-sheet dock's upward drop-shadow (base `.panel` rule) has a wide
+     44px blur that bleeds leftward onto the canvas when the panel is docked
+     right. The right dock reads as a flat sidebar (just the left border), so
+     drop the shadow here. Bottom-dock keeps its shadow. */
+  box-shadow: none;
+}
+
+/* Light theme re-adds a panel drop-shadow through a higher-specificity host
+   rule (`.uich-composer-host[data-theme="light"] .panel`, 0-3-0) that beats the
+   `.panel.dock-right` (0-2-0) removal above, so the shadow reappears and bleeds
+   onto the canvas in right-dock mode. Override it with matching specificity. */
+.uich-composer-host[data-theme="light"] .panel.dock-right,
+[data-uich-composer-theme="light"] .panel.dock-right,
+.panel.dock-right[data-theme="light"] {
+  box-shadow: none;
+}
+
+/* ---- Elementor-style edge toggle on the drawer's left edge ---- */
+.panel.dock-right .dock-edge-toggle {
+  position: absolute;
+  left: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 50px;
+  padding: 0;
+  border: 1px solid var(--panel-line);
+  border-right: 0;
+  border-radius: 0;
+  background: var(--panel-bg-2);
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 7;
+  box-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.panel.dock-right .dock-edge-toggle:hover {
+  color: var(--text-mid);
+  background: var(--panel-bg-2);
+}
+
+.panel.dock-right .dock-edge-toggle .chev {
+  display: inline-flex;
+  transform: rotate(-90deg);
+  /* chevron points right = "close towards the edge" */
+  transition: transform 0.2s ease;
+}
+
+.panel.dock-right .dock-edge-toggle.closed .chev {
+  transform: rotate(90deg);
+  /* points left = "pull the drawer back open" */
+}
+
+/* ---- Resize handle: left edge, width drag (vertical grip pill) ---- */
+.panel.dock-right .panel-resize {
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  right: auto;
+  width: 16px;
+  height: auto;
+  cursor: ew-resize;
+}
+
+.panel.dock-right .panel-resize::after,
+.panel.dock-right .panel-resize:hover::after {
+  width: 4px !important;
+  height: 48px !important;
+}
+
+/* ---- Header: structured two-row layout for the narrow panel.
+   Row 1 (title bar): logo · EDITOR/CODE/CHAT · collapse/close pinned right.
+   Row 2 (toolbar):   Simple|Developer left · dock + theme right. ---- */
+.panel.dock-right .panel-tabs {
+  flex-wrap: wrap;
+  padding-right: 0;
+}
+
+.panel.dock-right .panel-tab {
+  padding: 8px 6px;
+  font-size: 12px;
+  letter-spacing: 0;
+  min-width: 0;
+  flex: 1 1 0;
+  white-space: nowrap;
+  gap: 4px;
+}
+
+/* The AI badge costs precious width in the narrow title row. */
+.panel.dock-right .panel-tab .badge {
+  display: none;
+}
+
+/* The narrow title row doesn't need the brand logo. */
+.panel.dock-right .panel-brand {
+  display: none;
+}
+
+/* ---- Full tab bar: Editor/Chat/Code tabs + Layers/skin/Developer tools all
+   share ONE row (no separate "Edit" title bar). Tabs flex to fill; the tools
+   pin to the right edge and stay on the same line. ---- */
+.panel.dock-right .tab-tools {
+  display: flex;
+  align-items: center;
+  /* Fill the whole top bar so the Design/Developer switcher can stretch across
+     it (the Editor/Chat/Code tabs live in their own row below). */
+  flex: 1;
+  margin-left: 0;
+  padding-left: 12px;
+  padding-right: 8px;
+}
+
+/* The navigator icon + switcher wrapper spans the full width; the layers icon
+   keeps its size and the switcher grows to fill the rest. */
+.panel.dock-right .tab-tools>div:first-child {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* The mode switch is LINE tabs now, so it must not stretch. These two rules
+   used to read "Design / Developer split the filled width evenly" and gave the
+   list flex:1 with flex:1 on each button — correct for a filled segmented pill,
+   wrong here: it would stretch each underline across half the row instead of
+   letting it hug its label. Sized by content, left-aligned. */
+.panel.dock-right .tab-tools .mode-switch {
+  flex: 0 0 auto;
+}
+
+.panel.dock-right .tab-tools .mode-switch [role='tab'] {
+  flex: 0 0 auto;
+}
+
+/* Elementor-style stacked tabs, icon above, label below, equal width. */
+.panel.dock-right .panel-tabs {
+  flex-wrap: nowrap;
+  min-height: 58px;
+  background: var(--panel-bg-2);
+}
+
+/* Top bar (Designer/Developer + History): equal padding on all four sides. The
+   58px min-height above is meant for the stacked tab STRIP, on this row it just
+   inflated the vertical space (content centered, not evenly padded), and
+   .tab-tools carried an asymmetric 12/8 left/right. Pin uniform padding on the
+   bar itself and let tab-tools sit flush. Scoped :not(.panel-tabs-strip) so the
+   tab row below keeps its 58px. */
+.panel.dock-right .panel-tabs:not(.panel-tabs-strip) {
+  min-height: 0;
+  padding: 12px;
+}
+.panel.dock-right .panel-tabs:not(.panel-tabs-strip) .tab-tools {
+  padding: 0;
+}
+.panel.dock-right .panel-tab {
+  padding: 8px 6px;
+  font-size: 12px;
+  font-weight: 400;
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+/* Theme toggle pinned to the panel's bottom-right corner. */
+.panel.dock-right .dock-theme-fab {
+  position: absolute;
+  right: 6px;
+  bottom: 3px;
+  z-index: 8;
+  width: 24px;
+  height: 22px;
+}
+
+/* Skin (Brand / Elementor) toggle sits just left of the theme toggle. */
+.panel.dock-right .dock-skin-fab {
+  position: absolute;
+  right: 34px;
+  bottom: 3px;
+  z-index: 8;
+  width: 24px;
+  height: 22px;
+}
+
+/* ---- Inspector: accordions (rendered by JSX) ---- */
+.panel.dock-right .acc-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Section headers stay quiet (no filled header bar — the name is plain text and
+   the +/− carries the state), but every section is separated by a hairline so
+   the list reads as distinct rows rather than floating labels. No rule after the
+   last one, which would leave a stray line above the empty space below. */
+.panel.dock-right .acc {
+  border-bottom: 1px solid var(--panel-line);
+}
+.panel.dock-right .acc:last-child {
+  border-bottom: 0;
+}
+
+.panel.dock-right .acc-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  background: transparent;
+  /* Reference design keeps EVERY section name at full contrast, open or closed
+     — dimming the closed ones made the list read as mostly-disabled. */
+  color: var(--text-hi);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.panel.dock-right .acc-head:hover {
+  color: var(--text-hi);
+  background: transparent;
+}
+
+.panel.dock-right .acc.open>.acc-head {
+  color: var(--text-hi);
+  background: transparent;
+}
+
+.panel.dock-right .acc-ico {
+  display: inline-flex;
+  align-items: center;
+}
+
+.panel.dock-right .acc-label {
+  /* Natural width so the caption can sit directly after it; the caret is pushed
+     to the far right by its own auto margin instead. */
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel.dock-right .acc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  flex: 0 0 auto;
+}
+
+.panel.dock-right .acc-caret {
+  display: inline-flex;
+  margin-left: auto;
+  transition: transform 0.18s ease;
+  opacity: 0.6;
+}
+
+.panel.dock-right .acc.open .acc-caret {
+  transform: rotate(180deg);
+}
+
+.panel.dock-right .acc-body {
+  background: var(--panel-bg);
+}
+
+/* Per-section caption sitting inline after the label in the accordion head
+   ("text · image · link"), so each row says what's inside without opening it.
+   Hidden on the open row, where the controls themselves make it redundant. */
+.panel.dock-right .acc-meta-inline {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+.panel.dock-right .acc.open .acc-meta-inline {
+  display: none;
+}
+
+/* The dynamic-construct (Loop / Form …) accordion has its own markup but must look
+   IDENTICAL to the native section accordions (Layout / Spacing / …) in the right
+   dock. Mirror the `.acc` / `.acc-head` chrome above EXACTLY, keep these values in
+   sync with it. Switching to the section's border-BOTTOM model also removes the old
+   double-border with the last section, so the previous top-border hack is gone. */
+.panel.dock-right .construct-accordion {
+  border-top: 0;
+  border-bottom: 1px solid var(--panel-line);
+  background: transparent;
+}
+
+.panel.dock-right .construct-accordion-head {
+  gap: 9px;
+  padding: 13px 16px;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--text-mid);
+}
+
+.panel.dock-right .construct-accordion-head:hover,
+.panel.dock-right .construct-accordion.is-open>.construct-accordion-head {
+  color: var(--text-hi);
+  background: var(--panel-bg-2);
+}
+
+.panel.dock-right .construct-accordion-chevron {
+  color: inherit;
+  opacity: 0.6;
+}
+
+.panel.dock-right .construct-accordion-body {
+  border-top: 0;
+  background: var(--panel-bg);
+  padding-bottom: 0;
+}
+
+/* ---- Fields go one-by-one: every prop spans the full 12-col row.
+       (!important beats the inline gridColumn span set per-field.) ---- */
+.panel.dock-right .prop-row>* {
+  grid-column: 1 / -1 !important;
+}
+
+/* ---- Webflow-style rows: label on the LEFT, control on the RIGHT.
+       The label cell is col 1; every other child (input stack, hints,
+       applied-from notes) stacks in col 2. ---- */
+.panel.dock-right .field.pf {
+  display: grid;
+  /* Label column measured off the reference design (Figma, panel ≈260px wide,
+     label column ≈99px ≈ 38%). An earlier pass cut this to 70px, which crowded
+     the labels — "Font Wei…" truncated on a field that had room. */
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 4px;
+}
+
+.panel.dock-right .field.pf>.pf-label {
+  margin: 0;
+  grid-column: 1;
+  min-width: 0;
+  /* Don't clip the label as a whole, that hid the trailing "applied-from"
+     dot (and global markers) in the narrow label column, so the indicator
+     only appeared to show up when its hover tooltip did. Truncate the label
+     TEXT instead (below) and keep the dot/markers always visible. */
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.panel.dock-right .field.pf>.pf-label .pf-name {
+  flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.panel.dock-right .field.pf>.pf-label .pf-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.panel.dock-right .field.pf>*:not(.pf-label) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* The visual inset editor is a box, give it the full width (label above it)
+   instead of squeezing it into the right control column. */
+.panel.dock-right .field.pf.pf-layout-inset {
+  grid-template-columns: 1fr;
+}
+
+.panel.dock-right .field.pf.pf-layout-inset>.pf-label,
+.panel.dock-right .field.pf.pf-layout-inset>*:not(.pf-label) {
+  grid-column: 1;
+}
+
+/* ── Airier, minimal inspector density (right dock only) ─────────────────────
+   The compact controls read too small in the wider right panel. Bump control
+   heights + breathing room for a calmer, Framer-like feel, without adding any
+   new chrome. Scoped to .dock-right so the bottom sheet stays dense. */
+
+/* Section headers: a touch larger, more padding. */
+.panel.dock-right .acc-head {
+  padding: 13px 16px;
+  font-size: 13px;
+}
+
+/* Section body: more inner padding + vertical rhythm between fields. */
+.panel.dock-right .section {
+  padding: 16px 16px 20px;
+  gap: 18px;
+}
+/* The Content section already gets that 16px inset from the rule above, but the
+   TEXT field's own .text-row adds another 8px/14px on top, so the field floated
+   in an oversized double-padded box (unlike the other sections, which have no
+   inner .text-row). Drop the inner padding here so the field sits flush at the
+   section's 16px, matching Typography / Layout / etc. */
+.panel.dock-right .simple-content-section .text-row {
+  padding: 0;
+}
+.panel.dock-right .prop-rows { gap: 18px; }
+.panel.dock-right .prop-row { row-gap: 18px; }
+
+/* Field label ↔ control: a little more air, slightly larger label. */
+.panel.dock-right .field.pf {
+  row-gap: 7px;
+  column-gap: 12px;
+}
+
+.panel.dock-right .field.pf .pf-label {
+  font-size: 11.5px;
+  min-height: 16px;
+}
+
+/* Controls: taller so they don't feel cramped. Design fields wrap shadcn
+   controls, h-8 (32px) input/select shells and bg-muted segmented rows with
+   h-6 (24px) buttons. Bump both inside right-dock fields only. */
+.panel.dock-right .field.pf .h-8 {
+  height: 36px;
+}
+
+.panel.dock-right .field.pf .bg-muted {
+  padding: 3px;
+}
+
+.panel.dock-right .field.pf .bg-muted button.h-6 {
+  height: 30px;
+}
+
+/* Legacy CSS-field controls (Developer mode) if any render here. */
+.panel.dock-right .prop-cell .linput {
+  height: 36px;
+}
+
+.panel.dock-right .prop-cell .seg button {
+  height: 32px;
+}
+
+/* ---- Background ▸ Color tab: fill the panel instead of the bottom-dock 50%
+   cap, so the gradient builder isn't squished into the left half. ---- */
+.panel.dock-right .bg-color-rows {
+  max-width: 100%;
+}
+
+/* ---- Inspector header (Developer): class row etc. wraps ---- */
+.panel.dock-right .inspector-head {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+/* ---- Developer Editor: Layers stack ABOVE the inspector, both inside the
+   right panel (no separate side panel). ---- */
+.panel.dock-right .layers-col {
+  max-height: 240px;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 0;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.panel.dock-right .layers-resize-handle {
+  display: none;
+}
+
+/* ---- Code tab: editors stack vertically ---- */
+.panel.dock-right .code2-grid.cols-2,
+.panel.dock-right .code2-grid.cols-3 {
+  grid-template-columns: 1fr !important;
+}
+
+.panel.dock-right .ed-pane {
+  min-height: 200px;
+}
+
+.panel.dock-right .code-scope-tabs {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.panel.dock-right .stab-meta {
+  display: none;
+}
+
+/* ---- Chat: history sidebar overlays instead of splitting the width ---- */
+.panel.dock-right .chat2-wrap {
+  position: relative;
+}
+
+.panel.dock-right .chat2-wrap.side-open {
+  grid-template-columns: 1fr;
+}
+/* Inspector: the history opens FULL-WIDTH over the chat. The 240px side overlay
+   below is fine in the wide drawer, but the ~320px inspector has no room for it
+  , it left the chat (and Send button) bleeding through on the right. .chat-side
+   has an opaque bg, so full width covers everything cleanly; close (×) or "New
+   chat" returns to the conversation. */
+.uich-inspector-host .panel.dock-right .chat2-wrap.side-open .chat-side {
+  width: 100%;
+  right: 0;
+  border-right: 0;
+}
+.panel.dock-right .chat2-wrap.side-open .chat-side {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 240px;
+  z-index: 6;
+  box-shadow: 6px 0 16px rgba(0, 0, 0, 0.12);
+  border-right: 1px solid var(--panel-line);
+}
+
+/* ---- Globals / variables panel: card layout instead of the wide table ---- */
+/* Hide the NAME/VALUE/CSS VARIABLE column headers, rows become stacked cards. */
+.panel.dock-right .pr-glob-headrow {
+  display: none !important;
+}
+
+/* Each variable row: fields stack one-by-one inside a card. */
+.panel.dock-right .pr-glob-row {
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  padding: 12px 10px !important;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: var(--panel-bg-2);
+}
+
+.panel.dock-right .pr-glob-row:hover {
+  background: var(--panel-bg-2);
+  border-color: var(--panel-line-2);
+}
+
+/* Collection header card: tag+label row, full-width name input, delete right. */
+.panel.dock-right .pr-glob-collhead {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.panel.dock-right .pr-glob-collhead input[type="text"] {
+  grid-column: 1 / -1;
+  max-width: none !important;
+}
+
+.panel.dock-right .pr-glob-collspacer {
+  display: none;
+}
+
+.panel.dock-right .pr-glob-collhead .pr-glob-danger {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+
+/* ---- Deps/assets rows wrap in the narrow panel ---- */
+.panel.dock-right .dep {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+/* ── Canvas quick-action toolbar (Inspecta-style floating pill) ──────────────
+   A rounded-full pill portaled over the canvas, pinned bottom-centre. Shows all
+   actions in one horizontal row. Colours reuse the existing tokens, the active
+   tool is a filled `--primary` circle. */
+/* Host is a full-viewport passthrough layer so the canvas stays clickable; each
+   pill re-enables pointer events and pins itself (bottom-centre + left-centre). */
+.uich-canvas-toolbar-host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147482500;
+  color-scheme: inherit;
+}
+
+/* Positioned row holding the pill + the standalone ✕. Transparent and
+   pointer-transparent; only the pill and the ✕ opt back into pointer events. */
+.canvas-toolbar-wrap {
+  position: fixed;
+  /* Centre in the CANVAS area, not the whole viewport: when the panel is docked
+     open on the right it reserves `--uich-dock-w`, so shift left by half that to
+     stay visually centred over the canvas (falls back to 0 when closed). */
+  left: calc(50% - var(--uich-dock-w, 0px) / 2);
+  bottom: 24px;
+  transform: translateX(-50%);
+  transition: left 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* Entrance: slide up into place with a gentle decelerating ease. */
+  animation: uich-toolbar-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.canvas-toolbar {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--panel-bg-2);
+  border: 1px solid var(--panel-line);
+  box-shadow: 0 16px 44px -12px rgba(0, 0, 0, 0.48), 0 4px 12px -4px rgba(0, 0, 0, 0.32);
+}
+
+/* Standalone circular ✕ — hides the pill for this session (returns on refresh).
+   Same surface tokens as the pill so it tracks light/dark + skin. */
+.canvas-toolbar-wrap .ct-close {
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--panel-line);
+  font: inherit;
+  pointer-events: auto;
+  background: var(--panel-bg-2);
+  color: var(--text-mid);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 16px 44px -12px rgba(0, 0, 0, 0.48), 0 4px 12px -4px rgba(0, 0, 0, 0.32);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.canvas-toolbar-wrap .ct-close:hover {
+  color: var(--text-hi);
+  background: var(--panel-bg-3);
+}
+.canvas-toolbar-wrap .ct-close:active {
+  transform: scale(0.94);
+}
+.canvas-toolbar-wrap .ct-close svg {
+  width: 16px !important;
+  height: 16px !important;
+  color: inherit !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  display: block;
+}
+.uich-canvas-toolbar-host[data-theme="light"] .canvas-toolbar-wrap .ct-close {
+  box-shadow: 0 16px 40px -12px rgba(15, 15, 21, 0.18), 0 3px 10px -4px rgba(15, 15, 21, 0.12);
+}
+
+.uich-canvas-toolbar-host[data-theme="light"] .canvas-toolbar {
+  box-shadow: 0 16px 40px -12px rgba(15, 15, 21, 0.18), 0 3px 10px -4px rgba(15, 15, 21, 0.12);
+}
+
+@keyframes uich-toolbar-in {
+
+  /* Keep translateX(-50%) through the entrance, or it clobbers the horizontal
+     centring (fill-mode:both holds the final transform). */
+  from {
+    transform: translateX(-50%) translateY(calc(100% + 40px));
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas-toolbar-wrap {
+    animation-duration: 0.01ms;
+  }
+}
+
+.canvas-toolbar .ct-btn {
+  appearance: none;
+  /* Pin the full box model, on the live front end the pill is portaled into the
+     page <body>, where the theme's global `button` reset would otherwise collapse
+     the 34px button and shrink the icons. */
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  background: transparent;
+  color: var(--text-mid);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+/* Pin the stroke-icon rendering so the front-end theme's global svg reset can't
+   shrink, recolour or hide the HugeIcons strokes (keeps the pill identical to
+   the backend editor). */
+.canvas-toolbar .ct-btn svg {
+  width: auto !important;
+  height: auto !important;
+  color: inherit !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  vertical-align: middle;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.canvas-toolbar .ct-btn:hover {
+  color: var(--text-hi);
+  background: var(--panel-bg-3);
+}
+
+/* ── dock magnification ──────────────────────────────────────────────────────
+   composer-toolbar's useDockMagnify writes --ct-mag per button from the
+   pointer's distance to it; CSS does the rest. transform-origin sits at the
+   BOTTOM so a growing button rises out of the pill instead of spilling below
+   it, which is what makes it read as a macOS dock rather than a zoom.
+
+   `transform` is already in .ct-btn's transition list, so this animates for
+   free. The duration stays short (0.1s) on purpose: the pointer is driving it,
+   so a long ease feels like lag rather than smoothness. */
+/* Size comes from --ct-size (written per button by useDockMagnify), NOT from a
+   transform. Width participates in layout, so a growing button pushes its
+   neighbours along and the pill widens — which is the dock behaviour. A
+   transform: scale() left the pill at a fixed 218px and the buttons simply
+   overlapped each other. */
+.canvas-toolbar .ct-btn {
+  width: var(--ct-size, 34px);
+  height: var(--ct-size, 34px);
+  /* Width IS transitioned, briefly. Two things make this safe and smooth:
+     · the hook measures rest centres once per hover, so a size change can
+       never feed back into the next frame's input — no oscillation;
+     · 130ms is short enough to track the pointer (a new target interrupts and
+       re-targets the running transition, which is what turns a stream of
+       discrete pointermove values into continuous motion) and long enough to
+       smooth the gaps between events.
+     Longer than ~180ms and it visibly trails the cursor; shorter than ~90ms and
+     the steps between pointer events start to show. */
+  transition:
+    width 130ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 130ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* Returning to rest has no pointer to follow, so it can afford a slower, softer
+   settle than the tracking transition above. The class is set on pointerleave. */
+.canvas-toolbar.is-settling .ct-btn {
+  transition:
+    width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* The pill's own height is pinned so it cannot grow and shove itself up the
+   canvas while you sweep along it — only the width moves. A button at its
+   48px peak exactly fills the 48px inner height, so nothing spills. */
+.canvas-toolbar {
+  height: 48px;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The hook already bails out; this covers a --ct-size left behind by a
+     setting changed mid-session. */
+  .canvas-toolbar .ct-btn { width: 34px; height: 34px; }
+}
+
+/* ── tooltips ────────────────────────────────────────────────────────────────
+   Portaled into .canvas-toolbar-wrap (see the note in composer-toolbar.jsx), so
+   it inherits the host's theme. Inverted against the pill: the pill is near
+   black, so a bg-primary tooltip on top of it would disappear. */
+/* The tooltip wears the PILL's surface, not a theme abstraction — and this is
+   the third thing tried, so the reasoning is worth keeping:
+     · --panel-bg-4 : right on dark, invisible in light (#f4f4f5 on a #f6f6f7 page)
+     · bg-primary   : the shadcn default, inverts per theme — but measured only
+                      1.18:1 against the canvas, because a dark-themed composer
+                      floats over the user's LIGHT page
+   This pill hovers over a page whose colour we do not control, so neither
+   following nor inverting the theme can be right. Matching the pill makes the
+   label read as part of it, and reuses the same shadow the pill already relies
+   on to separate from arbitrary page content. */
+.canvas-toolbar-wrap .ct-tip {
+  background: var(--panel-bg-2);
+  color: var(--text-hi);
+  border: 1px solid var(--panel-line);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 5px 9px;
+  border-radius: 6px;
+  box-shadow: 0 16px 44px -12px rgba(0, 0, 0, 0.48), 0 4px 12px -4px rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+}
+
+/* Selected = a solid WHITE disc with a black glyph, replacing the old filled
+   `--primary` circle. Hover only lifts the glyph (`--text-hi`) on a faint fill,
+   so "armed" and "the pointer is here" can never be mistaken for each other.
+
+   Literal #fff / #101014, deliberately NOT `--text-hi` / `--panel-bg-2`: those
+   tokens are re-pointed per skin, and under the Elementor skin `--panel-bg-2`
+   is a mid-grey (#313336), which turned the glyph muddy instead of black. This
+   is a two-colour pressed state, not a themed surface — it should look the same
+   on every skin. */
+.canvas-toolbar .ct-btn-on,
+.canvas-toolbar .ct-btn-on:hover {
+  background: #ffffff;
+  color: #101014;
+}
+
+/* Light pill: a white disc on a near-white toolbar is invisible, so the pressed
+   state inverts the other way. Placed after (and one class more specific than)
+   the rule above so it wins on both the plain and the hovered state. */
+.uich-canvas-toolbar-host[data-theme="light"] .canvas-toolbar .ct-btn-on,
+.uich-canvas-toolbar-host[data-theme="light"] .canvas-toolbar .ct-btn-on:hover {
+  background: #101014;
+  color: #ffffff;
+}
+
+/* Disabled Undo/Redo — dimmed and non-interactive (no hover lift). */
+.canvas-toolbar .ct-btn-disabled,
+.canvas-toolbar .ct-btn-disabled:hover {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+  transform: none;
+}
+
+.canvas-toolbar .ct-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--panel-line);
+  margin: 0 2px;
+}
+
+/* Free build: Pro-only canvas action (Draw, Ask AI). The icon pill has no room
+   for the usual "PRO" text badge, so it carries the same gradient as a dot in
+   the top-right corner. The title/aria-label also say "– Pro", so the state is
+   never signalled by colour alone. */
+.canvas-toolbar .ct-btn-pro {
+  position: relative;
+}
+.canvas-toolbar .ct-btn-pro::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--uich-pro-grad);
+  box-shadow: 0 0 0 1.5px var(--panel-bg-2);
+  pointer-events: none;
+}
+
+/* ── Gutenberg: dock in-flow instead of overlaying the editor ────────────────
+   In the block editor the drawer's `position: fixed; right: 0` shell would sit
+   ON TOP of the editor header, covering Saved / Publish / the settings toggle
+  , and the admin bar (z-index 99999) would in turn cover the drawer's own
+   titlebar. Gutenberg's whole layout root `.interface-interface-skeleton` is
+   itself `position: fixed` with `right: 0`, so shrinking its right edge by the
+   drawer's visible width pushes the ENTIRE editor (header included) clear of
+   the drawer, no z-index war, nothing overlaps, and the header stays usable.
+
+   Both custom properties are written by the dock sync in
+   assets/js/uichemy-composer-gutenberg-adapter.js:
+     --uich-gb-dock-w    the drawer's currently visible width (0 when closed,
+                         ~50px when minimized, its dragged width when open)
+     --uich-gb-dock-top   the skeleton's viewport top, so the drawer starts
+                         below the admin bar (or at 0 in fullscreen mode)
+   `body.uich-gb-dock` is added once on init and never removed, the width var
+   alone drives open/close, so `right` can transition both ways instead of
+   snapping back when a class disappears. Defaulting the var to 0px keeps this
+   byte-identical to stock Gutenberg until the drawer is actually opened. */
+body.uich-gb-dock .interface-interface-skeleton {
+  right: var(--uich-gb-dock-w, 0px);
+  /* Eases in lockstep with the drawer's own translateX transition (same
+     duration + curve), so the editor and the drawer move as one. */
+  transition: right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  body.uich-gb-dock .interface-interface-skeleton { transition-duration: 0.01ms; }
+}
+/* Mid width-drag the easing would leave the editor edge trailing the handle;
+   the drag adds this class so the push tracks the pointer 1:1 (mirrors
+   `.uich-dock-resizing` on Elementor's preview). */
+body.uich-gb-dock.uich-gb-dock-resizing .interface-interface-skeleton {
+  transition: none;
+}
+
+/* ── Bricks: push the builder aside instead of covering it ──────────────────
+   Bricks has no single `position: fixed; right: 0` layout root to shrink like
+   Gutenberg's skeleton. Its builder is a flex row `.brx-body.main`
+   (`#bricks-panel` · `#bricks-preview` · `#bricks-structure`) plus a separate
+   fixed full-width `#bricks-toolbar`. Both carry `margin: 0 auto`, so shrinking
+   their WIDTH would CENTRE the narrower box, splitting the reserved strip in
+   half and leaving the right edge overlapping the drawer. So instead we inset
+   from the right with `padding-right` (box-sizing: border-box keeps the outer
+   box full-width and left-anchored, exactly like the Elementor `#elementor-
+   preview` carve): the flex children reflow into the reduced content box, the
+   canvas shrinks, panel + structure stay put, and the toolbar's right-hand
+   Save/settings controls (justify-content: space-between) slide left, clear of
+   the drawer. `--uich-bricks-dock-w` (written by the push effect in
+   composer-app.jsx) is the drawer's visible width, 0 when closed; the
+   `body.uich-bricks-dock` class is added once and the var alone drives
+   open/close so the inset eases both ways. The selectors carry an id/class +
+   element, out-specifying Bricks' own `#bricks-toolbar` / `.brx-body` rules. */
+body.uich-bricks-dock .brx-body.main,
+body.uich-bricks-dock #bricks-toolbar {
+  box-sizing: border-box;
+  padding-right: var(--uich-bricks-dock-w, 0px);
+  /* Eases in lockstep with the drawer's own translateX transition. */
+  transition: padding-right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  body.uich-bricks-dock .brx-body.main,
+  body.uich-bricks-dock #bricks-toolbar { transition-duration: 0.01ms; }
+}
+/* Mid width-drag: track the pointer 1:1 instead of trailing behind the easing
+   (mirrors the Gutenberg + Elementor resize guards). */
+body.uich-bricks-dock.uich-bricks-dock-resizing .brx-body.main,
+body.uich-bricks-dock.uich-bricks-dock-resizing #bricks-toolbar {
+  transition: none;
+}
+
+/* ── Gutenberg: composer inside the Block tab (InspectorControls) ───────────
+   A second, independent surface from the drawer above. WordPress's sidebar owns
+   the position, width, scrolling and close button here, so the whole fixed-
+   drawer model has to stand down: the panel becomes an ordinary in-flow block
+   that fills the sidebar column. Everything is scoped to `.uich-inspector-host`
+   (set by the mount in composer/src/index.jsx), so the drawer, in Gutenberg,
+   Elementor, Bricks and the front end alike, is untouched. */
+.uich-inspector-host {
+  display: block;
+  width: 100%;
+  /* Makes the host a query container so the field rows below can respond to the
+     ACTUAL width the composer ends up with, rather than to a hardcoded
+     assumption. Change --uichemy-gb-sidebar-w and the rows re-layout on their
+     own, no breakpoint to keep in sync. */
+  container-type: inline-size;
+}
+
+/* Sidebar width. WordPress ships 280px, which fits but forces every control
+   onto its own row; this widens it just while a UiChemy block owns the
+   inspector (via :has() on our host), so ordinary blocks keep the stock width
+   and Page/Block are only ever affected while you're editing a composer block.
+   One number to tune, it's a custom property for exactly that reason. */
+body[data-uich-builder="gutenberg"] .interface-complementary-area:has(.uich-inspector-host),
+body[data-uich-builder="gutenberg"] .interface-interface-skeleton__sidebar:has(.uich-inspector-host) {
+  --uichemy-gb-sidebar-w: 320px;
+  /* !important because WP's own `.interface-complementary-area{width:280px}`
+     lives inside a `@media (min-width:782px)` block. Our selector is more
+     specific so it should win on cascade order alone, but if it doesn't, the
+     failure mode is a dead strip beside the panel (the skeleton sidebar is
+     `width:auto` and stretches, while the 280px scroll container inside it does
+     not), which is exactly the gap this pins shut. */
+  width: var(--uichemy-gb-sidebar-w) !important;
+  max-width: var(--uichemy-gb-sidebar-w) !important;
+}
+/* Fill the column all the way. The sidebar is a CHAIN of wrappers, skeleton
+   sidebar → complementary area (the `overflow:auto` scroll container, also
+   carrying `.editor-sidebar__panel`) → its fill → the block inspector, and any
+   one of them stopping short of the new width leaves white space to the right of
+   the panel while the panel's own dividers stop short of the edge. Stretching
+   the whole chain is cheaper than depending on which single link is the culprit. */
+body[data-uich-builder="gutenberg"] .interface-complementary-area:has(.uich-inspector-host) .interface-complementary-area__fill,
+body[data-uich-builder="gutenberg"] .editor-sidebar__panel:has(.uich-inspector-host),
+body[data-uich-builder="gutenberg"] .block-editor-block-inspector:has(.uich-inspector-host) {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Hide WordPress's block card, the icon + "UiChemy Composer" + description
+   header at the top of the Block tab. The composer panel carries its own
+   identity and the description is static boilerplate, so the card is pure
+   vertical cost in a 280px column. Scoped with :has() to the inspector that
+   actually contains our host, so every OTHER block keeps its card. */
+.block-editor-block-inspector:has(.uich-inspector-host) .block-editor-block-card {
+  display: none;
+}
+.uich-inspector-host .panel,
+.uich-inspector-host .panel.dock-right {
+  position: static;
+  width: 100%;
+  max-width: 100%;
+  /* min-width: 0 defeats the drawer shell's 320px floor, which would otherwise
+     overflow WordPress's 280px sidebar and spill a horizontal scrollbar. */
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+/* ...but transparent only holds up while the composer's theme matches the
+   WordPress admin chrome behind it, which is light. In dark mode WP's white
+   sidebar showed straight through the panel, and the Chat / Editor / Code strip
+   sits directly on it: its track is a translucent WHITE wash (`--seg-track` is
+   `rgba(255,255,255,.06)` in dark, meant to lift off a dark panel) and its
+   labels are dim greys tuned for the same. Over white that is a white row with
+   near-invisible text. Paint the panel in dark so every child has the ground it
+   was designed against. */
+.uich-inspector-host .panel[data-theme="dark"],
+.uich-inspector-host .panel.dock-right[data-theme="dark"] {
+  background: var(--panel-bg);
+}
+/* Drawer-only chrome: WordPress already provides every one of these. The close
+   button and tab row are the sidebar's own; dragging the width is the sidebar's
+   job; and an off-canvas collapse makes no sense for in-flow content. */
+.uich-inspector-host .panel-resize,
+.uich-inspector-host .dock-edge-toggle,
+.uich-inspector-host .dock-theme-fab,
+.uich-inspector-host .dock-skin-fab {
+  display: none !important;
+}
+/* The drawer's body scrolls itself against a fixed 100vh shell. In the sidebar
+   the scroll container is WordPress's, so let the content size naturally and
+   scroll with the rest of the inspector, otherwise it becomes a nested
+   scroll area with its own stranded scrollbar. */
+.uich-inspector-host .panel-body,
+.uich-inspector-host .panel.dock-right .panel-body {
+  overflow: visible;
+  max-height: none;
+  height: auto;
+}
+
+/* `.panel-editor-stack` is the grid item inside `.panel-body`'s `1fr` track,
+   and it gets its `min-width: 0` guard only from a rule scoped to
+   `#uichemy-composer-floating-panel` — an ancestor that doesn't exist in this
+   surface, where the host is `#uichemy-composer-inspector-host` instead. Left
+   at `min-width: auto`, a grid item's automatic minimum size is its MIN-CONTENT
+   width, so the widest row in the inspector became a hard floor on the panel's
+   width and the sidebar grew to fit it. Anything that measures its own width to
+   decide what to render then oscillates: it widens the panel, re-measures
+   wider, renders more, widens again. */
+.uich-inspector-host .panel-editor-stack {
+  min-width: 0;
+}
+
+/* Chat transcript. `.chat2-body` is the scroll container that wraps the message
+   list, and its base rule is `flex: 1 1 0` + `min-height: 0` + `overflow-y: auto`
+  , built for a panel with a DEFINITE height, where it fills the leftover space.
+   The inspector body is `height: auto` (above), so there is no leftover space to
+   distribute: it collapsed to its zero basis and clipped the messages inside it.
+   The prompt box is a SIBLING of this element, which is why that kept rendering
+   while the conversation appeared to vanish.
+   Sized to content (basis auto, so it can't collapse) and capped, so a long
+   conversation scrolls here instead of pushing the prompt box off the end of an
+   ever-growing sidebar. */
+.uich-inspector-host .chat2-body {
+  flex: 0 1 auto;
+  max-height: none;
+  overflow: visible;
+}
+/* …and the message list inside it must NOT be a capped scroll area either. With
+   the prompt bar pinned (below), WordPress's sidebar is the single scroller: the
+   transcript simply grows and the sidebar scrolls, instead of a short inner pane
+   with its own stranded scrollbar. */
+.uich-inspector-host .chat-msgs {
+  flex: 0 1 auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* ---- Sticky prompt bar ----------------------------------------------------
+   Pin the CONTEXT row + prompt box to the bottom of the sidebar so it stays
+   reachable however long the conversation gets.
+   The prerequisite is that NOTHING between the composer and WordPress's sidebar
+   is itself a scroll container, or the composer sticks to that inner box instead
+   of the sidebar viewport. `.chat2-main` looked innocent with only
+   `overflow-x: hidden`, but per spec a hidden axis forces the other axis from
+   `visible` to `auto`, so it was silently a scroller. Both wrappers are opened
+   up here, and their `height: 100%` is dropped since it resolves against an
+   auto-height parent in the sidebar anyway. */
+.uich-inspector-host .chat2-wrap,
+.uich-inspector-host .chat2-main {
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+}
+.uich-inspector-host .chat-composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  /* Opaque: the transcript scrolls UNDER this, so a translucent bar would show
+     message text through the prompt box. */
+  background: var(--panel-bg);
+  /* Sits in place of the base rule's border-top, which would scroll away with
+     the element's own box, this reads as an edge against the scrolling content. */
+  box-shadow: 0 -1px 0 var(--panel-line);
+  /* Nudge the whole bar 30px further down. Only has an effect on a SHORT
+     conversation, where the bar rests at the end of the content with panel space
+     left below it; once the chat is long enough to scroll, the bar is pinned to
+     the bottom edge and this is ignored. Applied as top margin (not a transform
+     or offset) so the bar keeps its real position in the layout, nothing ends up
+     overlapping it or sliding underneath. */
+  margin-top: 30px;
+}
+
+/* The Code tab's panes have the identical defect from the identical cause:
+   `flex: 1` with an explicit `min-height: 0` (and `overflow-y: auto` on the
+   body), so they also floor at zero once the parent stops having a definite
+   height. Given a FLOOR rather than sized to content, because CodeMirror needs a
+   real height to lay its editor out, sizing to content would leave it 0 tall
+   even after this. */
+.uich-inspector-host .code2,
+.uich-inspector-host .code2-body {
+  min-height: 240px;
+}
+/* Cap each code editor at a fixed height with its own scroll. Without this,
+   CodeMirror (height:100% of .ed-pane-body-live, which flexes to fit) grows to
+   show every line, so a long HTML/CSS/JS file balloons the whole sidebar. A
+   fixed box height turns each editor into a fixed, internally-scrolling pane.
+   Inspector-only, the drawer keeps flex:1 and fills its own shell. */
+.uich-inspector-host .ed-pane-body-live {
+  flex: 0 0 auto;
+  height: 280px;
+}
+/* Match the Gutenberg-native 2px radius on the code editor panes (they ship at
+   8px), same treatment as the prompt box, so the composer reads the same across
+   surfaces. Applies everywhere: .uich-composer-host is on both the Gutenberg
+   inspector AND the Elementor/Bricks/front-end drawer. */
+.uich-composer-host .ed-pane {
+  border-radius: 2px;
+}
+
+/* ── Chat tab: dock the compose bar at the foot of the sidebar ───────────────
+   The rules above deliberately let the inspector flow at content height and
+   scroll with WordPress's sidebar, right for the Editor/Code field lists.
+   Chat wants the opposite: the message history fills the middle and the compose
+   bar is pinned to the bottom (the drawer's model). So, ONLY while the Chat tab
+   is active, the composer marks its shell `.panel.tab-chat`, a class the Editor
+   and Code tabs never carry, so nothing here leaks onto them, rebuild a
+   fill-height flex column from WordPress's inspector down through our host and
+   panel. .chat2-wrap is already flex:1, so once its ancestors fill, the existing
+   .chat2-main → .chat2-body (scroll) → .chat-composer (foot) layout resolves
+   exactly as it does in the drawer. The sticky bottom on the compose bar is the
+   fallback for any WordPress wrapper that still refuses to fill. */
+body[data-uich-builder="gutenberg"] .block-editor-block-inspector:has( .uich-inspector-host .panel.tab-chat ),
+body[data-uich-builder="gutenberg"] .block-editor-block-inspector:has( .uich-inspector-host .panel.tab-chat ) [role="tabpanel"] {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.uichemy-composer-inspector-host:has( .panel.tab-chat ),
+.uich-inspector-host:has( .panel.tab-chat ),
+.uich-inspector-host .panel.tab-chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+/* Prompt box: pinned to the bottom of the sidebar, and aligned to the panel's
+   horizontal rhythm.
+
+   Sticky is safe here now, and it wasn't before. WordPress's sidebar scrolls past
+   the bottom of our panel, its Advanced panel and "Skip to the selected block"
+   button live down there, so without this the prompt box scrolls away with the
+   rest of the content. `bottom: 0` keeps it against the scrollport while
+   `.chat2-main` still overlaps it.
+   The reason this was removed earlier: sticky pins by LIFTING an element off its
+   real position, and back when the pick notice was in normal flow the box would
+   ride up on top of it. The notice is `position: absolute` now and can't be
+   pushed into, so the failure mode is gone. The opaque background is what makes
+   the lift read correctly, the transcript scrolls underneath, and without a
+   paint the messages ghost through.
+
+   Padding: the box shipped at `8px 12px` while `.chat-status` and `.chat-msgs`
+   are both `14px`, so the prompt box hung 2px wider on each side than the
+   messages directly above it, two stray vertical edges in a 320px column. 14px
+   puts left, right, the transcript and the scope row on one shared edge. Only the
+   inline padding is set, so the compose bar keeps its own tighter 8px block
+   rhythm. */
+.uich-inspector-host .panel.tab-chat .chat-composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--panel-bg);
+  padding-inline: 14px;
+}
+/* Chat tab: fill the sidebar height. The fixed height goes on the PANEL, and the
+   flex column inside it then divides that up on its own, scope pill and compose
+   bar at their natural heights, transcript taking everything left over.
+
+   Only ONE measured number, and it is the stable one: 116px of chrome above the
+   panel (the editor header plus WordPress's Page/Block tab row). An earlier
+   version put `height: calc(100vh - 440px)` on the TRANSCRIPT instead, which
+   meant estimating the compose bar's height as well, and every pixel that
+   estimate was short pushed the prompt box off the bottom of the screen. Here the
+   compose bar measures itself, so it is always fully visible.
+
+   Errors stay bounded and cosmetic: too tall and WordPress's sidebar scrolls a
+   little (the sticky compose bar above keeps the prompt box on screen), too short
+   and there is a small gap under it. The min-height is the floor for short
+   viewports and for fullscreen mode, where the chrome above is smaller. */
+.uich-inspector-host .panel.tab-chat {
+  height: calc(100vh - 116px);
+  min-height: 360px;
+  max-height: none;
+}
+/* THE reason the compose bar drifted down on every send.
+   `.chat2-wrap` is `display: grid`, and with no `grid-template-rows` its single
+   row is `auto`, content-sized. `.chat2-main` is `height: 100%`, which resolves
+   against that auto row, so it too collapsed to content height: the transcript
+   never got a bounded box, never scrolled, and the whole column simply grew taller
+   with each message, pushing the prompt box down with it. Sticky can't fix that –
+   the box genuinely IS at the end of ever-growing content.
+   `minmax(0, 1fr)` pins the row to the container's (already fixed) height, and the
+   `min-height: 0` chain lets the boxes inside shrink below content so the
+   transcript's own `overflow-y: auto` can finally engage. Now the transcript
+   scrolls internally and the prompt box holds the bottom edge, unmoved by sends. */
+.uich-inspector-host .panel.tab-chat .chat2-wrap {
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+.uich-inspector-host .panel.tab-chat .chat2-main {
+  min-height: 0;
+}
+/* The transcript takes the slack and owns the scrolling.
+   `flex-basis: auto` with a `min-height` floor, never `flex: 1 1 0`, a zero
+   basis floors at zero the moment anything upstream fails to supply a definite
+   height, and then the conversation and the "What do you want to do?" empty state
+   both vanish, leaving just the prompt box. An auto basis starts from content
+   height, and the floor means the worst case is a transcript that scrolls sooner
+   than it should, not one that disappears. */
+.uich-inspector-host .panel.tab-chat .chat2-body {
+  /* PINNED to the viewport, not floored. This box holds BOTH chat states, the
+     "What do you want to do?" setup card AND the message list, so whatever it
+     measures is the height of both. Earlier it was `min-height` + `flex: 1 1
+     auto`, which let a long conversation grow it taller than the setup card
+     (the parent chain that should have capped it doesn't resolve on WordPress's
+     inspector markup). A fixed `height` removes that: the box is exactly this
+     tall no matter how many messages it holds, so the panel reads identically
+     whether the chat is empty or full, which is the whole request here.
+       flex 0 0 auto → content can't stretch or squash the box off this height;
+       overflow-y   → a long conversation scrolls INSIDE it, so the compose bar
+                      below never moves when you send.
+     470px is everything that isn't this box: ~100px of panel tab rows + ~53px
+     scope row + ~175px compose bar + ~104px of editor chrome above the panel +
+     margins. Erring high a touch keeps the compose bar fully visible, a small
+     gap is fine, a clipped Send button is not. This is the one number to tune. */
+  flex: 0 0 auto;
+  height: calc(100vh - 470px);
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+/* Empty state: CENTER it in the slack instead of letting it hug the top.
+   The transcript is now viewport-tall even with no messages, and the setup deck
+   (sparkles disc, "What do you want to do?", suggestion cards) is content-height
+  , top-aligned it reads as a stack with dead space under it, which is exactly
+   the "unfilled panel" look this layout exists to kill. `margin: auto 0` centres
+   it in whatever slack the screen provides, so the empty state reads as a
+   composed welcome screen at 700px and at 1200px alike, same idiom as every
+   chat product's zero state. `auto` margins collapse to 0 when space runs out,
+   so on short screens it degrades to exactly the current top-aligned flow.
+   On the empty-state WRAPPER, not `.ai-setup` itself: `.ai-setup` also renders
+   inside the drawer (content-height there), where an auto margin is a no-op
+   anyway, but scoping to the inspector keeps intent readable. */
+.uich-inspector-host .panel.tab-chat .chat2-body > .ai-setup {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+/* Message list fills the screen-sized transcript instead of hugging the top.
+   The inspector rule further up sets `flex: 0 1 auto` on `.chat-msgs` to stop it
+   being a second scroll area (the parent `.chat2-body` owns the scrolling, two
+   nested scrollbars otherwise). But `flex-grow: 0` also means it never claims the
+   slack, so with a short conversation the list ends where the last message ends
+   and the rest of the transcript is dead space.
+   `flex: 1 0 auto` restores just the growth:
+     grow   1 → takes the leftover height, so the list is always as tall as the
+                visible transcript, at any window size;
+     shrink 0 → never compresses the messages to make room, once the thread is
+                taller than the screen it keeps its natural height and the parent
+                scrolls, which is what keeps the single-scrollbar behaviour;
+     basis auto → still sized from content, so nothing collapses if the height
+                above is ever missing.
+   Messages stay top-aligned inside it, so new ones fill downward toward the
+   prompt box the way every chat thread does. */
+.uich-inspector-host .panel.tab-chat .chat-msgs {
+  flex: 1 0 auto;
+}
+/* Match WordPress's native control radius (2px) on the compose box so the prompt
+   bar reads consistently across surfaces. Applies everywhere: .uich-composer-host
+   is on both the Gutenberg inspector AND the Elementor/Bricks/front-end drawer. */
+.uich-composer-host .composer-input {
+  border-radius: 2px;
+}
+
+/* WordPress's sidebar keeps its native 280px, the composer adapts to it rather
+   than the other way round, so a UiChemy block never resizes the sidebar out
+   from under Page/Block.
+   To actually FIT 280px, the field rows stop being two columns. The drawer lays
+   them out Webflow-style (92px label column + control), which inside 280px –
+   ~248px once WP's 16px gutters are removed, leaves ~146px for the control:
+   too narrow for a select plus its dynamic-value button. Stacking label ABOVE a
+   full-width control is also exactly what the block editor does at this width
+   (see its own "FONT SIZE" over the S/M/L/XL row), so this lands closer to
+   native, not further from it. */
+/* Compaction. The control HEIGHT stays at WordPress's own 36px (`controlHeight`
+   in its components theme), that's the size we're matching, and shrinking it
+   would make the panel look less native, not more. What made this feel oversized
+   was the vertical rhythm BETWEEN fields: the drawer's 18px row gaps were tuned
+   for a 420px panel with two-column rows, and once rows stack each gap is paid
+   twice as often. 12px keeps fields clearly separated at a third less height. */
+.uich-inspector-host .panel.dock-right .prop-rows { gap: 12px; }
+.uich-inspector-host .panel.dock-right .prop-row { row-gap: 12px; }
+
+@container (max-width: 359px) {
+  .uich-inspector-host .panel.dock-right .field.pf {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    column-gap: 0;
+    row-gap: 4px;
+  }
+  .uich-inspector-host .panel.dock-right .field.pf > .pf-label {
+    grid-column: 1;
+    /* The label owns a full row now, so it no longer needs to be squeezed into a
+       fixed column, let long names wrap instead of truncating with an ellipsis. */
+    white-space: normal;
+  }
+  /* Anything that was pinned to the control column (input stacks, hints,
+     applied-from notes) now follows the label in the single column. */
+  .uich-inspector-host .panel.dock-right .field.pf > *:not(.pf-label) {
+    grid-column: 1;
+  }
+}
+/* Start the drawer below the admin bar. wp-admin gets no `admin-bar` body class
+   (that one is front-end only), so the base `body.admin-bar` rule above never
+   matches here, hence this Gutenberg-specific offset, measured from the
+   skeleton so fullscreen mode and the 782px breakpoint both come out right. */
+body.uich-gb-dock #uichemy-composer-floating-panel.uich-dock-right,
+body.uich-gb-dock .uichemy-composer-floating-panel.uich-dock-right {
+  top: var(--uich-gb-dock-top, 0px);
+}
+
+/* ---- Control surfaces (dock-right only) ------------------------------------
+   Scoped to the floating right dock so the bottom dock and the Gutenberg
+   inspector keep their existing chrome.
+
+   Every control gets a VISIBLE edge and a fill. The shadcn recipes these
+   controls share (`border border-input bg-transparent` — LengthInput,
+   SelectCustomInput and INPUT_CLS all use it) render as an unfilled box with a
+   very low-contrast outline, which in the dark panel reads as no field at all:
+   a bare "px − +" floating with nothing around it. Painting both the border and
+   the surface from the panel's own tokens makes each field an obvious target in
+   every skin. Colours are existing tokens — nothing new is introduced. */
+.panel.dock-right .field.pf .border-input,
+.panel.dock-right .field.pf .input,
+.panel.dock-right .field.pf .select,
+.panel.dock-right .field.pf .textarea,
+.panel.dock-right .field.pf .swatch-input,
+.panel.dock-right .field.pf .combo,
+.panel.dock-right .field.pf .seg {
+  /* Controls MUST stay visible in every skin. Measured in a browser: inside the
+     panel `--panel-bg-2` computes to the SAME white as `--panel-bg` (the source
+     file says #f7f7fa, but something later in the cascade overrides it), so a
+     token-based fill painted nothing and the field vanished. Twice.
+
+     These two neutrals are deliberately theme-agnostic instead of tokens: a
+     mid-grey at low alpha darkens a light panel and lightens a dark one, so the
+     control cannot disappear no matter how the tokens resolve. Not a new brand
+     colour — a neutral scrim over whatever the panel already is. */
+  /* No resting border — the field reads from its faint fill alone; the border
+     appears only on hover / focus (rules below). */
+  border-color: transparent;
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
+/* One height for every control. The components hard-code Tailwind `h-8` (32px)
+   while the panel token says 30px, so the two systems disagreed and rows sat at
+   different heights. The token wins here. */
+.panel.dock-right .field.pf .border-input,
+.panel.dock-right .field.pf .input,
+.panel.dock-right .field.pf .select,
+.panel.dock-right .field.pf .swatch-input,
+.panel.dock-right .field.pf .combo {
+  height: var(--input-h);
+  min-height: var(--input-h);
+}
+
+.panel.dock-right .field.pf .border-input:hover,
+.panel.dock-right .field.pf .input:hover,
+.panel.dock-right .field.pf .select:hover,
+.panel.dock-right .field.pf .textarea:hover,
+.panel.dock-right .field.pf .swatch-input:hover,
+.panel.dock-right .field.pf .combo:hover,
+.panel.dock-right .field.pf .seg:hover,
+.panel.dock-right .field.pf .border-input:focus-within,
+.panel.dock-right .field.pf .input:focus,
+.panel.dock-right .field.pf .select:focus,
+.panel.dock-right .field.pf .textarea:focus,
+.panel.dock-right .field.pf .swatch-input:focus-within,
+.panel.dock-right .field.pf .combo:focus-within {
+  border-color: rgba(128, 128, 128, 0.75);
+  background-color: rgba(128, 128, 128, 0.18);
+}
+
+/* The inner <input>/<select> inside a bordered wrapper must stay transparent,
+   otherwise it paints a second, slightly different box inside the first. */
+.panel.dock-right .field.pf .border-input input,
+.panel.dock-right .field.pf .border-input select {
+  background-color: transparent;
+}
+
+/* ---- Framer-style unit suffix (dock-right only) ---------------------------
+   Framer prints the unit as quiet text INSIDE the field ("16 PX", "0 X")
+   rather than as a chip sitting beside the number. It's still a button that
+   opens the unit menu, so the chip fill returns on hover/open. */
+.panel.dock-right .upill-btn {
+  background: transparent;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-size: 9.5px;
+  border-radius: var(--radius);
+}
+
+.panel.dock-right .upill-btn:hover,
+.panel.dock-right .upill.open .upill-btn {
+  background: var(--panel-bg-4);
+  color: var(--text-hi);
+}
+
+/* ---- Framer-style −/+ steppers on length fields (dock-right only) ---------
+   The value could already be stepped with ArrowUp/Down or an alt-drag scrub;
+   these buttons make that discoverable. Quiet by default so 40+ fields don't
+   turn into chrome — they pick up a fill on hover. */
+/* The stepper is its own filled box beside the field (reference design), not a
+   pair of glyphs crowded inside it. */
+.panel.dock-right .lin-step {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: var(--input-h);
+  padding: 0 2px;
+  /* Same theme-agnostic neutrals as the fields above, for the same reason. */
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.panel.dock-right .lin-step-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: 15px;
+  height: 18px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: var(--radius);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.panel.dock-right .lin-step-btn:hover {
+  background: var(--panel-bg-4);
+  color: var(--text-hi);
+}
+
+.panel.dock-right .lin-step-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Length field + its stepper box sit on one row; the field takes the space. */
+.panel.dock-right .field.pf .lin-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.panel.dock-right .field.pf .lin-row > .border-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The colour field carries a 200px cap for use in gradient-stop pickers. Inside
+   an inspector row that made it visibly shorter than every other control, so
+   let it fill the column like the rest. */
+.panel.dock-right .field.pf .swatch-input.color-input {
+  max-width: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTROL STATES  ·  right dock only
+   ───────────────────────────────────────────────────────────────────────────
+   Every control in the panel — select, length, number, text, colour, segmented,
+   spacing cell, unit pill — reads from one state matrix:
+
+     empty       quiet border, placeholder at --text-dim
+     filled      same box, value at --text-hi
+     hover       border lifts, fill warms slightly
+     focus       brand ring + brand border  ← was identical to hover before
+     active      fill deepens on press
+     disabled    45% opacity, not-allowed, hover suppressed
+     inherited   value dimmed (cascade), unchanged from today
+     invalid     danger border + danger ring
+
+   The neutral greys stay rgba(128,128,128,…) on purpose: a mid-grey at low
+   alpha darkens a light panel and lightens a dark one, so a control cannot
+   vanish however the tokens resolve (see the note above about that happening
+   twice). Only the focus ring is branded, via --accent-rgb, which each skin
+   already re-points — so focus reads Elementor-pink under the Elementor skin.
+
+   Geometry, colour language and layout are untouched; this only adds states.
+   Self-contained: delete from this banner to the end of the file to revert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.panel.dock-right {
+  --ctl-line: rgba(128, 128, 128, 0.45);
+  --ctl-line-hover: rgba(128, 128, 128, 0.70);
+  --ctl-fill: rgba(128, 128, 128, 0.10);
+  --ctl-fill-hover: rgba(128, 128, 128, 0.16);
+  --ctl-fill-active: rgba(128, 128, 128, 0.24);
+  /* ONE ring, not three. The previous version stacked a solid accent border, a
+     near-opaque grey hairline and a 3px accent glow — 4px of chrome around
+     every focused field, which read as a fat blurry band. It passed a contrast
+     check and looked wrong; the number was not the goal.
+     Now: neutral border at hover strength, plus a single 2px accent ring.
+
+     TWO alphas since the accent went monochrome. A chromatic accent survives a
+     mid alpha — 45% indigo still reads as indigo. White at 45% does not read as
+     a white ring, it reads as a grey haze, and the same at black on the light
+     panel. So the ring splits by JOB:
+       --ctl-ring       the stroke that IS the focus indicator (a 2px solid
+                        outline on fields, steppers, pills, icon buttons) —
+                        near-opaque, so white stays a crisp hairline;
+       --ctl-ring-soft  the 3px lift that sits OUTSIDE an already-solid focus
+                        border on the prompt box — a whisper, because the border
+                        beside it is doing the work. */
+  --ctl-ring: rgba(var(--accent-rgb), 0.85);
+  --ctl-ring-soft: rgba(var(--accent-rgb), 0.14);
+  --ctl-line-focus: var(--ctl-line-hover);
+  /* FLUSH with the panel, on request: the prompt box carries no fill step at
+     all, and its 1px --ctl-line border is the only thing stating the shape.
+     This is the same figure/ground the light theme already used (a #ffffff box
+     on a white panel), so both themes now describe the box the same way.
+
+     History, so nobody "fixes" this back: it was a raised surface first
+     (translucent grey — read as a stray patch), then pure #000 to look recessed.
+     Recessed did not survive contact with the real skins. Against the Elementor
+     dark panel (#1f2124) black separates by 1.30:1 and against the shadcn dark
+     panel (#09090b) by ~1.13:1 — far too little to read as a deliberate well,
+     so it just looked like the same surface with a border on it.
+
+     `var(--panel-bg)`, NOT a hardcoded #1f2124: this block is skin-agnostic, and
+     the dark panel is #1f2124 on Elementor but #1e1e1e on Gutenberg. Hardcoding
+     either one leaves the other a hair off, which is worse than flush — a
+     mismatch too small to look intentional. The token keeps it exactly flush in
+     every skin and theme (Elementor dark #1f2124, Gutenberg dark #1e1e1e, both
+     lights #ffffff). --panel-bg is declared on the [data-uich-composer-skin]
+     ancestor, so it is in scope here — verified resolving, not assumed. */
+  --ctl-card: var(--panel-bg);
+}
+
+.uich-composer-host[data-theme="light"] .panel.dock-right,
+[data-uich-composer-theme="light"] .panel.dock-right,
+.panel.dock-right[data-theme="light"] {
+  /* --ctl-card is NOT re-stated here any more. It is `var(--panel-bg)` in the
+     block above, which already resolves to #ffffff on this theme — so the box
+     stays flush with the white panel exactly as before, with its 1px --ctl-line
+     border stating the shape. Repeating the literal here only gave the two
+     themes a way to drift apart. */
+  /* Lighter line in light mode. The shared 0.45 grey renders as #c6c6c6 on
+     white — 1.71:1, which is a hard rule, and it became the loudest thing in the
+     panel the moment the prompt box went white and the border started carrying
+     the shape on its own. 0.28 renders #dbdbdb at 1.38:1: still unmistakably a
+     line, no longer a rule. Dark is untouched — the same 0.45 grey lands at
+     #3f3f40 there, which is already quiet against a near-black panel. */
+  --ctl-line: rgba(128, 128, 128, 0.28);
+  /* Kept proportional. Left at 0.70 the hover would jump from #dbdbdb to
+     ~#6f6f6f — a step three times the size of the resting line, which would read
+     as a different control rather than the same one hovered. 0.42 keeps a clear
+     step (1.66:1) at the new scale. --ctl-line-focus follows this. */
+  --ctl-line-hover: rgba(128, 128, 128, 0.42);
+}
+
+/* ── hover: lift the border, warm the fill ────────────────────────────────── */
+.panel.dock-right .field.pf .border-input:hover,
+.panel.dock-right .field.pf .input:hover,
+.panel.dock-right .field.pf .select:hover,
+.panel.dock-right .field.pf .textarea:hover,
+.panel.dock-right .field.pf .swatch-input:hover,
+.panel.dock-right .field.pf .combo:hover,
+.panel.dock-right .field.pf .seg:hover {
+  border-color: var(--ctl-line-hover);
+  background-color: var(--ctl-fill-hover);
+}
+
+/* ── focus: a brand ring, unmistakably different from hover ───────────────── */
+/* This is the fix. Before, :hover and :focus-within shared one rule, so a
+   focused field looked exactly like a hovered one and you could not tell where
+   the keyboard was. */
+.panel.dock-right .field.pf .border-input:focus-within,
+.panel.dock-right .field.pf .input:focus,
+.panel.dock-right .field.pf .select:focus,
+.panel.dock-right .field.pf .textarea:focus,
+.panel.dock-right .field.pf .swatch-input:focus-within,
+.panel.dock-right .field.pf .combo:focus-within {
+  border-color: var(--ctl-line-focus);
+  background-color: var(--ctl-fill-hover);
+  /* `outline` rather than a spread box-shadow. A spread shadow draws its outer
+     corner at (radius + spread), so on a 6.4px field the ring's arc is 8.4px
+     while the field's own corner stays 6.4px — the two arcs don't coincide and
+     the corners read as fat blobs. An outline at offset 0 follows the border
+     box exactly, so the stroke is uniform all the way round. */
+  outline: 2px solid var(--ctl-ring);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* ── active: press feedback on anything clickable ─────────────────────────── */
+.panel.dock-right .field.pf .select:active,
+.panel.dock-right .field.pf .swatch-input:active,
+.panel.dock-right .field.pf .combo:active,
+.panel.dock-right .lin-step-btn:active,
+.panel.dock-right .upill-btn:active,
+.panel.dock-right .sb-link:active {
+  background-color: var(--ctl-fill-active);
+}
+
+/* ── disabled: one treatment, and hover must not fight it ─────────────────── */
+.panel.dock-right .field.pf :disabled,
+.panel.dock-right .field.pf .is-disabled,
+.panel.dock-right .field.pf [aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.panel.dock-right .field.pf .border-input:has(:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.panel.dock-right .field.pf .border-input:has(:disabled):hover,
+.panel.dock-right .field.pf .select:disabled:hover,
+.panel.dock-right .field.pf .input:disabled:hover {
+  border-color: var(--ctl-line);
+  background-color: var(--ctl-fill);
+}
+
+/* ── empty vs filled ──────────────────────────────────────────────────────── */
+/* A placeholder must read as absent, a real value as present. They were the
+   same weight, which is why an empty Display select and a set one looked alike. */
+.panel.dock-right .field.pf input::placeholder,
+.panel.dock-right .field.pf textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+.panel.dock-right .field.pf input,
+.panel.dock-right .field.pf select,
+.panel.dock-right .field.pf textarea {
+  color: var(--text-hi);
+}
+
+/* A select showing no value (empty option) sits at placeholder weight. */
+.panel.dock-right .field.pf select:invalid,
+.panel.dock-right .field.pf select.is-empty {
+  color: var(--text-dim);
+}
+
+/* ── invalid ──────────────────────────────────────────────────────────────── */
+.panel.dock-right .field.pf [aria-invalid='true'],
+.panel.dock-right .field.pf .is-invalid {
+  border-color: var(--uich-danger);
+}
+
+.panel.dock-right .field.pf [aria-invalid='true']:focus,
+.panel.dock-right .field.pf [aria-invalid='true']:focus-within,
+.panel.dock-right .field.pf .is-invalid:focus-within {
+  border-color: var(--uich-danger);
+  box-shadow: 0 0 0 2px rgba(255, 122, 122, 0.30);
+}
+
+/* ── keyboard focus on the panel's bare buttons ───────────────────────────── */
+/* Steppers, unit pills, chain toggles and section heads had no visible focus at
+   all — tabbing through the panel was invisible. :focus-visible keeps the ring
+   off mouse clicks. */
+.panel.dock-right .lin-step-btn:focus-visible,
+.panel.dock-right .upill-btn:focus-visible,
+.panel.dock-right .sb-link:focus-visible,
+.panel.dock-right .sb-cell:focus-visible,
+.panel.dock-right .acc-head:focus-visible,
+.panel.dock-right .seg button:focus-visible {
+  outline: 2px solid var(--ctl-ring);
+  outline-offset: 0;
+  border-radius: var(--radius-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPACING + TYPE SCALE  ·  right dock only
+   ───────────────────────────────────────────────────────────────────────────
+   Driven by variables so the scale can be tuned live (see panel-scale.html)
+   and then baked in — no hunting through rules to change a gap.
+
+   Fixes a genuine inversion in the previous values: rows sat 18px apart while a
+   section header sat only 16px from its own content, so every row read as
+   separate as a whole section. Spacing should widen outwards:
+
+       within a row  <  between rows  <  section to section
+
+   Type gains a real step too. A 13px title against an 11.5px label is a 1.5px
+   difference — not enough to register as hierarchy.
+
+   Self-contained: delete from this banner to the end of the file to revert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.panel.dock-right {
+  /* type */
+  --pf-sec-fs: 14px;        /* section title  (was 13)   */
+  --pf-sec-fw: 600;
+  --pf-label-fs: 12px;      /* field label    (was 11.5) */
+  --pf-value-fs: 12px;      /* control value             */
+
+  /* spacing, narrowest to widest */
+  --pf-label-gap: 6px;      /* label → control, inside one row  (was 7)  */
+  --pf-row-gap: 12px;       /* row → row                        (was 18) */
+  --pf-sec-head-gap: 14px;  /* section title → first row        (was 16) */
+  --pf-sec-pad-x: 16px;
+  --pf-sec-pad-b: 18px;     /* section bottom                   (was 20) */
+  --pf-label-w: 96px;
+}
+
+/* ── section header ───────────────────────────────────────────────────────── */
+.panel.dock-right .acc-head {
+  padding: 12px var(--pf-sec-pad-x);
+  font-size: var(--pf-sec-fs);
+  font-weight: var(--pf-sec-fw);
+}
+
+/* ── section body ─────────────────────────────────────────────────────────── */
+.panel.dock-right .section {
+  padding: var(--pf-sec-head-gap) var(--pf-sec-pad-x) var(--pf-sec-pad-b);
+  gap: var(--pf-row-gap);
+}
+
+.panel.dock-right .prop-rows { gap: var(--pf-row-gap); }
+.panel.dock-right .prop-row { row-gap: var(--pf-row-gap); }
+
+/* ── one row ──────────────────────────────────────────────────────────────── */
+.panel.dock-right .field.pf {
+  grid-template-columns: var(--pf-label-w) minmax(0, 1fr);
+  row-gap: var(--pf-label-gap);
+  column-gap: 12px;
+}
+
+.panel.dock-right .field.pf .pf-label {
+  font-size: var(--pf-label-fs);
+}
+
+/* ── control values ───────────────────────────────────────────────────────── */
+.panel.dock-right .field.pf input,
+.panel.dock-right .field.pf select,
+.panel.dock-right .field.pf textarea {
+  font-size: var(--pf-value-fs);
+}
+
+/* ── one corner radius for every control ──────────────────────────────────────
+   The panel was mixing two radii: `.select` takes var(--radius) (6.4px) while
+   anything using Tailwind's `rounded-md` gets calc(var(--radius) - 2px) =
+   4.4px. Side by side in the same row that reads as a mistake, and it also made
+   the focus ring's corner disagree with the field's own. One value, everywhere. */
+.panel.dock-right .field.pf .border-input,
+.panel.dock-right .field.pf .input,
+.panel.dock-right .field.pf .select,
+.panel.dock-right .field.pf .textarea,
+.panel.dock-right .field.pf .swatch-input,
+.panel.dock-right .field.pf .combo,
+.panel.dock-right .field.pf .seg,
+.panel.dock-right .lin-step {
+  border-radius: var(--radius);
+}
+
+/* The inner input must not paint its own, smaller corner inside the wrapper. */
+.panel.dock-right .field.pf .border-input > input,
+.panel.dock-right .field.pf .border-input > select {
+  border-radius: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHAT  ·  right dock only
+   ───────────────────────────────────────────────────────────────────────────
+   The CSS half of the minimal chat pass. Numbers are measured off shadcn/ui's
+   own chat components (Bubble + MessageScroller, June 2026), whose scroller is
+   384px against our 420px dock, so they transfer nearly 1:1:
+
+       turn gap 32   ·   content padding 20   ·   text 14 / 22.75
+       composer radius 18
+
+   NOT reachable from this repo: the message and bubble elements themselves.
+   `.chat-msgs` is the only message-level hook here — the individual turns are
+   rendered AND styled by the Pro bundle, so the user-bubble geometry (10/12
+   padding, r22, max-width 80%) and the ghost assistant treatment have to be
+   done there. Same for removing the sidebar, the follow-up chips and the
+   status bar, which are Pro markup.
+
+   Also fixes four surfaces that are currently INVISIBLE: .chat-composer,
+   .chat-side, .chat-followup and .chat-status paint with --panel-bg-2/-3,
+   which commit a94f4dc pointed at --panel-bg. A gradient between two identical
+   colours is flat; a fill equal to its parent is nothing. They use the same
+   neutral scrim the panel controls use, so they cannot vanish again whatever
+   the tokens resolve to.
+
+   Self-contained: delete from this banner to the end of the file to revert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── message stream ───────────────────────────────────────────────────────── */
+.panel.dock-right .chat-msgs {
+  padding: 20px;
+  gap: 32px;
+}
+
+/* ── composer ─────────────────────────────────────────────────────────────── */
+.panel.dock-right .chat-composer {
+  margin: 0 16px 16px;
+  border-radius: 18px;
+  /* Solid --ctl-card, not the old rgba(128,128,128,0.10): the translucent grey
+     let the panel show through, which is what read as a patch instead of a
+     surface. See the token for why this one is solid. */
+  background: var(--ctl-card);
+  /* Back to the lighter line now that --ctl-card carries the card: a solid fill
+     AND a 0.70-alpha border together read as a heavy slab. The fill does the
+     separating, the hairline just finishes the edge. */
+  border: 1px solid var(--ctl-line);
+  padding: 8px 8px 8px 14px;
+  box-shadow: none;
+}
+
+/* Focus can no longer just darken the border (it is already at hover strength),
+   so it lights the accent ring instead — one ring, on the outer card only. */
+.panel.dock-right .chat-composer:focus-within {
+  border: 1px solid var(--ctl-line);
+  box-shadow: none;
+}
+
+.panel.dock-right .chat-composer .composer-input textarea {
+  font-size: 14px;
+  line-height: 22.75px;
+}
+
+/* ── sidebar ──────────────────────────────────────────────────────────────── */
+/* Kept, not hidden — it is Pro markup. Given a real surface so the split reads
+   as intentional rather than as a stray border.
+
+   OPAQUE, not the 6% wash this used to carry. The history panel is an OVERLAY:
+   `position: absolute; inset: 0 auto 0 0` over the conversation (see the
+   .side-open rule earlier in this file, whose comment already assumed "an opaque
+   bg covers everything cleanly"). At 6% it did not — measured in the editor, the
+   messages read straight through the New chat button and the Recent list, which
+   is what made the panel look broken rather than layered. */
+.panel.dock-right .chat-side {
+  background: var(--panel-bg-2);
+  /* It floats above the conversation, so it needs its own edge. */
+  box-shadow: inset -1px 0 0 var(--panel-line);
+}
+
+/* ── follow-up chips ──────────────────────────────────────────────────────── */
+/* Quietened rather than removed: weight 600 at full text colour made three
+   suggestions shout louder than the reply above them. */
+.panel.dock-right .chat-followups {
+  gap: 6px;
+  /* margin-left is deliberately NOT touched. The 36px in the base rule aligns
+     the chips past the assistant avatar, which is Pro markup I cannot see from
+     this repo — zeroing it here would have knocked them out of alignment with
+     the message text above. */
+}
+
+.panel.dock-right .chat-followup {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-mid);
+  background: rgba(128, 128, 128, 0.08);
+  border-color: var(--ctl-line);
+  border-radius: 20px;
+  padding: 5px 11px;
+}
+
+.panel.dock-right .chat-followup:hover {
+  color: var(--text-hi);
+  background: rgba(128, 128, 128, 0.16);
+}
+
+/* ── status bar ───────────────────────────────────────────────────────────── */
+/* The gradient ran between two colours that now resolve identically, i.e. no
+   gradient at all. One flat scrim plus a hairline does the separating. */
+.panel.dock-right .chat-status {
+  background: rgba(128, 128, 128, 0.12);
+  border-bottom-color: var(--panel-line);
+  padding: 7px 16px;
+  font-size: 11.5px;
+}
+
+/* ── thinking / loading ───────────────────────────────────────────────────── */
+.panel.dock-right .chat-loading {
+  font-size: 14px;
+  line-height: 22.75px;
+  color: var(--text-dim);
+}
+
+/* ── composer: one card, not eight boxes ─────────────────────────────────────
+   The composer was drawing eight nested frames: the outer .chat-composer, then
+   .composer-input with its OWN border, radius and background inside it, then a
+   bordered box around each of the four icon buttons, the chevron, and the send
+   pill. Reference composers draw one card and put exactly two shapes in it.
+
+   Everything below removes a frame rather than adding one. */
+
+/* 2 → the inner frame goes. .composer-input becomes a plain stack; the outer
+   .chat-composer is the only box, so focus rings once instead of twice. */
+.panel.dock-right .chat-composer .composer-input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  gap: 8px;
+}
+
+/* The context row reads as a quiet caption, not a shouting micro-label. */
+.panel.dock-right .chat-composer .composer-ctx-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-dim);
+}
+
+.panel.dock-right .chat-composer .composer-ctx { gap: 4px; }
+
+/* 3–7 → ghost icon buttons: no border, no resting fill, circular, and they
+   only pick up a surface on hover. Five boxes become five glyphs. */
+.panel.dock-right .chat-composer .composer-iconbtn {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-mid);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.panel.dock-right .chat-composer .composer-iconbtn:hover {
+  background: rgba(128, 128, 128, 0.16);
+  color: var(--text-hi);
+}
+
+.panel.dock-right .chat-composer .composer-iconbtn:focus-visible {
+  outline: 2px solid var(--ctl-ring);
+  outline-offset: 0;
+}
+
+/* 8 → send keeps its fill, since it is the one action in the card that should
+   read as primary, but loses the extra height and squares off to a pill. */
+.panel.dock-right .chat-composer .composer-send {
+  height: 28px;
+  border-radius: 999px;
+}
+
+.panel.dock-right .chat-composer .composer-foot {
+  gap: 4px;
+  padding-top: 2px;
+}
+
+/* The textarea now sits directly on the card.
+   `background: transparent !important` is not decoration: a global
+   `.uich-composer-host textarea { background: var(--panel-bg-2) !important }`
+   was overriding the composer's own transparent, and since --panel-bg-2 now
+   resolves to the panel colour it painted a solid rectangle inside the card —
+   the third frame. Only !important beats !important here. */
+.panel.dock-right .chat-composer .composer-input textarea {
+  background: transparent !important;
+  font-size: 14px;
+  line-height: 22.75px;
+  min-height: 56px;
+  padding: 0;
+}
+
+/* ── the context row is a duplicate ───────────────────────────────────────────
+   Pick and Draw render twice: once as labelled buttons in the .composer-ctx row
+   above the field, and again as icon buttons in .composer-foot below it. Same
+   two actions, two places. The foot row is the better home — it sits with the
+   other tools, and it keeps the card to a single column of content.
+
+   Hiding the row also removes the "CONTEXT" label, which was a 10px/700
+   uppercase micro-heading over a field that already says what it wants in its
+   placeholder.
+
+   CAVEAT: this hides Pro markup from CSS, which is a blunt instrument. If a
+   selection hint (.composer-scope-hint) is rendered inside this row rather than
+   beside it, it disappears with it — worth one look in the real editor. The
+   proper fix is deleting the duplicate in the Pro bundle; this is the version
+   reachable from here. */
+.panel.dock-right .chat-composer .composer-ctx {
+  display: none;
+}
+
+/* The scope hint must survive the row above if it happens to live inside it. */
+.panel.dock-right .chat-composer .composer-scope-hint {
+  display: block;
+  font-size: 11px;
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+/* ── foot row: nothing should truncate ───────────────────────────────────────
+   The model dropdown was rendering as "Cl…" — clipped mid-word. The tools sit
+   left, the model and send sit right, and the row wraps rather than shaving
+   characters off a control. */
+/* NOT flex-wrap. The foot has a `flex: 1` spacer between the tools and the
+   model/send cluster; on a wrapping row that spacer expands to fill line one
+   and shoves Send onto a second line, which is what made the composer look
+   broken with a longer model name ("Claude Opus 4.7").
+   One row, and the model name is what yields if space runs out. */
+.panel.dock-right .chat-composer .composer-foot {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.panel.dock-right .chat-composer .composer-foot select,
+.panel.dock-right .chat-composer .composer-foot .combo {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 132px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+/* Send keeps its label — the shortcut hint is what earns the extra width — but
+   it no longer needs to shrink, so it stops truncating too. */
+.panel.dock-right .chat-composer .composer-send {
+  display: inline-flex;
+  /* An ancestor rule sets flex-direction: column on the composer's children, so
+     the button inherited a vertical stack even once it was a flex container —
+     icon, label and shortcut on three separate rows. */
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  /* Without nowrap the icon, label and shortcut stack into three rows as soon
+     as the foot gets tight — the button was rendering as a tall block rather
+     than a pill. */
+  white-space: nowrap;
+  flex: 0 0 auto;
+  min-width: max-content;
+  overflow: visible;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+/* ── send button: one icon, not two ──────────────────────────────────────────
+   The button renders FOUR things: the component's own send icon, a second
+   `.send-ico-plane` icon, the "Send" label, and a ⌘↵ chip.
+
+   That is a skin bug, not a design choice. `.send-ico-plane` was added for the
+   Gutenberg skin, which collapses the button to a 28px square and hides
+   `.composer-send-label` — one icon, no text. Those rules are scoped to
+   [data-uich-composer-skin="gutenberg"], so under brand and Elementor nothing
+   hides either icon and both render either side of the label.
+
+   Outside Gutenberg the label already says "Send", so the plane is redundant.
+   Hiding the plane (rather than the component's own icon) keeps the Gutenberg
+   path untouched — it is the icon that skin deliberately keeps. */
+.panel.dock-right:not([data-uich-composer-skin="gutenberg"]) .composer-send .send-ico-plane {
+  display: none;
+}
+
+/* Gutenberg has the mirror image of the same bug: it hides the label and sizes
+   the plane, but never hid the component's own icon — so its 28px square holds
+   two glyphs on top of each other. There the plane is the one to keep. */
+.panel.dock-right[data-uich-composer-skin="gutenberg"] .composer-send svg:not(.send-ico-plane) {
+  display: none;
+}
+
+/* …and the shortcut chip goes with the label. Gutenberg asks for a 28px square
+   but the chip was still inside it, so the button measured 56px — twice its
+   declared width. Icon-only means icon only. */
+.panel.dock-right[data-uich-composer-skin="gutenberg"] .composer-send .kbd {
+  display: none;
+}
+
+/* The shortcut is a hint, not a second button. */
+.panel.dock-right .composer-send .kbd {
+  margin-left: 6px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 10px;
+  opacity: 0.65;
+}
+
+/* ── composer: no inner focus ring, no inner fill ────────────────────────────
+   Two things were still drawing a box inside the card.
+
+   1. `.composer-input:focus-within` paints `box-shadow: 0 0 0 3px accent/.16`.
+      Setting `border: 0` on that element earlier removed its border but did
+      nothing to the shadow, so a 3px accent glow still outlined the inner
+      wrapper the moment the field was focused — a second ring inside the card's
+      own one.
+
+   2. The textarea kept a fill from the global
+      `.uich-composer-host textarea { background: var(--panel-bg-2) !important }`.
+      That is overridden above, but the focused state re-asserted a surface, so
+      it is pinned here for every state.
+
+   Focus belongs to the card, once. Everything inside it is flat. */
+.panel.dock-right .chat-composer .composer-input,
+.panel.dock-right .chat-composer .composer-input:focus-within {
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+}
+
+/* Scoped to `.chat-composer textarea`, NOT `.composer-input textarea`: the
+   earlier rule assumed the field is always wrapped in `.composer-input`, and if
+   Pro renders it as a direct child the selector never matches — leaving the
+   global `.uich-composer-host textarea { background: var(--panel-bg-2)
+   !important }` to paint the dark rectangle. Matching on the composer itself
+   covers both shapes. */
+.panel.dock-right .chat-composer textarea,
+.panel.dock-right .chat-composer textarea:focus,
+.panel.dock-right .chat-composer textarea:focus-visible,
+.panel.dock-right .chat-composer textarea:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: none !important;
+}
+
+/* Third copy of this selector in this file — see the two above. All three must
+   agree or whichever lands last reinstates the grey fill. Focus lights the
+   accent ring; the resting border is already at hover strength, so a border
+   shift alone would be invisible. */
+.panel.dock-right .chat-composer:focus-within {
+  border-color: rgba(var(--accent-rgb), 0.90);
+  background: var(--ctl-card);
+  box-shadow: 0 0 0 3px var(--ctl-ring-soft);
+}
+
+/* ── portalled menus must stay inside the dock ────────────────────────────────
+   The model picker opens past the panel's right edge, clipping its second tab.
+   Its markup lives in the Pro bundle, but every portal-bearing component in the
+   composer renders into `.uich-portal-root` (see components/ui/portal-context),
+   which IS ours — so a width cap can be applied there even though the menu
+   itself cannot be targeted directly.
+
+   This is a guard, not the real fix. A menu anchored to a trigger near the
+   panel's right edge will still be anchored there; capping the width only stops
+   it running off. Genuine centring is `align="center"` plus a collision
+   boundary on the Pro component — CSS cannot move a Radix-positioned popper
+   without fighting its inline transform, which would break every other menu.
+
+   UNVERIFIED: I cannot see the model picker render from here, so I cannot
+   confirm it uses this portal. Worth one look in the editor. */
+.uich-portal-root [role='listbox'],
+.uich-portal-root [role='menu'],
+.uich-portal-root [data-radix-popper-content-wrapper] > * {
+  max-width: min(320px, calc(var(--uich-dock-w, 420px) - 24px));
+}
+
+/* ── the composer field is flat — beating an ID selector ─────────────────────
+   Inspected in the real Elementor editor rather than guessed at. Three earlier
+   attempts failed for one reason: the dark fill comes from rules carrying an
+   **ID**, in the separately-enqueued panel stylesheet
+   (uichemy-composer/assets/css/uichemy-composer-editor-panel.css):
+
+     #uichemy-composer-floating-panel .uich-composer-host textarea
+         background: var(--panel-bg-2) !important
+     .uichemy-composer-floating-panel input…, textarea, select
+         background-color: var(--uichemy-composer-input-bg) !important
+         border: 1px solid var(--uichemy-composer-border-color) !important
+
+   `!important` on both sides means specificity decides, and (1,2,1) with an ID
+   beats (0,4,1) of classes however many classes are stacked. Adding the same ID
+   here takes it to (1,5,1), which wins without touching that stylesheet — it
+   styles every other panel input and must keep doing so.
+
+   Scoped to `.chat-composer` so only the chat field is affected. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer textarea,
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer textarea:hover,
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer textarea:focus,
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer textarea:focus-visible {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Same treatment for the structural wrappers around the field. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer > div,
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer .composer-input,
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer .composer-input:focus-within {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The card is defined by its BORDER, not a fill. Mirrors the class-scoped rule
+   above — this copy exists only to carry the ID needed to outrank the legacy
+   input stylesheet described at the top of this block, so the two must agree or
+   the grey comes back through this one. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer {
+  background: var(--ctl-card) !important;
+  border: 1px solid var(--ctl-line) !important;
+}
+
+/* Focus keeps the SAME normal border (no accent change) and drops the glow —
+   border stays visible in both states, no shadow. [ui-ux] */
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer:focus-within {
+  background: var(--ctl-card) !important;
+  border: 1px solid var(--ctl-line) !important;
+  box-shadow: none !important;
+}
+
+/* ── send: icon only ─────────────────────────────────────────────────────────
+   The label and the ⌘↵ chip go, leaving the paper-plane on its own — the same
+   treatment the Gutenberg skin already used, now applied everywhere. A square
+   button matching the other three foot icons, so the row reads as four glyphs
+   with the last one filled.
+
+   Carries #uichemy-composer-floating-panel because the panel's own stylesheet
+   styles buttons through that ID; a class-only selector loses to it however
+   many classes are stacked (learned the hard way on the textarea fill). */
+#uichemy-composer-floating-panel .panel.dock-right .composer-send {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  gap: 0;
+  flex: 0 0 auto;
+  border-radius: 999px;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .composer-send .composer-send-label,
+#uichemy-composer-floating-panel .panel.dock-right .composer-send .kbd {
+  display: none !important;
+}
+
+/* The remaining glyph centres itself in the square. */
+#uichemy-composer-floating-panel .panel.dock-right .composer-send svg {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+/* ── foot row: one height, one corner ────────────────────────────────────────
+   Inspected in the running editor. The three tool buttons are shadcn Buttons
+   carrying Tailwind utility classes, not `.composer-iconbtn` — so they are
+   targeted structurally here. They were already ghost (transparent, no border),
+   which is why they looked right; the earlier `.composer-iconbtn` rules simply
+   never matched anything in the chat composer.
+
+   Two real mismatches remained:
+     · `.model-dd` renders 32px tall against 28px buttons — a 4px step in the row
+     · the tool buttons sit at radius 4 while send is now a circle */
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot > button:not(.composer-send) {
+  border-radius: 999px;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot > button:not(.composer-send):hover {
+  background: rgba(128, 128, 128, 0.16);
+}
+
+/* Match the button height so the row sits on one baseline.
+   Scoped to `.model-btn`, NOT `> *`. The open `.model-menu` is also a direct
+   child of `.model-dd`, so the wildcard was pinning the MENU to 28px as well —
+   and the menu is `overflow: hidden`, so it clipped to its tab row and nothing
+   below it ever rendered. The dropdown looked broken rather than short. */
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot .model-dd,
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot .model-dd > .model-btn {
+  height: 28px;
+  min-height: 28px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RADIUS SCALE  ·  right dock only
+   ───────────────────────────────────────────────────────────────────────────
+   Audited in the running editor: 62 rounded shapes across the panel used FIVE
+   different radii —
+
+     6px  ×41   fields, inputs, the mode switch      ← the panel's own --radius
+     4px  ×16   icon buttons, chips, a textarea shell
+     2px  ×2    segmented items
+     5px  ×2    the spacing box (.sb-mar / .sb-pad)
+     8px  ×1    a segmented track
+
+   6px is what the panel already declares and what 2/3 of the shapes use, so
+   everything lines up on the existing two-step token scale rather than a new
+   value:
+
+     --radius     6px   every container, field, track and box
+     --radius-sm  4px   small items INSIDE one of those (≤24px tall)
+
+   The strays come from Tailwind's rounded-sm/md/lg resolving off shadcn's own
+   --radius (which is 0.4rem here, so rounded-md = 4.4px, not 6px) plus a few
+   hand-written 5px/8px. Mapping the utilities onto our scale fixes all of them
+   in one place instead of chasing each component.
+
+   rounded-full / 999px is deliberately untouched — pills and circles stay round.
+
+   Self-contained: delete from this banner to the end of the file to revert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Containers, fields, tracks, boxes. */
+#uichemy-composer-floating-panel .panel.dock-right .rounded,
+#uichemy-composer-floating-panel .panel.dock-right .rounded-md,
+#uichemy-composer-floating-panel .panel.dock-right .rounded-lg,
+#uichemy-composer-floating-panel .panel.dock-right .rounded-xl,
+#uichemy-composer-floating-panel .panel.dock-right .sb-mar,
+#uichemy-composer-floating-panel .panel.dock-right .sb-pad {
+  border-radius: var(--radius);
+}
+
+/* Small items sitting inside a container — segmented buttons, the drag handle,
+   the unit pill, spacing cells. One step tighter so they nest visually.
+   NOT var(--radius-sm): measured in the editor, that token resolves to
+   `calc(6px - 4px)` = 2px inside the panel, not the 4px the base file declares
+   — shadcn's own --radius is re-derived there. Using it produced ten 2px cells.
+   4px is written literally so the step is what it says. */
+#uichemy-composer-floating-panel .panel.dock-right .rounded-sm,
+#uichemy-composer-floating-panel .panel.dock-right .lin-glyph,
+#uichemy-composer-floating-panel .panel.dock-right .upill-btn,
+#uichemy-composer-floating-panel .panel.dock-right .seg button,
+#uichemy-composer-floating-panel .panel.dock-right .sb-cell {
+  border-radius: 4px;
+}
+
+/* Pills and circles keep their shape. */
+#uichemy-composer-floating-panel .panel.dock-right .rounded-full,
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot > button {
+  border-radius: 999px;
+}
+
+/* ── the Chat tab, on the same scale ────────────────────────────────────────
+   The Editor tab came down to 4px / 6px, but Chat has its own set: 12px on
+   .empty-mark, 7px on .empty-card-step, 2px on the copy buttons, and 18px on
+   the composer card. Audited in the editor, same as above.
+
+   Rather than force everything to 6px — which would flatten the composer card
+   and the empty-state cards into looking like fields — the scale gets a third
+   step for large containers:
+
+     4px   items inside a control
+     6px   controls, fields, boxes
+     12px  large containers (composer card, empty-state cards)
+
+   Each step is roughly a doubling, so the three read as deliberate levels
+   rather than near-misses like 5/6/7/8. */
+#uichemy-composer-floating-panel .panel.dock-right .empty-card-step,
+#uichemy-composer-floating-panel .panel.dock-right .empty-card-providers {
+  border-radius: var(--radius);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd-copy,
+#uichemy-composer-floating-panel .panel.dock-right .agent-prompt-copy {
+  border-radius: 4px;
+}
+
+/* Large containers. The composer card was 18px, taken from the shadcn chat
+   reference, which sat oddly next to 6px fields — 12px keeps it soft without
+   breaking the ladder. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-composer,
+#uichemy-composer-floating-panel .panel.dock-right .empty-mark,
+#uichemy-composer-floating-panel .panel.dock-right .empty-card {
+  border-radius: 12px;
+}
+
+/* ── Option B header: tabs only ──────────────────────────────────────────────
+   The panel used to open with three stacked segmented controls — measured at
+   214px of chrome before any content in a 300px panel. The top bar (brand mark
+   + Design/Developer switch) is collapsed in composer-app.jsx for the right
+   dock, and the switch re-renders at the top of the Editor body, which is the
+   only surface it governs.
+
+   What is left is one 36px row of tool tabs, styled as a pill rather than a
+   full-width strip with a 2px underline — the same shape shadcn uses for its
+   own 30px tab strip, which is what we measured against. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  min-height: 36px;
+  /* Equal on all four sides, and the same 16px the sections use — so the strip's
+     left edge lines up with the field labels below it instead of sitting 4px
+     inside them. Was `8px 12px`, which measured 9px top against 12px sides. */
+  margin: 16px;
+  padding: 3px;
+  border: 0;
+  /* 6px, not a 999px pill: the panel's radius scale is 6px for containers and
+     4px for the items inside them, and a fully round track next to 6px fields
+     was the odd one out. */
+  border-radius: var(--radius);
+  background: rgba(128, 128, 128, 0.14);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab {
+  flex: 1;
+  display: inline-flex;
+  /* The base rule is `flex-direction: column` — that is what stacked the icon
+     above the label and left the glyphs clipped at the top of the row. Setting
+     alignment alone does not undo it. */
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-mid);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+/* Labels only. At 26px tall a 16px glyph plus a label is cramped, and the three
+   tabs read faster as words — Chat / Editor / Code are not shapes anyone scans
+   for by icon. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab > svg {
+  display: none;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab:hover {
+  color: var(--text-hi);
+}
+
+/* Active tab lifts to the panel surface, so the row reads as a track with a
+   raised thumb instead of an underlined strip. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab.active {
+  background: var(--panel-bg);
+  color: var(--text-hi);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* The old strip drew its active state with a bottom border and an ::after bar. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab::after {
+  display: none;
+}
+
+/* The re-homed mode switch sits as a quiet row above the inspector. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-mode-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px 0;
+}
+
+/* ── colour field: an inset chip, not a fused block ──────────────────────────
+   Ours renders the swatch as a 30px full-height cell with `border-right` acting
+   as a divider, so the field reads as two boxes welded together and the swatch
+   corners fight the field's own radius.
+
+   The reference treats it as a small rounded chip floating inside one field:
+   inset from every edge, its own 4px corner, no divider, hex text beside it.
+
+   `.sw` and `.swatch-trigger` are both used (different call sites), so both are
+   matched — same as the base rule. */
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input {
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 5px;
+  overflow: visible;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input .sw,
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input .swatch-trigger {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-right: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  /* Tighter checker so the transparency pattern still reads at 18px — the 8px
+     squares of the full-height version showed barely one tile in a chip. */
+  background:
+    linear-gradient(45deg, var(--panel-bg-4) 25%, transparent 25%, transparent 75%, var(--panel-bg-4) 75%) 0 0 / 6px 6px,
+    linear-gradient(45deg, var(--panel-bg-4) 25%, transparent 25%, transparent 75%, var(--panel-bg-4) 75%) 3px 3px / 6px 6px;
+}
+
+/* The colour itself sits inside the chip, so it picks up the chip's corner. */
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input .sw::before,
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input .swatch-trigger::before {
+  border-radius: 4px;
+}
+
+/* The hex no longer needs the left padding that cleared the old divider. */
+#uichemy-composer-floating-panel .panel.dock-right .swatch-input > input {
+  padding-left: 0;
+  background: transparent;
+}
+
+/* ── chat status becomes a drawer under the composer ─────────────────────────
+   Mechanism measured off ChatGPT's cowork tray (768px card, radius 28):
+
+     tray  728 wide · inset 20px each side · radius 0 0 16 16
+           bg black @ 3% · margin-top -20px · padding-top 20px · overflow clip
+
+   The negative top margin slides the tray's box UNDER the card by exactly its
+   own top padding, so the content lands below the card with no gap at all and
+   the hidden top edge is clipped. That is the whole trick — not a sibling
+   sitting below with the gap tuned to zero.
+
+   Ours: `.chat2-main` is already a flex column holding
+   `.chat-status → .chat2-body → .chat-composer`, so `order` moves the status
+   row beneath the composer without touching the Pro markup. It carries the
+   history button, the connection chip and the Widget/Page selector — the same
+   class of content the reference tray holds. Scaled to our 12px card radius and
+   16px side margins: 22px tray margins (6px inset) and a 12px tuck. */
+#uichemy-composer-floating-panel .panel.dock-right .chat2-main > .chat2-body { order: 1; }
+
+#uichemy-composer-floating-panel .panel.dock-right .chat2-main > .chat-composer {
+  order: 2;
+  margin-bottom: 0;
+  /* the card must paint over the drawer's hidden top edge */
+  position: relative;
+  z-index: 1;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .chat2-main > .chat-status {
+  order: 3;
+  margin: -12px 22px 16px;
+  padding: 19px 10px 7px;
+  border: 0;
+  border-radius: 0 0 12px 12px;
+  background: rgba(128, 128, 128, 0.12);
+  overflow: clip;
+  position: relative;
+  z-index: 0;
+  gap: 8px;
+  font-size: 11.5px;
+}
+
+/* One row. The base `.chat-status` is `flex-wrap: wrap` and the Widget/Page
+   selector sits in a `w-full` wrapper, so it dropped to a second line and made
+   the drawer twice as tall as the reference's. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-status {
+  flex-wrap: nowrap;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .chat-status > div {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  margin-left: auto;
+}
+
+/* Compact the selector so it reads as one control in the drawer rather than a
+   full-width segmented bar. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-status .rounded-lg {
+  margin-left: auto;
+  padding: 2px;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .chat-status .rounded-lg > button {
+  height: 22px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  border-radius: 4px;
+}
+
+/* ── Editor body: switch at its natural height, inspector takes the rest ─────
+   `.panel-body` is a single-cell grid (`grid-template-rows: 1fr`). The
+   re-homed mode switch and the Inspector share that one cell via this flex
+   column, so the switch stays 32px instead of being stretched by the 1fr row —
+   which is what put 147px of dead space above the inspector. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-editor-stack {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .panel-editor-stack > .panel-mode-row {
+  flex: 0 0 auto;
+}
+
+/* The Inspector's own wrapper must be the part that scrolls. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-editor-stack > *:not(.panel-mode-row) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .panel-mode-row {
+  padding: 10px 16px 2px;
+}
+
+/* Belt and braces: the drawer must never clip its own contents, whatever ends
+   up in it. The selector yields before anything gets cut. */
+#uichemy-composer-floating-panel .panel.dock-right .chat-status {
+  overflow-x: clip;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .chat-status .rounded-lg {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* ── connect flow, layout B ──────────────────────────────────────────────────
+   Markup lives in the Pro bundle (editor/src/composer-chat.jsx, AgentPairing);
+   the styles live here because every other chat class does.
+
+   Replaces two expanded setup blocks and an "or" divider with one action and
+   one status line. Measured before: 898px of content in a ~600px panel, the
+   command clipped to 147px, and no feedback that anything was happening. */
+
+/* The command wraps in full — it carries a password, so it has to be readable
+   before anyone pastes it. */
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 8px 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--ctl-line);
+  background: rgba(128, 128, 128, 0.10);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd code {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-hi);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd-secret {
+  color: var(--text-dim);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd-reveal {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  text-decoration: underline;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-cmd-reveal:hover {
+  color: var(--text-mid);
+}
+
+/* One status line, swapping between hint and live wait. */
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  background: rgba(128, 128, 128, 0.07);
+  font-size: 12.5px;
+  color: var(--text-mid);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-pulse {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgb(var(--accent-rgb));
+  animation: uich-pair-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes uich-pair-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+/* The assistant route and the requirement drop to the bottom as quiet text. */
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 10px;
+  border-top: 1px solid var(--panel-line);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-alt {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-mid);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-alt:hover {
+  color: var(--text-hi);
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .agent-pairing-req {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* Prefers-reduced-motion: the pulse is decorative, so it stops. */
+@media (prefers-reduced-motion: reduce) {
+  #uichemy-composer-floating-panel .panel.dock-right .agent-pairing-pulse {
+    animation: none;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE TABBING LANGUAGE
+   ───────────────────────────────────────────────────────────────────────────
+   Every segmented control in the panel — the Chat/Editor/Code strip, the
+   Design/Developer switch, the state and breakpoint tabs, the inline .seg
+   toggles, the section-tab chips, the Pro bundle's Widget/Page pill — now reads
+   the same way: a GREY track with a lighter GREY active chip sitting on it.
+
+   The three languages this replaces:
+     · Chat/Editor/Code   grey track (rgba(128,128,128,.14)), near-black active
+                          tab (--panel-bg). Inverted: the ACTIVE tab was the
+                          darkest thing in the row, so the row read as a hole
+                          with two lit shoulders. This is the one that prompted
+                          the change.
+     · .seg / .state-tabs / .responsive-tabs / .field.pf .bg-muted
+                          light-wash track (--panel-bg-2) with a lighter chip
+                          (--panel-bg-4) — right direction, wrong ground: the
+                          track sat ABOVE the panel instead of below it.
+     · .mode-seg           active half filled solid --foreground with inverted
+                          ink. A different figure/ground from both of the above.
+
+   Colours come from --seg-track / --seg-track-line / --seg-thumb /
+   --seg-thumb-hover / --seg-thumb-shadow (composer.css, dark in :root and light
+   in the theme block below it), so a skin can re-point the language in one place.
+
+   The hairline is an INSET box-shadow, never a border: several of these tracks
+   already have a border contributing to their layout, and swapping its colour
+   keeps the geometry identical — adding a border where there wasn't one would
+   move every tab strip 2px.
+
+   Geometry, radii, sizes and type are untouched. This is colour only.
+   Self-contained: delete from this banner to the end of the file to revert.
+   Last import in index.jsx, so it needs no !important except where a Tailwind
+   utility class is the thing being overridden.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · tracks ───────────────────────────────────────────────────────────── */
+.panel-tabs-strip,
+/* `.panel.dock-right .panel-tabs { background: var(--panel-bg-2) }` earlier in
+   this file is 0,3,0 and outranks a bare `.panel-tabs-strip`, so the dock needs
+   its own copy at matching weight (later in source, so it wins) as well as the
+   ID-carrying one that outranks the Option-B header block below it. */
+.panel.dock-right .panel-tabs-strip,
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip,
+.state-tabs,
+.responsive-tabs,
+.mode-seg,
+.seg,
+.iv2 .iv2-tablist,
+.field.pf .bg-muted:has(button),
+/* Pro bundle: SEG_WRAP_CLS is `inline-flex … rounded-lg bg-muted p-0.5`, and the
+   Widget/Page pill is the one that reaches the user. `:has(> button)` keeps this
+   off every other bg-muted surface — chat bubbles (.msg2.ai) are bg-muted too. */
+.uich-tw .bg-muted.rounded-lg:has(> button) {
+  background: var(--seg-track);
+  background-color: var(--seg-track);
+  border-color: transparent;
+  border-radius: var(--seg-radius);
+  box-shadow: inset 0 0 0 1px var(--seg-track-line);
+}
+
+/* ── 2 · active chip ──────────────────────────────────────────────────────── */
+.panel-tab.active,
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab.active,
+[data-uich-composer-skin="gutenberg"] .panel.dock-right .panel-tab.active,
+.state-tabs button.on,
+.responsive-tabs button.on,
+.mode-seg-btn.on,
+.mode-seg-btn.on:hover,
+[data-uich-composer-skin="gutenberg"] .mode-seg-btn.on,
+[data-uich-composer-skin="gutenberg"] .mode-seg-btn.on:hover,
+.seg button.on,
+.stab-tab.on,
+.ed-pane-tools .stab-tab.on,
+.iv2 .iv2-tab[data-state='active'],
+.field.pf .bg-muted:has(button) button.bg-background,
+.uich-tw .bg-muted.rounded-lg:has(> button) > button.bg-background {
+  background: var(--seg-thumb);
+  background-color: var(--seg-thumb);
+  color: var(--text-hi);
+  border-color: transparent;
+  border-radius: var(--seg-radius-inner);
+  /* Hairline FIRST, drop shadow second: the inset ring draws the chip's edge and
+     the shadow only separates it from the track. One box-shadow list, because a
+     border would change the chip's box and shift the label by a pixel. */
+  box-shadow: inset 0 0 0 1px var(--seg-thumb-line), var(--seg-thumb-shadow);
+}
+
+/* ── 3 · hover on the inactive segments ───────────────────────────────────── */
+/* A wash at a third of the chip's weight: enough to answer the pointer, not
+   enough to be mistaken for the active tab. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab:not(.active):hover,
+.panel-tabs-strip .panel-tab:not(.active):hover,
+.state-tabs button:not(.on):hover,
+.responsive-tabs button:not(.on):hover,
+.mode-seg-btn:not(.on):hover,
+[data-uich-composer-skin="gutenberg"] .mode-seg-btn:not(.on):hover,
+.seg button:not(.on):hover,
+.stab-tab:not(.on):hover,
+.iv2 .iv2-tab:not([data-state='active']):hover,
+.uich-tw .bg-muted.rounded-lg:has(> button) > button:not(.bg-background):hover {
+  background: var(--seg-thumb-hover);
+  background-color: var(--seg-thumb-hover);
+  color: var(--text-hi);
+  border-radius: var(--seg-radius-inner);
+}
+
+/* ── 4 · section-tab chips ────────────────────────────────────────────────── */
+/* These are loose chips rather than one track, so they have no track to sit in —
+   they get the same ink instead: transparent at rest, the wash on hover, the
+   chip when on. Their own border would draw a box round each one and undo the
+   effect, so it goes transparent. The `padding` shift on hover/on is theirs and
+   is left alone. */
+.stab-tab {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* ── 5 · .mode-seg loses its inverted ink ─────────────────────────────────── */
+/* The active half used to be a solid --foreground block with --background text.
+   With the chip treatment the label is normal panel ink like every other active
+   tab, and the track's own inset ring replaces the one it drew itself. */
+.mode-seg {
+  overflow: hidden;
+}
+
+/* ── 6 · concentric radii ─────────────────────────────────────────────────── */
+/* Every segment takes the inner radius whether it is active or not. Without
+   this only the active chip is rounded, so the moment you switch tabs the
+   corner shape jumps from square to round — visible as a flicker on the tab you
+   just left. The track's own radius is set alongside its fill in 1 · above,
+   except for these families whose radius is declared on a different rule. */
+.panel-tabs-strip .panel-tab,
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab,
+.state-tabs button,
+.responsive-tabs button,
+.mode-seg-btn,
+.seg button,
+.stab-tab,
+.iv2 .iv2-tab,
+.uich-tw .bg-muted.rounded-lg:has(> button) > button {
+  border-radius: var(--seg-radius-inner);
+}
+
+.panel-tabs-strip,
+.panel.dock-right .panel-tabs-strip,
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip,
+.state-tabs,
+.responsive-tabs,
+.mode-seg,
+.seg,
+.iv2 .iv2-tablist,
+.field.pf .bg-muted:has(button) {
+  border-radius: var(--seg-radius);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODEL MENU  ·  keep it inside the panel
+   ───────────────────────────────────────────────────────────────────────────
+   `.model-menu` is `position: absolute` against `.model-dd`, i.e. against the
+   small "Claude Op…" BUTTON in the prompt footer. With a fixed 260px width it
+   hangs off whichever side that button happens to sit near, and the panel clips
+   the overhang — in the right dock that means the second tab ("WP Connectors")
+   is cut in half.
+
+   The Gutenberg skin already fixed this, and the fix is skin-independent: take
+   the button out of the positioning chain so the menu measures against
+   `.chat-composer` — the prompt box, which by definition spans the panel — and
+   pin it to both of that box's edges instead of giving it a width. It then fits
+   at any panel width, and still opens directly above the prompt box.
+
+   Note the `.uich-portal-root` width cap earlier in this file was never reaching
+   this menu. Its comment guessed the model picker was portalled; it is not, it
+   renders inline inside `.model-dd`. That cap still does real work for the menus
+   that ARE portalled (the scope dropdown), so it stays — it just was never the
+   fix for this one.
+
+   `.model-dd.full` and `.model-dd.drop-down` are matched too. `.full` set an
+   explicit `width: 100%` at 0,3,0, which outranks a bare `.model-menu`, and
+   `.drop-down` flips the menu below the box — both need to survive the switch
+   from width-based to edge-pinned sizing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.model-dd,
+.model-dd.full {
+  position: static;
+}
+
+.model-menu,
+.model-dd.full .model-menu {
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  bottom: calc(100% + 6px);
+}
+
+.model-dd.drop-down .model-menu {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+
+/* The button keeps its own stacking context so the menu's shadow lands over the
+   prompt box rather than under the footer controls. */
+.model-menu {
+  z-index: 90;
+}
+
+/* ---- Design / Developer switcher: bar rides the panel's own separator ------
+   The top bar carries `padding: 12px` and its own full-width border-bottom, and
+   the TabsList drew a SECOND, shorter rule of its own. The result was a short
+   underline floating 12px above the real separator, with bare space beside it.
+   Drop the list's rule, then stretch the list through the bar's bottom padding
+   so its edge meets the bar's border — the sliding bar (bottom:-1px) then lands
+   exactly on that separator and runs the full width of the row. */
+.panel.dock-right .tab-tools .mode-switch {
+  flex: 1 1 auto;
+  width: 100%;
+  border-bottom: 0;
+  margin-bottom: -12px;
+  padding-bottom: 12px;
+  height: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STOP  ·  icon only, same circle as send
+   ───────────────────────────────────────────────────────────────────────────
+   Stop replaces Send in the same slot while the agent is working, so it has to
+   be the same shape. It was a labelled pill ("■ Stop"), which meant the footer
+   row changed width the moment a message was sent, and put a second piece of
+   text in a row that is otherwise four glyphs.
+
+   Right dock only, exactly like the send treatment above it — the bottom dock
+   keeps both buttons labelled, so the pair stays consistent in each layout.
+
+   Carries #uichemy-composer-floating-panel for the same reason send does: the
+   panel's own stylesheet styles buttons through that ID, and a class-only
+   selector loses to it however many classes are stacked.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#uichemy-composer-floating-panel .panel.dock-right .composer-stop {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  /* !important because the button carries Tailwind's `px-2.5`. */
+  padding: 0 !important;
+  gap: 0;
+  flex: 0 0 auto;
+  border-radius: 999px;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .composer-stop .composer-stop-label {
+  display: none !important;
+}
+
+/* The red hover has to survive the generic foot-button hover
+   (`.composer-foot > button:not(.composer-send):hover`, grey). That one is
+   (1,5,1) — the extra point is its `button` ELEMENT — so a class-only match at
+   (1,5,0) loses no matter that this block sits later in the file. Measured, not
+   assumed: with `.composer-stop:hover` the border and text went red and the
+   background stayed grey, because background was the only property the two
+   rules both declared. Naming `button` here levels it at (1,5,1), and source
+   order then decides. */
+#uichemy-composer-floating-panel .panel.dock-right .composer-foot > button.composer-stop:hover {
+  background: rgba(220, 60, 60, 0.22);
+  border-color: rgba(220, 60, 60, 0.55);
+  color: #f06060;
+}
+
+/* A touch larger with no label beside it to balance against. */
+#uichemy-composer-floating-panel .panel.dock-right .composer-stop .stop-icon {
+  width: 9px;
+  height: 9px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SLIDING PILL  ·  tool tab strip (Chat / Editor / Code)
+   ───────────────────────────────────────────────────────────────────────────
+   The active state used to be a background on the tab itself, so switching tabs
+   made the chip vanish in one cell and appear in another — two things blinking
+   rather than one thing moving.
+
+   The pill itself comes from `.seg-slide` (composer.css), the same travelling
+   chip every other segmented control in the composer uses, measured by
+   useSlidingSeg. All that is left here is what the strip needs on top of it:
+   the tabs stop drawing chips of their own, and the pill's corner is squared up
+   with the tabs'. Everything else — fill, hairline, shadow, easing — is shared,
+   so the strip cannot drift from the rest of the panel.
+
+   Self-contained: delete from this banner to the end of the file to revert, and
+   drop `seg-slide` + the ref + the data-state props in composer-app.jsx.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The chip moved to the track, so the tab keeps only its ink. Without this the
+   old per-tab background would sit on top of the pill as a second, stationary
+   chip. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab.active {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* The tabs are `flex: 1`, but `min-width: auto` still stops one shrinking below
+   its own label — so a Chat tab carrying a PRO badge grows and the others
+   shrink. The pill hugs whatever it measures either way, but the tabs should
+   stay even. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip .panel-tab {
+  min-width: 0;
+}
+
+/* The strip's items are 4px (set with the rest of the radius scale above), so
+   the pill matches them rather than taking the wider --seg-radius-inner the
+   Tailwind-classed segments use. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip::before {
+  border-radius: 4px;
+}
+
+/* The inspector head is [mode switch][Attributes][Mark as]. A dedicated
+   .head-spacer used to push the two buttons right; letting the tab row grow
+   does the same job with one less element, and has the side benefit of running
+   the tabs' underline rule across the whole row instead of stopping it in a
+   stub after "Developer". */
+.panel.dock-right .inspector-head .mode-switch {
+  /* The DS `line` TabsList ships as `inline-flex … justify-start`, so it
+     shrink-wraps to the two labels and pins them left — which left the tabs no
+     spare width to divide however hard `[role=tab]` tried to grow. Override the
+     display so it fills its row, and pin width:100% because the list's parent
+     (Radix's Tabs div) is a plain block, not a flex container, so `flex:1 1 auto`
+     alone never stretched it. */
+  display: flex;
+  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Design / Developer split the full row evenly. `.inspector-head__tabs` is a
+   100%-wide row of its own, and the list above fills it — but the two line tabs
+   still hugged their labels on the left, leaving the rest of the row empty. Let
+   each trigger grow to an equal share and centre its label, so the pair spans
+   the whole width and each underline sits under its own half. Scoped to the
+   inspector head only: the `.tab-tools` variant is deliberately content-sized
+   and left-aligned (see the note near the top of this file). */
+.panel.dock-right .inspector-head .mode-switch [role='tab'] {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+/* Right-dock actions row: the tag / Mark as controls, re-homed from the head to
+   sit BELOW the class strip so the panel reads classes-first. The element's tag
+   is pinned LEFT and Mark as pushed to the right edge — the tag is what the row
+   is primarily about, so it leads and the dynamic-construct control trails.
+   Closed off with the same hairline the class strip carries so the two read as
+   one "what is this element" group above the section list. */
+.panel.dock-right .insp-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--panel-line);
+}
+.panel.dock-right .insp-actions-row .insp-head-tag { order: 1; margin-right: auto; }
+.panel.dock-right .insp-actions-row .insp-head-mark { order: 2; }
+
+/* ── section header: more air above the label ────────────────────────────────
+   `.acc-head` is set three times in this file, all at 0,3,0 — 11px, then 13px,
+   then 12px — so the last one wins and the header sat at 12px top and bottom.
+   This lifts the top to 18px, which reads as space between a section's label and
+   the divider closing the section above it.
+
+   padding-TOP only, deliberately: the shorthand copies above still own the other
+   three sides, so the horizontal gutter stays on --pf-sec-pad-x and the bottom
+   stays at 12px, keeping the label closer to its own fields than to the section
+   before it. Applies in the Gutenberg skin too — its own header rule sets only
+   padding-left/right, on purpose, and so does not reset this. */
+.panel.dock-right .acc-head {
+  padding-top: 18px;
+}
+
+/* ── inspector head: no bottom padding ───────────────────────────────────────
+   The head is the slim strip carrying the Design/Developer switch. Its base rule
+   in composer.css is `padding: 7px 14px`; dropping the bottom to 0 pulls the
+   divider up against the switch instead of leaving a 7px shelf under it.
+
+   padding-BOTTOM only, so the base rule keeps owning the top and the 14px
+   horizontal gutter. Scoped to the right dock, where this strip actually renders
+   the switch — the bottom dock's head is a Developer-only actions row and is
+   left as it was. */
+.panel.dock-right .inspector-head {
+  padding-bottom: 0;
+  /* Grey divider gone too. The head now runs straight into the first section,
+     and the only thing separating them is that section's own 18px top padding —
+     which is enough, and is why the line was reading as a second separator
+     stacked on top of real space. */
+  border-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MINIMAL  ·  surfaces, not boxes
+   ───────────────────────────────────────────────────────────────────────────
+   Standing direction: the panel is minimal in BOTH themes — controls are read
+   from their fill and from the space around them, not from a 1px line.
+
+   Measured before writing this (a light + dark panel rendered against the built
+   stylesheet, then every element with a visible computed border enumerated).
+   Six sources, structurally identical in the two themes:
+
+     .acc            ×4  section dividers
+     textarea        ×1  the Content field shell, all four sides
+     .chat-composer  ×1  the prompt box, all four sides
+     .model-btn      ×1  the model picker, all four sides
+     .chat-status    ×1  bottom
+     .panel          ×1  the dock's own outer edge
+
+   Only the last of those is a structural boundary — it separates the panel from
+   the host editor's chrome. It keeps a line, softened to --min-line. Every other
+   one becomes a fill or nothing.
+
+   Why light was the trigger: all of these drew ONE token, #e8e8e8 in light and
+   #27272a in dark. On near-black that is invisible and the panel looked clean;
+   on white the same line is a hard rule, so the light panel read as a stack of
+   boxes. The replacements are neutral-grey alphas, which resolve correctly on
+   either ground.
+
+   Self-contained: delete from this banner to the end of the file to revert.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1 · section dividers go. The header already carries 18px of space above its
+       label; a rule on top of that space is a second separator for one gap. */
+.panel.dock-right .acc {
+  border-bottom: 0;
+}
+
+/* 2 · the Content field: a soft-filled well, no outline. `border-color`, not
+       `border: 0`, so the 1px stays in the box model and the field does not
+       shift by a pixel. Beats Tailwind's `.uich-tw .border-input` (0,2,0). */
+#uichemy-composer-floating-panel .panel.dock-right .text-row-area > textarea {
+  border-color: transparent !important;
+  background-color: var(--min-fill) !important;
+  box-shadow: none !important;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .text-row-area > textarea:hover {
+  background-color: var(--min-fill-hover) !important;
+}
+
+/* 3 · the model picker button, same treatment as the field it sits beside. */
+#uichemy-composer-floating-panel .panel.dock-right .model-btn {
+  border-color: transparent !important;
+  background-color: var(--min-fill) !important;
+  box-shadow: none !important;
+}
+
+#uichemy-composer-floating-panel .panel.dock-right .model-btn:hover {
+  background-color: var(--min-fill-hover) !important;
+}
+
+/* 4 · the prompt box is the ONE exception to this block — it keeps its
+       `--ctl-card` fill AND its `--ctl-line` border, in both states. It was
+       stripped like everything else at first, which was wrong: this is the
+       panel's primary input, and it is the one surface where the outline is the
+       point rather than clutter. Nothing to declare here — the pre-existing
+       resting and :focus-within rules further up already state that look, and
+       they already agree with each other, so both states match by default. */
+
+/* 5 · the status strip under the composer. The Widget/Page pill inside it is a
+       filled track and defines itself; the rule under it separated nothing. */
+.chat-status {
+  border-bottom: 0;
+}
+
+/* 6 · the one line that stays: the dock's own edge against the host editor.
+       Softened from the shared panel-line token to --min-line. */
+.panel.dock-right {
+  border-color: var(--min-line);
+}
+
+/* ── tool tab strip: height comes from its content ───────────────────────────
+   It was pinned at `height: 36px; min-height: 36px` while its own contents
+   measure 32px — a 26px tab inside 3px of track padding. So the track carried
+   4px of dead space that no value in the strip accounted for, and any change to
+   the tab height (or a skin with different control sizes) would have been
+   swallowed by the pin instead of resizing the row.
+
+   `auto` / `0` rather than deleting the declarations, because two lower rules
+   would otherwise take over: the base `.panel-tabs-strip` at `min-height: 46px`
+   (composer.css) and `.panel.dock-right .panel-tabs` at `min-height: 58px`,
+   which the strip also matches — it carries both classes. This selector keeps
+   the ID so it outranks both.
+
+   The sliding pill is unaffected: it is sized from the custom properties
+   useSlidingSeg measures off the active ITEM, and centred with `top: 50%`, so it
+   never referenced the track's height. */
+#uichemy-composer-floating-panel .panel.dock-right .panel-tabs-strip {
+  height: auto;
+  min-height: 0;
+}

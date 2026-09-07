@@ -1,0 +1,243 @@
+/* ==========================================================================
+   Button, global component (1:1 with Figma "Button")
+   Heights are exactly padding + line-height (Regular 36 / Large 40 /
+   Small 30 / Mini 24). Outlines are drawn with inset box-shadow so the stroke
+   does NOT add to the layout box, matching Figma auto-layout.
+   All values use the global design tokens defined on .uich-wpc.
+   ========================================================================== */
+
+.uich-wpc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 0;
+  margin: 0;
+  font-family: var(--uich-wpc-font-family);
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:focus {
+    outline: none;
+  }
+
+  &__label {
+    display: inline-block;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg,
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* ---------------------------------------------------------------- Sizes */
+  &--regular {
+    padding: var(--uich-wpc-space-8) var(--uich-wpc-space-16);
+    gap: var(--uich-wpc-space-8);
+    border-radius: var(--uich-wpc-radius-8);
+    font-size: var(--uich-wpc-font-size-caption);
+    line-height: var(--uich-wpc-line-height-caption);
+    font-weight: var(--uich-wpc-font-weight-medium);
+  }
+
+  &--large {
+    padding: var(--uich-wpc-space-10) 24px; /* Figma semantic/xl = 24px */
+    gap: var(--uich-wpc-space-8);
+    border-radius: var(--uich-wpc-radius-8);
+    font-size: var(--uich-wpc-font-size-caption);
+    line-height: var(--uich-wpc-line-height-caption);
+    font-weight: var(--uich-wpc-font-weight-medium);
+  }
+
+  &--small {
+    padding: var(--uich-wpc-space-7) var(--uich-wpc-space-12);
+    gap: var(--uich-wpc-space-6);
+    border-radius: var(--uich-wpc-radius-6);
+    font-size: var(--uich-wpc-font-size-label);
+    line-height: var(--uich-wpc-line-height-label);
+    font-weight: var(--uich-wpc-font-weight-regular);
+  }
+
+  &--mini {
+    padding: var(--uich-wpc-space-4) var(--uich-wpc-space-8);
+    gap: var(--uich-wpc-space-6);
+    border-radius: var(--uich-wpc-radius-6);
+    font-size: var(--uich-wpc-font-size-label);
+    line-height: var(--uich-wpc-line-height-label);
+    font-weight: var(--uich-wpc-font-weight-regular);
+  }
+
+  /* Icon box sizing per size (Figma icon wrapper ≈ 13–16px) */
+  &--regular &__icon,
+  &--large &__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &--small &__icon,
+  &--mini &__icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ------------------------------------------------------------- Variants */
+
+  /* Primary (brand purple) */
+  &--primary {
+    background-color: var(--uich-wpc-color-secondary);
+    color: var(--uich-wpc-color-text-white);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-secondary-darker);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-secondary-lightest);
+    }
+    &:disabled {
+      background-color: var(--uich-wpc-color-background-strongest);
+      color: var(--uich-wpc-color-text-weakest);
+      cursor: not-allowed;
+    }
+  }
+
+  /* Secondary (white + border + xs shadow) */
+  &--secondary {
+    background-color: var(--uich-wpc-color-background-weaker);
+    color: var(--uich-wpc-color-text-default);
+    box-shadow:
+      inset 0 0 0 1px var(--uich-wpc-color-border-weak),
+      var(--uich-wpc-elevation-xs);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-background-stronger);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-secondary-lightest);
+    }
+    &:disabled {
+      background-color: var(--uich-wpc-color-background-strongest);
+      color: var(--uich-wpc-color-text-weakest);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+  }
+
+  /* Outline (white + border, dark text) */
+  &--outline {
+    background-color: var(--uich-wpc-color-background-weaker);
+    color: var(--uich-wpc-color-text-default);
+    box-shadow: inset 0 0 0 1px var(--uich-wpc-color-border-weak);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-background-default);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow:
+        inset 0 0 0 1px var(--uich-wpc-color-border-weak),
+        0 0 0 3px var(--uich-wpc-color-focus-ring);
+    }
+    &:disabled {
+      color: var(--uich-wpc-color-text-weakest);
+      cursor: not-allowed;
+    }
+  }
+
+  /* Ghost (white, no border) */
+  &--ghost {
+    background-color: var(--uich-wpc-color-background-weaker);
+    color: var(--uich-wpc-color-text-default);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-background-strongest);
+      color: var(--uich-wpc-color-text-weakest);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring);
+    }
+    &:disabled {
+      background-color: transparent;
+      color: var(--uich-wpc-color-text-weakest);
+      cursor: not-allowed;
+    }
+  }
+
+  /* Ghost Muted (transparent, muted text) */
+  &--ghost-muted {
+    background-color: transparent;
+    color: var(--uich-wpc-color-text-disabled);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-background-strongest);
+      color: var(--uich-wpc-color-text-weakest);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring);
+    }
+    &:disabled {
+      color: var(--uich-wpc-color-text-weakest);
+      cursor: not-allowed;
+    }
+  }
+
+  /* Destructive (red) */
+  &--destructive {
+    background-color: var(--uich-wpc-color-error-darker);
+    color: var(--uich-wpc-color-text-white);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-error-darker);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring-error);
+    }
+    &:disabled {
+      background-color: var(--uich-wpc-color-error);
+      color: var(--uich-wpc-color-text-white);
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  /* Dark */
+  &--dark {
+    background-color: var(--uich-wpc-color-background-dark);
+    color: var(--uich-wpc-color-text-white);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      background-color: var(--uich-wpc-color-background-dark-2);
+    }
+    &:focus-visible:not(:disabled) {
+      box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring);
+    }
+    &:disabled {
+      background-color: var(--uich-wpc-color-background-strongest);
+      color: var(--uich-wpc-color-text-weakest);
+      cursor: not-allowed;
+    }
+  }
+}

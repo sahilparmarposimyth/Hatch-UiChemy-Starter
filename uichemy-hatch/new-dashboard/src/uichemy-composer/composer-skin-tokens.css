@@ -1,0 +1,193 @@
+/*
+ * Composer SKIN TOKENS — the single source of the palette.
+ *
+ * Imported by BOTH bundles: the composer panel (index.jsx) and the canvas
+ * (canvas-entry.js, which PHP enqueues into the Elementor preview). That shared
+ * import is the whole reason this file exists.
+ *
+ * The on-canvas toolbar used to hard-code this palette as literals, because it
+ * renders in a document these tokens never reached. Hand-copying is not the same
+ * as matching: alongside the real values it grew a dozen invented in-between
+ * shades — #f1f1f3, #2c2e33, #e6e6e9 — that appear nowhere in the panel. Panel,
+ * dock and toolbar now read the SAME declarations, so a colour changed here
+ * changes all three and they cannot drift apart again.
+ *
+ * Moved verbatim out of composer.css. No value was altered.
+ */
+
+/* Elementor skin, dark variant (default; = Editor One "Dark" UI theme) */
+[data-uich-composer-skin="elementor"] {
+  /* AI mark in Elementor's own pink family — the same pair the canvas
+     selection chrome uses (ACCENT_LINE #d946ef, composer-box-handles.js). */
+  --ai-glyph-from: #f5d0fe;
+  --ai-glyph-to: #d946ef;
+  --bg-canvas: #0c0d0e;
+  /* background-paper (top chrome / outer) */
+  --bg-canvas-ink: #babfc5;
+  /* text-secondary */
+  --panel-bg: #1f2124;
+  /* background-default */
+  --panel-bg-2: #313336;
+  /* action-hover over panel */
+  --panel-bg-3: #434547;
+  /* action-selected over panel */
+  --panel-bg-4: #4b4d51;
+  /* action-focus+ / chip */
+  --panel-line: #3a3c3e;
+  /* divider (rgba(255,255,255,.12)) */
+  --panel-line-2: #434547;
+  /* stronger divider (rgba(255,255,255,.16)) */
+  --text-hi: #ffffff;
+  /* text-primary */
+  --uich-text: #babfc5;
+  /* text-secondary */
+  --text-mid: #9da5ae;
+  /* text-tertiary */
+  --text-dim: #515962;
+  /* text-disabled */
+  --accent-2: hsl(var(--primary));
+  --accent-rgb: 240, 171, 252;
+  /* #f0abfc primary-main */
+  --accent-bg: rgba(var(--accent-rgb), 0.22);
+  --brand-green: #0a875a;
+  /* success-main */
+  --uich-danger: #dc2626;
+  /* error-main */
+  --ok: #0a875a;
+  --warn: #f59e0b;
+  /* warning-main */
+  --radius: 6px;
+  /* Editor One: cards ~6px */
+  --radius-sm: 4px;
+  /* Editor One: inputs/controls 4px */
+}
+
+[data-uich-composer-skin="elementor"][data-uich-composer-theme="light"] {
+  --bg-canvas: #f1f2f3;
+  /* outer canvas grey */
+  --bg-canvas-ink: #0c0d0e;
+  --panel-bg: #ffffff;
+  /* background-default */
+  --panel-bg-2: #f5f5f5;
+  /* action-hover over #fff */
+  --panel-bg-3: #ebebeb;
+  /* action-selected over #fff */
+  --panel-bg-4: #e0e0e0;
+  /* divider (rgba(0,0,0,.12)) */
+  --panel-line: #e0e0e0;
+  /* divider (rgba(0,0,0,.12)) */
+  --panel-line-2: #a7aaad;
+  /* border (control outlines) */
+  --text-hi: #0c0d0e;
+  /* text-primary */
+  --uich-text: #3f444b;
+  /* text-secondary */
+  --text-mid: #69727d;
+  /* text-tertiary */
+  --text-dim: #9da5ae;
+  /* text-disabled */
+  --accent-2: hsl(var(--primary));
+  --accent-rgb: 240, 171, 252;
+  /* #f0abfc primary-main */
+  --accent-bg: rgba(var(--accent-rgb), 0.14);
+  --brand-green: #0a875a;
+  /* success-main */
+  --uich-danger: #dc2626;
+  /* error-main */
+  --ok: #0a875a;
+  --warn: #bb5b1d;
+  /* warning-main (light) */
+  --radius: 6px;
+  /* Editor One: cards ~6px */
+  --radius-sm: 4px;
+  /* Editor One: inputs/controls 4px */
+}
+
+/* Gutenberg skin, dark variant (the block editor's own dark UI): the dark theme
+   applies to its own inverted chrome: #1e1e1e base, #2f2f2f raised.
+
+   NOTE, and worth remembering: this header's opening delimiter went missing when
+   the skin palettes were extracted into this file, which left a dangling closing
+   delimiter sitting right above the selector. That is a parse error, and a CSS
+   parser recovers from it by discarding the rule that follows — so this ENTIRE
+   token block was silently dead, and the Gutenberg skin inherited the :root
+   (UiChemy) palette instead: --accent-rgb measured 255,255,255 rather than
+   56,88,233, and --radius 0.4rem rather than 4px.
+
+   Never write the two-character comment terminator inside a comment body while
+   describing this, either. Doing so ends the comment early, turns the remaining
+   prose into garbage declarations, and drops the next rule for the very same
+   reason. Describe the delimiters in words. */
+[data-uich-composer-skin="gutenberg"] {
+  /* AI mark in wp-admin blue — #3858e9 is the same --wp-admin-theme-color
+     this skin already uses for --accent-rgb, plus a lighter step to run
+     the gradient from. */
+  --ai-glyph-from: #a8c4ff;
+  --ai-glyph-to: #3858e9;
+  --bg-canvas: #1e1e1e;
+  --bg-canvas-ink: #e0e0e0;
+  --panel-bg: #1e1e1e;
+  --panel-bg-2: #2f2f2f;
+  /* hover */
+  --panel-bg-3: #404040;
+  /* selected */
+  --panel-bg-4: #4a4a4a;
+  /* raised chip */
+  --panel-line: #404040;
+  --panel-line-2: #545454;
+  --text-hi: #ffffff;
+  --uich-text: #e0e0e0;
+  --text-mid: #949494;
+  --text-dim: #757575;
+  --accent-2: hsl(var(--primary));
+  --accent-rgb: 56, 88, 233;
+  /* #3858e9 --wp-admin-theme-color */
+  /* WP's ToggleGroupControl is a 2px-radius track with 2px items; the softer
+     9px/7px pill would be the one un-WordPress thing in a WordPress sidebar. */
+  --seg-radius: 4px;
+  --seg-radius-inner: 2px;
+  --accent-bg: rgba(var(--accent-rgb), 0.24);
+  --brand-green: #4ab866;
+  /* admin success */
+  --uich-danger: #cc1818;
+  /* admin error */
+  --ok: #4ab866;
+  --warn: #f0b849;
+  /* admin warning */
+  --radius: 4px;
+  /* WP popovers/menus = 4px */
+  --radius-sm: 2px;
+  /* WP controls = 2px */
+}
+
+[data-uich-composer-skin="gutenberg"][data-uich-composer-theme="light"] {
+  --bg-canvas: #f0f0f0;
+  /* the editor's canvas grey behind the content column */
+  --bg-canvas-ink: #1e1e1e;
+  --panel-bg: #ffffff;
+  --panel-bg-2: #f0f0f0;
+  /* hover */
+  --panel-bg-3: #e0e0e0;
+  /* selected */
+  --panel-bg-4: #dddddd;
+  --panel-line: #e0e0e0;
+  /* divider */
+  --panel-line-2: #949494;
+  /* control outline */
+  --text-hi: #1e1e1e;
+  --uich-text: #1e1e1e;
+  --text-mid: #757575;
+  --text-dim: #949494;
+  --accent-2: hsl(var(--primary));
+  --accent-rgb: 56, 88, 233;
+  /* #3858e9 */
+  --accent-bg: rgba(var(--accent-rgb), 0.08);
+  --brand-green: #4ab866;
+  --uich-danger: #cc1818;
+  --ok: #4ab866;
+  --warn: #f0b849;
+  --radius: 4px;
+  /* WP popovers/menus = 4px */
+  --radius-sm: 2px;
+  /* WP controls = 2px */
+}

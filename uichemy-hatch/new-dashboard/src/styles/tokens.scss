@@ -1,0 +1,115 @@
+/* ============================================================
+   UiChemy WordPress plugin, design tokens (DS bridge)
+   ------------------------------------------------------------
+   The UiChemy Create design system (design-system/styles/tokens.css)
+   is now the single source of truth. Its --uc-* tokens resolve on the
+   mount because #uich-new-dash carries the `.uc-content` surface scope
+   (added in index.js).
+
+   Every legacy --* token below is remapped onto a --uc-* value, so the
+   3k-line app.scss, which consumes these legacy names, re-skins to the
+   monochrome brand (black + light-grey, no orange/purple) + Zalando Sans
+   without editing a single rule there. Names are preserved for markup /
+   inline styles that still reference them.
+   ============================================================ */
+
+#uich-new-dash {
+  /* Legacy --accent* stays NEUTRAL (decoupled from --uc-brand, which is now
+     orange). app.scss uses these for icon chips, text, small fills and borders
+    , all of which must remain monochrome; only the DS solid-brand CTA is
+     orange (via --uc-brand). */
+  --accent:        var(--uc-inverse-bg);         /* neutral dark (#171717 on light) */
+  --accent-dark:   #000000;                       /* hover (darker) */
+  --accent-2:      #404040;                       /* lighter (dark grey) */
+  --accent-wash:   var(--uc-brand-glow-hover);   /* row hover / focus-within (neutral) */
+  --accent-soft:   var(--uc-brand-soft);         /* soft fills / key-chips (light grey) */
+  --accent-soft2:  var(--uc-brand-glow-press);   /* slightly stronger soft fill (neutral) */
+  --accent-mid:    var(--uc-brand-border);       /* neutral hairline */
+  --accent-line:   var(--uc-inverse-bg);         /* selected borders (neutral) */
+
+  /* Pro / premium accent → DS accent (now MONOCHROME, no purple) */
+  --secondary:          var(--uc-accent);        /* B&W primary */
+  --secondary-dark:     #000000;                  /* accent CTA hover */
+  --secondary-btn:      var(--uc-accent-soft);   /* secondary button fill (light grey) */
+  --secondary-btn-dark: #E5E5E5;
+
+  /* text → DS text scale */
+  --ink:        var(--uc-text-strong);   /* headings */
+  --ink-2:      var(--uc-text);          /* body */
+  --ink-3:      var(--uc-text-muted);    /* subtext, muted icons */
+  --ink-4:      var(--uc-text-subtle);   /* disabled */
+  --ghost-ink:  var(--uc-text);          /* ghost/quaternary text */
+
+  /* surfaces + strokes → DS surfaces */
+  --paper:       var(--uc-surface-base);    /* page bg */
+  --paper-2:     var(--uc-surface-sunken);  /* tile fills inside cards */
+  --card:        var(--uc-surface-raised);
+  /* Card "tray" grey, a near-white recess that white sub-cards sit on. Single
+     source for every grey-tray-with-white-cards group (Home tool tabs, theme
+     builder, license, tokens). Tune here to change them all at once. */
+  --tray:        color-mix(in srgb, var(--card) 55%, var(--paper));
+  --paper-light: var(--uc-surface-base);
+  --line:        var(--uc-border);          /* default borders/dividers */
+  --line-2:      var(--uc-border-subtle);
+  --hover-fill:  var(--uc-surface-sunken);  /* tertiary button hover */
+  --ghost-fill:  var(--uc-surface-sunken);  /* ghost button hover */
+  --code-bg:     #171717;                    /* dark code/tooltip surface */
+  --code-fg:     #E5E5E5;                    /* code text on the dark surface (DS neutral light) */
+  --code-key:    #D4D4D4;                    /* syntax keys on the dark surface (DS neutral) */
+
+  /* status → DS semantic families */
+  --status-ok:      var(--uc-success);         /* #2EA343 */
+  --status-ok-bg:   var(--uc-success-soft);
+  --status-warn:    var(--uc-danger);          /* brand "warning" = red */
+  --status-warn-bg: var(--uc-danger-soft);
+  --status-err:     var(--uc-danger);
+  --status-err-bg:  var(--uc-danger-soft);
+  --ring-ok:        var(--uc-success-border);  /* success input ring */
+  --ring-err:       var(--uc-danger-border);   /* danger input ring */
+
+  /* legacy aliases still referenced in markup → DS (monochrome now) */
+  --premium:    var(--uc-brand);        /* brand panel (dark) */
+  --premium-2:  #000000;
+  --lime:       var(--uc-accent);       /* Pro accent (dark, was purple) */
+  --violet-700: var(--uc-brand);
+  --violet-50:  var(--uc-brand-soft);
+
+  /* shape → DS radius scale (name = px) */
+  --r-btn:  var(--uc-radius-6);     /* ALL buttons */
+  --r-ctl:  var(--uc-radius-4);     /* inputs, menus, badges, toasts */
+  --r-sm:   var(--uc-radius-4);
+  --r-card: var(--uc-radius-12);    /* sub-cards, tiles, ghost/icon buttons, brand curve (was 8) */
+  --r-lg:   var(--uc-radius-16);    /* main cards / big containers, brand curve (was 12) */
+  --r-pill: var(--uc-radius-6);
+
+  /* elevation → DS shadow recipes */
+  --sh-rest:  var(--uc-shadow-1);   /* resting tertiary/inputs */
+  --sh-50:    var(--uc-shadow-1);   /* resting outlined controls */
+  --sh-100:   var(--uc-shadow-2);   /* hover, active switcher */
+  --sh-pop:   var(--uc-shadow-4);   /* menus, panels */
+  --focus-ring: 0 0 0 3px var(--uc-brand-glow-press);   /* orange focus */
+
+  --sh-card:  var(--uc-shadow-1);
+  --sh-pop-legacy: var(--uc-shadow-4);
+  --sh-accent: var(--uc-shadow-2);
+  --shadow-brand-sm: none;
+
+  /* motion → DS durations/easing */
+  --t:      var(--uc-dur-fast);         /* 160ms */
+  --ease:   var(--uc-ease-standard);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --press:  scale(.9);      /* xs/sm buttons */
+  --press-lg: scale(.97);   /* full-width lg buttons */
+
+  /* type → DS brand typeface (Zalando Sans) */
+  --font-display: var(--uc-font-sans);
+  --font-body:    var(--uc-font-sans);
+  --font-mono:    var(--uc-font-mono);
+
+  /* Keep the app's carefully-tuned type scale (px) unchanged. */
+  --fs-h1: 18px;  --lh-h1: 24px;   /* page title, Bold */
+  --fs-h2: 16px;  --lh-h2: 24px;   /* modal/panel titles */
+  --fs-h3: 14px;  --lh-h3: 21px;   /* section labels (Bold), card titles */
+  --fs-h4: 12px;  --lh-h4: 18px;   /* default body, SemiBold */
+  --fs-h5: 10px;  --lh-h5: 15px;   /* xs buttons (Bold), badges, tooltips */
+}

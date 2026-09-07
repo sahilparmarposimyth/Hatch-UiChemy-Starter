@@ -1,0 +1,85 @@
+/*
+ * Tailwind for the DASHBOARD bundle, utilities only, no preflight.
+ *
+ * `@tailwind base` is deliberately absent. It emits a global reset that would
+ * restyle every element on the wp-admin page (including WordPress's admin menu
+ * and admin bar) the moment this stylesheet loads. Utilities are already scoped
+ * by `important: '.uich-tw'` in tailwind.config.js, so omitting base is all it
+ * takes to confine Tailwind to the island.
+ *
+ * The handful of preflight rules the shadcn components genuinely depend on are
+ * re-stated below, scoped to the island. Everything else preflight does is
+ * either irrelevant here or already handled by wp-admin's own stylesheet.
+ */
+@tailwind components;
+@tailwind utilities;
+
+.uich-tw,
+.uich-tw *,
+.uich-tw *::before,
+.uich-tw *::after {
+  box-sizing: border-box;
+  /* Tailwind's border utilities set width only and assume this default. Without
+     it `border` / `border-t` produce no visible line. */
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--border));
+
+  /* Initialise Tailwind's transform vars. Preflight normally does this on `*`;
+     this island omits preflight, so a utility like `translate-x-4` sets only
+     --tw-translate-x, leaving --tw-translate-y empty → `translate(1rem, )` is
+     invalid and the browser drops the whole transform. That silently froze the
+     Switch thumb (and any transform utility) in place. Seeding all seven makes
+     translate/rotate/skew/scale compose correctly. */
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+}
+
+.uich-tw button,
+.uich-tw [type='button'],
+.uich-tw [type='reset'],
+.uich-tw [type='submit'] {
+  background-color: transparent;
+  background-image: none;
+}
+
+.uich-tw button,
+.uich-tw input,
+.uich-tw optgroup,
+.uich-tw select,
+.uich-tw textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.uich-tw h1,
+.uich-tw h2,
+.uich-tw h3,
+.uich-tw h4,
+.uich-tw p {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.uich-tw ol,
+.uich-tw ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.uich-tw svg {
+  display: block;
+  vertical-align: middle;
+}

@@ -1,0 +1,92 @@
+/* Modal, the webpage flow's popup, on top of the design-system Dialog.
+   -----------------------------------------------------------------------
+   This file used to style a hand-rolled shell (.uich-wpc-modal__dialog /
+   __panel / __header / __close / __footer). Modal.jsx was later rebuilt on the
+   DS Dialog (Radix), which renders none of those elements, so every rule here
+   stopped matching anything and the popup silently fell back to bare DS
+   defaults. What is left is only what this flow needs ON TOP of the DS look:
+   its width, its tighter padding, and its own type scale.
+
+   The DS parts render at <body>, outside #uich-new-dash, so these selectors are
+   global. `--uc-*` resolve through .uc-portal (on the positioner) and
+   `--uich-wpc-*` through .uich-wpc (on the card and footer). */
+
+/* The positioner owns the width; the content only fills it. 480px is this
+   flow's dialog size, the DS default is 440. */
+.uc-portal:has(.uich-wpc-modal) {
+  width: min(calc(100vw - 40px), 480px);
+}
+
+.uich-wpc-modal {
+  font-family: var(--uich-wpc-font-family);
+}
+
+/* Panel = header + body. Tighter than the DS 24px, per the flow's own spec.
+   Matched as the FIRST .uich-wpc child rather than by :last-child, so a modal
+   with no footer still gets the card padding and not the footer's. */
+.uich-wpc-modal > .uich-wpc:first-child {
+  gap: 20px;
+  padding: 15px;
+}
+
+/* The footer is the card's sibling, sitting on the tray. */
+.uich-wpc-modal > .uich-wpc + .uich-wpc {
+  padding: 16px;
+}
+
+/* Title + close on one row. The DS close sits OUTSIDE the dialog corner, which
+   this flow turns off (showClose={false}) in favour of this one. */
+.uich-wpc-modal__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.uich-wpc-modal__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  /* Pulled toward the panel edge so the ICON lines up with the content, not the
+     button box, otherwise a 28px hit area reads as an indent. */
+  margin: -4px -4px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--uich-wpc-radius-6, 6px);
+  background: transparent;
+  color: var(--uich-wpc-color-text-weaker);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+
+  svg {
+    display: block;
+  }
+
+  &:hover {
+    background: var(--uich-wpc-color-background-stronger);
+    color: var(--uich-wpc-color-text-default);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--uich-wpc-color-focus-ring);
+  }
+}
+
+.uich-wpc-modal h2 {
+  font-size: var(--uich-wpc-font-size-h5);
+  line-height: var(--uich-wpc-line-height-h5);
+  font-weight: var(--uich-wpc-font-weight-medium);
+  color: var(--uich-wpc-color-text-default);
+}
+
+.uich-wpc-modal p {
+  max-width: 401px;
+  font-size: var(--uich-wpc-font-size-caption);
+  line-height: var(--uich-wpc-line-height-caption);
+  font-weight: var(--uich-wpc-font-weight-regular);
+  color: var(--uich-wpc-color-text-weaker);
+}

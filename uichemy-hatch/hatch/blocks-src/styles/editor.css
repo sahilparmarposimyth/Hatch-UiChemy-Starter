@@ -1,0 +1,79 @@
+/* Hatch Blocks editor stylesheet — only affects wp-admin block editor. */
+
+/* Add gentle outline to all hatch blocks when selected, for clarity */
+.wp-block.is-selected .hatch-section,
+.wp-block.is-selected .hatch-container {
+	outline: 1px dashed rgba(37, 99, 235, 0.35);
+	outline-offset: 4px;
+	border-radius: 4px;
+}
+
+/* Responsive tab pill style */
+.hatch-blocks-responsive-tabs .components-tab-panel__tabs {
+	gap: 4px;
+	padding: 2px;
+	background: #f1f5f9;
+	border-radius: 6px;
+}
+.hatch-blocks-responsive-tabs .components-tab-panel__tabs-item {
+	font-size: 11px;
+	padding: 4px 8px;
+	border-radius: 4px;
+}
+.hatch-blocks-responsive-tabs .components-tab-panel__tabs-item.is-active {
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* ==========================================================================
+   v0.3.5 — Hatch brand cue in the inserter (outline + icon, no fill).
+   The previous fill made the panel feel like a candy shop. New approach:
+   transparent tile background, amber icon tint, amber-on-hover outline,
+   and a tiny chick mark — that's it.
+   ========================================================================== */
+
+/* Resting tile — no fill, no border. Only the icon gets a brand colour. */
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"] {
+	position: relative;
+	background: transparent !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	transition: box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"] .block-editor-block-types-list__item-icon svg,
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"] svg {
+	color: #d97706 !important;
+}
+
+/* Hover/focus — amber outline reveals; still no fill. */
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"]:hover {
+	background: rgba(254, 243, 199, 0.4) !important;
+	box-shadow: inset 0 0 0 1.5px rgba(217, 119, 6, 0.7) !important;
+	transform: translateY(-1px);
+}
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"]:focus,
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"].is-active {
+	box-shadow: inset 0 0 0 2px #d97706 !important;
+}
+
+/* Tiny chick mark — SVG of the Hatch egg/chick instead of an emoji so it
+   doesn't render system-font-dependent. */
+.block-editor-block-types-list__item[class*="editor-block-list-item-hatch-"]::after {
+	content: '';
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #d97706;
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+/* Canvas selection ring — thin amber dashed border. */
+.wp-block.is-selected[class*="wp-block-hatch-"] {
+	outline: 1px dashed rgba(217, 119, 6, 0.55) !important;
+	outline-offset: 4px;
+	border-radius: 4px;
+}

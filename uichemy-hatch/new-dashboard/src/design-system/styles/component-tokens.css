@@ -1,0 +1,41 @@
+/* =============================================================================
+   UiChemy Create, COMPONENT tokens (per-component knobs)
+   -----------------------------------------------------------------------------
+   Per-component sizing/shape variables, editable from the internal DS editor
+   (tools/ds-editor). Each defaults to a GLOBAL token via var(), so out of the
+   box a component still follows the global scale, overriding one here changes
+   ONLY that component, not the whole system.
+
+   Loaded right after tokens.css (src/index.js), same surface scopes, so the
+   values resolve wherever the components render. The component CSS modules read
+   these with the original value as a var() fallback, so a missing/av value can
+   never break a component.
+   ========================================================================== */
+.uc-scope,
+.uc-content,
+.uc-chrome,
+.uc-portal {
+  /* ---- Button --------------------------------------------------------- */
+  --uc-btn-radius: var(--uc-radius-md);
+  --uc-btn-weight: var(--uc-weight-medium);
+  --uc-btn-h:      var(--uc-control-h-md);
+  --uc-btn-px:     var(--uc-space-16);
+
+  /* ---- Input ---------------------------------------------------------- */
+  --uc-input-radius: var(--uc-radius-md);
+  --uc-input-h:      var(--uc-control-h-md);
+  --uc-input-px:     var(--uc-space-12);
+
+  /* ---- Card ----------------------------------------------------------- */
+  --uc-card-radius: var(--uc-radius-lg);
+  --uc-card-pad:    var(--uc-space-20);
+
+  /* ---- Tabs (pill variant) -------------------------------------------- */
+  --uc-tab-track-bg:     #F2F2F2;   /* lighter track (was --uc-surface-sunken #EBEBEB) */
+  --uc-tab-track-stroke: none;      /* no hairline stroke around the track */
+  --uc-tab-track-radius: var(--uc-radius-md);
+  --uc-tab-track-pad:    3px;
+  --uc-tab-radius:       var(--uc-radius-sm);
+  --uc-tab-h:            26px;
+  --uc-tab-px:           var(--uc-space-12);
+}

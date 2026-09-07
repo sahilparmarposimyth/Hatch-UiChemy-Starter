@@ -1,0 +1,100 @@
+/* Dialog, Radix behavior, uc- token look. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: oklch(20% 0.01 285 / 0.44);
+  backdrop-filter: blur(2px);
+  z-index: var(--uc-z-overlay);
+  animation: uc-overlay-in var(--uc-dur-enter) var(--uc-ease-standard);
+}
+/* centers the dialog + hosts the outside close button */
+.positioner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(calc(100vw - var(--uc-space-32)), 480px);
+  z-index: var(--uc-z-dialog);
+}
+.content {
+  position: relative;
+  width: 100%;
+  max-height: calc(100vh - var(--uc-space-48));
+  overflow: auto;
+  background: var(--uc-surface-base);      /* grey tray */
+  border-radius: var(--uc-radius-xl);
+  box-shadow: var(--uc-shadow-5);
+  padding: var(--uc-space-4);
+  animation: uc-dialog-in var(--uc-dur-enter) var(--uc-ease-emphasized);
+}
+/* white content card inside the tray, same radius as the dialog + full border */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--uc-space-16);
+  padding: var(--uc-space-20);           /* 20px equal on all 4 sides */
+  background: var(--uc-surface-raised);
+  border-radius: var(--uc-radius-xl);
+  border: 1px solid var(--uc-border);
+  overflow: hidden;
+}
+/* close button sits just outside the dialog's top-right corner.
+   Radix disables pointer-events on the body while the modal is open and only
+   re-enables them on its own Content, this button lives outside that Content,
+   so it must opt back in explicitly or hover/click fall through to the overlay. */
+.closeOutside {
+  pointer-events: auto;
+  position: absolute;
+  top: 0;
+  left: calc(100% + var(--uc-space-8));
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: var(--uc-surface-raised);
+  color: var(--uc-text-strong);
+  border-radius: var(--uc-radius-md);
+  box-shadow: var(--uc-shadow-control);
+  cursor: pointer;
+  transition:
+    background var(--uc-dur-fast) var(--uc-ease-standard),
+    box-shadow var(--uc-dur-fast) var(--uc-ease-standard),
+    transform var(--uc-dur-fast) var(--uc-ease-standard),
+    color var(--uc-dur-fast) var(--uc-ease-standard);
+}
+.closeOutside:hover {
+  background: var(--uc-surface-sunken);
+  color: var(--uc-text-strong);
+  box-shadow: var(--uc-shadow-raised);
+}
+.closeOutside:active {
+  transform: translateY(1px);
+  box-shadow: var(--uc-shadow-1);
+}
+.closeOutside:focus-visible {
+  outline: 2px solid var(--uc-ring);
+  outline-offset: 2px;
+}
+.header { display: flex; flex-direction: column; gap: var(--uc-space-4); }
+/* margin: 0 is load-bearing, the dialog portals to .uc-portal, OUTSIDE the
+   #uich-new-dash scope that resets heading/paragraph margins, so without this
+   the <h2> title / <p> description inherit the browser's default ~0.83em margin
+   and the header reads loose and uneven. Spacing is owned by .header's gap. */
+.title { font-size: var(--uc-text-xl); font-weight: var(--uc-weight-semibold); color: var(--uc-text-strong); margin: 0; }
+.desc { font-size: var(--uc-text-base); color: var(--uc-text-muted); margin: 0; }
+.body { min-width: 0; }
+/* footer sits below the card on the grey tray */
+.footer {
+  display: flex;
+  justify-content: space-between;        /* secondary left, primary right */
+  align-items: center;
+  gap: var(--uc-space-16);
+  padding: var(--uc-space-20);           /* 20px below/around the white card */
+}
+
+@keyframes uc-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes uc-dialog-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
