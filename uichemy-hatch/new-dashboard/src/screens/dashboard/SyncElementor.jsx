@@ -28,24 +28,44 @@ import { getBoot } from '../../lib/api.js';
  * rather than as a panel with its own scrollbar.
  */
 
-/** No content shorter than this — avoids a collapsed frame on first paint. */
-const MIN_HEIGHT = 480;
+/**
+ * Starting height, used until the first real measurement lands. Only an initial
+ * value — deliberately NOT a floor on the measured height, or a short screen
+ * would carry dead space below its content.
+ */
+const START_HEIGHT = 480;
 
 /**
- * Keep an iframe's height equal to its content's height.
+ * A measurement below this is treated as "the document isn't ready", not as a
+ * genuinely tiny page — an iframe mid-navigation reports a near-zero
+ * scrollHeight, and honouring it collapses the frame to nothing for a frame or
+ * two before the real content arrives.
+ */
+const NOT_READY_BELOW = 80;
+
+/**
+ * Keep an iframe's height equal to its content's height, so the frame never
+ * scrolls internally — the dashboard page's own scrollbar moves the whole thing,
+ * the way every other screen in this dashboard behaves.
+ *
+ * This only works because the embed stylesheet drops the `min-height: 100vh`
+ * Hatch sets on its root element; inside an iframe that unit resolves to the
+ * frame's own height, which makes measuring it circular. See
+ * includes/hatch/class-uich-hatch-embed.php.
  *
  * Re-measured on load — which fires again on every navigation INSIDE the frame,
  * so each wizard step re-fits — and on any later reflow of the inner document
- * via a ResizeObserver. Both are wrapped: same-origin access is expected to
- * work here, but a browser that refuses it should degrade to a tall scrolling
- * frame, never to a thrown render.
+ * via a ResizeObserver, which is what catches React rendering taller content
+ * after its first paint. Both are wrapped: same-origin access is expected to
+ * work here, but a browser that refuses it should degrade to a scrolling frame,
+ * never to a thrown render.
  *
  * @return {{ ref: object, height: number, remeasure: Function }} Frame plumbing.
  */
 function useFrameAutoHeight() {
   const ref = useRef( null );
   const observer = useRef( null );
-  const [ height, setHeight ] = useState( MIN_HEIGHT );
+  const [ height, setHeight ] = useState( START_HEIGHT );
 
   const measure = useCallback( () => {
     const frame = ref.current;
@@ -53,13 +73,24 @@ function useFrameAutoHeight() {
     try {
       const doc = frame.contentDocument;
       if ( ! doc || ! doc.documentElement ) return;
-      // scrollHeight of BOTH: WP admin pages give body the layout, but a short
-      // page leaves body smaller than the html box.
-      const next = Math.max(
-        doc.documentElement.scrollHeight || 0,
-        doc.body ? doc.body.scrollHeight : 0,
-        MIN_HEIGHT
+
+      /*
+       * scrollHeight of BOTH boxes, plus body's own rect: WP admin pages give
+       * <body> the layout, a short page leaves body smaller than the html box,
+       * and the rect is the only one of the three that is fractional. Rounding
+       * UP matters — floor a 700.4px document to 700 and the leftover 0.4px is
+       * enough for the browser to fit an inner scrollbar, which is the exact
+       * thing this hook exists to avoid.
+       */
+      const next = Math.ceil(
+        Math.max(
+          doc.documentElement.scrollHeight || 0,
+          doc.body ? doc.body.scrollHeight : 0,
+          doc.body ? doc.body.getBoundingClientRect().height : 0
+        )
       );
+
+      if ( next < NOT_READY_BELOW ) return;
       setHeight( ( prev ) => ( Math.abs( prev - next ) > 1 ? next : prev ) );
     } catch ( _ ) {
       /* Cross-origin refusal — keep the last known height. */

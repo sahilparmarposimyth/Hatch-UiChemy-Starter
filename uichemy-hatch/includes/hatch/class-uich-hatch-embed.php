@@ -287,14 +287,34 @@ html.wp-toolbar {
 #wpcontent {
 	min-height: 0 !important;
 }
-/* The iframe is measured from body.scrollHeight to size itself, so the document
-   must not claim viewport height it isn't using, and must not paint a ground of
-   its own over the dashboard's. */
+/* The iframe is measured from the document's scrollHeight to size itself, so the
+   document must not claim viewport height it isn't using, and must not paint a
+   ground of its own over the dashboard's. */
 html,
 body.uich-hatch-embed {
 	height: auto !important;
 	min-height: 0 !important;
 	background: transparent !important;
+}
+/* THE rule that makes the auto-height work at all.
+ *
+ * Both Hatch admin apps set `minHeight: '100vh'` INLINE on their root
+ * `.hatch-react` div (admin-react/src/index.jsx and setup/SetupApp.jsx). In a
+ * normal admin page that fills the window; inside an iframe `100vh` resolves to
+ * the IFRAME's height, which makes the measurement self-referential — the
+ * content is always at least as tall as the frame, so scrollHeight can never
+ * report that the frame is too small, the height settles early and everything
+ * past it becomes an inner scrollbar.
+ *
+ * `!important` here beats the inline declaration (an important author rule wins
+ * over a normal inline one), so the height becomes content-driven and the frame
+ * can grow to fit. The alternative was threading an "embedded" flag through
+ * Hatch's boot payload and editing both JSX roots; this leaves Hatch's source
+ * alone. The app's own background and padding are untouched — only the
+ * viewport-height floor goes.
+ */
+.hatch-react {
+	min-height: 0 !important;
 }
 </style>
 			<?php

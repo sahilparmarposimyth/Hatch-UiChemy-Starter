@@ -3830,9 +3830,12 @@
     display: block;
     width: 100%;
     border: 0;
-    /* The height is set inline from the measured content height. `height` is
-       the only geometry this element owns — no min-height, or a short wizard
-       step would leave dead space below it. */
+    /* The height is set inline from the measured content height, so the frame
+       is exactly as tall as its content and never scrolls on its own — the
+       page's scrollbar moves it, like every other screen here. `height` is the
+       only geometry this element owns: a min-height would leave dead space
+       under a short wizard step, and a max-height would put the inner
+       scrollbar straight back. */
   }
 
   /* Build-missing hint. `code` inside an Alert, on its own line. */
