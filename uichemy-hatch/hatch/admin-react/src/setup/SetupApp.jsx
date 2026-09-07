@@ -1109,11 +1109,19 @@ export default function SetupApp() {
 
 	return (
 		<div className="hatch-react" style={{ minHeight: '100vh', paddingBottom: 60, background: 'var(--hx-bg)' }}>
-			{/* Header */}
+			{/* Header.
+
+			    No product mark here, and the heading names Astro rather than
+			    Hatch: in this build the wizard is a screen INSIDE UiChemy
+			    ("Sync with Astro"), which already carries its own branding in
+			    the rail immediately to the left. A second logo and a second
+			    product name stacked on top of it read as two products bolted
+			    together, which is the one thing the merge exists to avoid.
+			    Astro is also what the user is actually setting up — the
+			    frontend this deploys. */}
 			<div style={{ textAlign: 'center', padding: '40px 24px 0' }}>
-				<div style={{ fontSize: 38, lineHeight: 1, marginBottom: 8 }}>🐣</div>
 				<h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--hx-fg)', letterSpacing: '-0.025em', lineHeight: 1.1, margin: 0 }}>
-					Hatch setup
+					Astro setup
 				</h1>
 				<p className="hx-desc" style={{ color: 'var(--hx-subtle)', marginTop: 6 }}>
 					Connect WordPress to your headless frontend in 3 steps.

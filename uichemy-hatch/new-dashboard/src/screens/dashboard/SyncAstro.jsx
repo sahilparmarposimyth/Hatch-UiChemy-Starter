@@ -140,7 +140,10 @@ const VIEWS = [
   },
   {
     id: 'admin',
-    label: __( 'Hatch', 'uichemy' ),
+    // Named for what the view IS — Hatch's Connection / Design / Content /
+    // Security tabs — rather than for the plugin behind it, which this screen
+    // no longer surfaces by name anywhere else either.
+    label: __( 'Settings', 'uichemy' ),
     urlKey: 'adminUrl',
     openKey: 'adminOpenUrl',
   },
@@ -313,7 +316,14 @@ export default function SyncAstro() {
           key={ active.id }
           className="nd-hatch__frame"
           src={ src }
-          title={ active.id === 'wizard' ? __( 'Hatch setup wizard', 'uichemy' ) : __( 'Hatch', 'uichemy' ) }
+          // The frame's accessible name. Matches the heading rendered INSIDE it
+          // ("Astro setup" / the settings tabs) — announcing "Hatch" while the
+          // heading says Astro would leave a screen-reader user looking for a
+          // product name that appears nowhere on the page. The Alerts above
+          // still say "Hatch" on purpose: those name the plugin as a package
+          // (one of them has to be findable on the Plugins screen), which is a
+          // different thing from branding this surface.
+          title={ active.id === 'wizard' ? __( 'Astro setup', 'uichemy' ) : __( 'Astro settings', 'uichemy' ) }
           style={ { height: `${ height }px` } }
           onLoad={ onFrameLoad }
         />

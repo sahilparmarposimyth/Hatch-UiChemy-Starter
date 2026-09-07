@@ -193,11 +193,16 @@ function App() {
 
 	return (
 		<div className="hatch-react" style={{ minHeight: '100vh', paddingBottom: 100, background: 'var(--hx-bg)' }}>
-			{/* ── Header ───────────────────────────────────────────────── */}
+			{/* ── Header ─────────────────────────────────────────────────
+			    Unbranded, for the same reason as the wizard's header in
+			    setup/SetupApp.jsx: this is a screen inside UiChemy ("Sync
+			    with Astro"), whose own rail sits immediately to the left. A
+			    product mark and a second product name on top of that read as
+			    two plugins bolted together. Attribution is not lost — the
+			    footer still names Hatch and its version. */}
 			<div style={{ textAlign: 'center', padding: '44px 24px 0' }}>
-				<div style={{ fontSize: 44, lineHeight: 1, marginBottom: 10 }}>🐣</div>
 				<h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--hx-fg)', letterSpacing: '-0.035em', lineHeight: 1, margin: 0 }}>
-					Hatch
+					Astro
 				</h1>
 				<p style={{ fontSize: 14, color: 'var(--hx-subtle)', marginTop: 6 }}>The Headless Engine for WordPress</p>
 
