@@ -64,13 +64,21 @@ All environment variables — nothing to edit in the source.
 | `HATCH_BRANCH` | `main` | branch to clone |
 | `HATCH_ROOT_DIR` | — | build scratch directory |
 
-Example, pointing at your own starter repo:
+Example, pointing at the UiChemy starter mirror:
 
 ```bash
 PORT=3000
 HATCH_DEPLOY_BASE=https://deploy.example.com
-HATCH_REPO=https://github.com/Parmar-Sahil/<your-starter-repo>.git
+HATCH_REPO=https://github.com/sahilparmarposimyth/Hatch-UiChemy-Starter.git
 HATCH_BRANCH=main
+```
+
+That repo is a full copy of `eticastudio/hatch` (`main` + all tags), so it has
+`astro-starter/` where the broker expects it. It keeps `upstream` pointed at the
+original, so starter updates come down with:
+
+```bash
+git fetch upstream && git merge upstream/main
 ```
 
 Then point the plugin at it, in `wp-config.php`:
@@ -89,10 +97,44 @@ then does `path.join( workDir, 'astro-starter' )`, writes `.env` there and build
 inside it. A repo without that directory clones successfully and fails at the
 next step. Copy `astro-starter/` from this repo across unchanged.
 
-**The clone is unauthenticated.** `git clone` runs with no credentials, so
-`HATCH_REPO` has to be public, or the box needs a deploy key / credential helper
-configured for it. Note the default points at a repo that is now private — if a
-clone fails with an auth error, that is why.
+**The clone is unauthenticated.** `runCmd('git', ['clone', …])` passes no
+credentials, so an HTTPS `HATCH_REPO` must be publicly readable. The default
+(`eticastudio/hatch`) is public, so it works out of the box.
+
+A **private** `HATCH_REPO` needs the box to supply credentials. Two ways:
+
+*Deploy key over SSH — keeps the source closed, nothing secret in the env:*
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/hatch_starter -N ''
+# add ~/.ssh/hatch_starter.pub to the repo:
+#   Settings → Deploy keys → Add deploy key (read access is enough)
+cat >> ~/.ssh/config <<'CFG'
+Host github-starter
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/hatch_starter
+  IdentitiesOnly yes
+CFG
+ssh -T github-starter          # accept the host key once, as the service user
+```
+
+```bash
+HATCH_REPO=github-starter:sahilparmarposimyth/Hatch-UiChemy-Starter.git
+```
+
+The host key must already be in the service user's `known_hosts` — the clone
+runs non-interactively and will hang or fail on the prompt otherwise.
+
+*Or a read-only fine-grained token over HTTPS — simpler, but it is a secret in
+an env var and it expires:*
+
+```bash
+HATCH_REPO=https://x-access-token:<TOKEN>@github.com/sahilparmarposimyth/Hatch-UiChemy-Starter.git
+```
+
+Making the repo public also works, but publishes the whole plugin source — a
+product decision, not a deployment one.
 
 ## Sanity check
 
