@@ -2018,6 +2018,11 @@ function makePrepareHandler(providerKey) {
 			// lib/img-hosts.js, not here — it arrives from the customer's own
 			// WordPress, which is the party the SSRF guard exists to distrust.
 			img_allowed_hosts: b.img_allowed_hosts,
+			// Optional: what to call the deployed project. The plugin sends the WP
+			// site name; lib/project-name.js sanitises it and falls back to
+			// astro-starter. Absent from an older plugin, which simply keeps the
+			// old directory-derived naming.
+			project_name: b.project_name,
 			[cfg.tokenKey]: providerToken,
 		});
 		// `frameable` tells the caller this build can run inside its own iframe

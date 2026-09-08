@@ -25,10 +25,11 @@
  */
 
 import { spawn } from 'node:child_process';
-import { mkdtemp, mkdir, rm, writeFile, chmod } from 'node:fs/promises';
+import { mkdtemp, mkdir, rename, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { imgAllowedHosts } from './img-hosts.js';
+import { projectNameFor } from './project-name.js';
 
 /*
  * Each concurrent build is its own `npm install` + `astro build`, which is
@@ -237,9 +238,42 @@ export async function deployToVercel({ ticket, vercelToken, onProgress }) {
 			}
 		}
 
-		const astroDir = path.join(workDir, 'astro-starter');
+		/*
+		 * Name the build directory after the site, because that is what names
+		 * the Vercel project.
+		 *
+		 * The CLI runs with no `--name` and nothing linking it to an existing
+		 * project, so it takes the project name from the directory it is invoked
+		 * in. That was always `astro-starter`, and since the name is taken after
+		 * the first deploy Vercel appends a random word — `astro-starter-murex`,
+		 * `astro-starter-snowy`. With several sites there was no way to tell
+		 * which URL belonged to which.
+		 *
+		 * Renamed here, before anything writes into the directory, so the .env,
+		 * the install, the build and the deploy all happen in one place and
+		 * `.vercel/output` lands where `--prebuilt` looks for it.
+		 *
+		 * This does NOT make the URL stable across redeploys — nothing links to
+		 * an existing project, so whether a second deploy reuses the name is the
+		 * CLI's call. A custom domain remains the answer for a URL that must not
+		 * move.
+		 */
+		const desiredName = projectNameFor(ticket);
+		let astroDir = path.join(workDir, 'astro-starter');
+		if ('astro-starter' !== desiredName) {
+			const named = path.join(workDir, desiredName);
+			try {
+				await rename(astroDir, named);
+				astroDir = named;
+				progress(`🏷️  Project will be named "${desiredName}" (from the site name)`);
+			} catch (err) {
+				// Not worth failing a deploy over a cosmetic name. Carry on in
+				// the original directory and say so, rather than dying here.
+				progress(`⚠️  Could not use "${desiredName}" as the project name — building in astro-starter instead`);
+			}
+		}
 
-		progress('✍️  Writing astro-starter/.env (mode 600)…');
+		progress(`✍️  Writing ${path.basename(astroDir)}/.env (mode 600)…`);
 		const envContent = [
 			`WP_API_URL=${ticket.wp_url}/wp-json/wp/v2`,
 			`WP_API_USER=${ticket.wp_user}`,
