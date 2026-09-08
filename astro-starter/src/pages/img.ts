@@ -67,8 +67,37 @@ export const GET: APIRoute = async ({ request, url }) => {
     });
   }
 
+  /*
+   * Resolve the source against THIS request before doing anything with it.
+   *
+   * Media from the WordPress library arrives as a same-origin RELATIVE path —
+   * `/img?url=/hatch-media/2026/09/Hand.png` — because that is what
+   * hatch-media/[...path].ts serves. isAllowedSrc() called `new URL(raw)` with
+   * no base, which THROWS on a relative path, so every one of those images was
+   * refused with "url host not allowed". The same-origin escape hatch below
+   * could never fire, because the code never got far enough to compare hosts.
+   *
+   * That made it a bug for the common case rather than an edge case: a site
+   * whose images live in the WP media library had none of them render. It only
+   * looked fine on sites whose images sat on a template CDN, where the URLs are
+   * already absolute.
+   *
+   * The absolute form is then used for BOTH the allowlist check and the
+   * backend hand-off, so the resizer receives something it can actually fetch,
+   * and so the failure redirect below is a valid absolute Location.
+   */
+  let absoluteSrc: string;
+  try {
+    absoluteSrc = new URL(src, url).toString();
+  } catch {
+    return new Response(JSON.stringify({ error: 'url invalid' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Backlog #161 — reject non-allowlisted origins before touching backend.
-  if (!isAllowedSrc(src, url.host.toLowerCase())) {
+  if (!isAllowedSrc(absoluteSrc, url.host.toLowerCase())) {
     return new Response(JSON.stringify({ error: 'url host not allowed' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -76,7 +105,7 @@ export const GET: APIRoute = async ({ request, url }) => {
   }
 
   const backendUrl = new URL(BACKEND + '/img');
-  backendUrl.searchParams.set('url', src);
+  backendUrl.searchParams.set('url', absoluteSrc);
   if (w) backendUrl.searchParams.set('w', w);
   if (h) backendUrl.searchParams.set('h', h);
   backendUrl.searchParams.set('format', format === 'avif' ? 'avif' : 'webp');
@@ -92,11 +121,11 @@ export const GET: APIRoute = async ({ request, url }) => {
   } catch {
     // On timeout or network error, redirect to the original WP image as a
     // graceful fallback so the page never shows a broken-image icon.
-    return Response.redirect(src, 302);
+    return Response.redirect(absoluteSrc, 302);
   }
 
   if (!upstream.ok) {
-    return Response.redirect(src, 302);
+    return Response.redirect(absoluteSrc, 302);
   }
 
   return new Response(upstream.body, {
