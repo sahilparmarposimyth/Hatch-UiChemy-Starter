@@ -82,6 +82,41 @@ const articleMaxWStyle = 'max-width: var(--hatch-max-width, 1160px);';
  *     on the slug is not indexed as a duplicate. Astro.url is already `/` when
  *     this renders through the rewrite, so this only changes the direct case.
  */
+/*
+ * The starter's own chrome around a page, switched off for the UiChemy build.
+ *
+ * An imported design carries its header and footer INSIDE the content, because
+ * that is how a theme builder composes a page. The starter added its own on
+ * top, so every imported page shipped two of each. Confirmed on a live deploy,
+ * in this order down the document:
+ *
+ *   <header class="hatch-header hatch-header-blog …">     the starter's
+ *   <header data-template-id="…" class="header-c…">       the design's
+ *   <footer class="elementor-element …">                  the design's
+ *   <footer class="hatch-footer">                         the starter's
+ *
+ * PageLayout already had a `bare` prop for exactly this ("skip rendering the
+ * site header/footer chrome") which had never been wired to anything, so
+ * `bare` is simply passed as this constant.
+ *
+ * The same switch drops the wrapper below, because those pieces fight an
+ * imported design just as much as the header does — all three were live:
+ *
+ *   <h1>Home</h1>       the page TITLE, stacked above a hero the design
+ *                       already has
+ *   max-width: 1080px   --hatch-max-width, boxing a full-bleed layout into
+ *                       a column
+ *   px-5 pt-12 pb-16    padding the design does not expect
+ *
+ * Set to true to get all of it back. It is one constant rather than detection
+ * on the content, so what renders is a decision you can read here rather than
+ * something inferred per page.
+ *
+ * Note this affects PAGES only — posts, the blog index and 404 keep their
+ * chrome, because they go through their own routes.
+ */
+const SHOW_STARTER_PAGE_CHROME = false;
+
 const frontSlug = await resolveFrontPageSlug( features );
 const isFrontPage = !! frontSlug && slugStr === frontSlug;
 const canonical = isFrontPage ? new URL( '/', Astro.url ).toString() : Astro.url.toString();
@@ -103,10 +138,29 @@ const contentHtml = rewriteFrontPageLinks(
     return /^https?:\/\//i.test(img) ? img : undefined;
   })()}
   canonical={canonical}
+  bare={! SHOW_STARTER_PAGE_CHROME}
 >
-  {/* Article container matches posts + homepage at --hatch-max-width. The
-      inner .hatch-prose fills 100% of the article so wide hero images and
-      multi-column page layouts still render edge-to-edge inside the cap. */}
+  {/* The switch above drops the starter's wrapper too, not just the header and
+      footer.
+
+      Three things in the branch below actively fight an imported design, all
+      three confirmed on a live deploy:
+
+        <h1>Home</h1>          the page TITLE, stacked above a design that
+                               already has its own hero
+        max-width: 1080px      --hatch-max-width, which boxes a full-bleed
+                               layout into a column
+        px-5 pt-12 pb-16       padding the design does not expect
+
+      The featured image goes for the same reason: a designed page supplies its
+      own hero, and rendering the WP featured image above it duplicates that.
+
+      .hatch-prose is deliberately KEPT. The design already renders correctly
+      inside it, so removing the class would be an unforced change to how every
+      existing imported page looks. Only the width cap is dropped. */}
+  { ! SHOW_STARTER_PAGE_CHROME ? (
+    <div class="hatch-prose" style="max-width: 100%;" set:html={contentHtml}></div>
+  ) : (
   <article class="mx-auto px-5 sm:px-8 pt-12 pb-16" style={articleMaxWStyle}>
     {page.featuredImage && (
       <div class="aspect-[2/1] rounded-xl overflow-hidden mb-10 bg-hatch-bg-3">
@@ -127,6 +181,7 @@ const contentHtml = rewriteFrontPageLinks(
         fills the article width (~1160px). Posts keep the cap for reading. */}
     <div class="hatch-prose" style="max-width: 100%;" set:html={contentHtml}></div>
   </article>
+  ) }
   {/* v0.51: hydrates any [fluentform]/[wpforms]/[gravityform]/[contact-form-7]
       shortcode that the Forms Bridge rewrote into <div class="hatch-form-mount">.
       No-op when the page has no form mounts. Fixes #208 (.ff-btn on /contact). */}
