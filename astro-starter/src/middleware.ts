@@ -244,6 +244,34 @@ const BASE_HEADERS: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
 };
 
+/*
+ * Edge cache for HTML, set HERE rather than in the page.
+ *
+ * edgeCache() in lib/cache.ts is correct and was never taking effect. It is
+ * called from PageLayout.astro — a layout COMPONENT — and with output:'server'
+ * Astro streams the response, so that frontmatter runs after the headers have
+ * already gone out. `Astro.response.headers.set()` there is too late, silently.
+ *
+ * Measured on a live deploy: the response carried
+ *
+ *   Cache-Control: public, max-age=0, must-revalidate
+ *   X-Vercel-Cache: MISS        (on every request, twice in a row)
+ *
+ * Nothing in this codebase emits that string — it is Vercel's default for an
+ * SSR function with no cache header, i.e. proof that ours never arrived. The
+ * consequence was that every visitor paid a full render against WordPress:
+ * 5.9s, then 20.3s on the same URL.
+ *
+ * Middleware is the right place because it demonstrably works — the CSP and
+ * HSTS below reach the live response through this same function, since it wraps
+ * the finished Response instead of trying to mutate one mid-stream.
+ *
+ * `s-maxage` is what a CDN reads; `max-age=0` keeps the browser revalidating so
+ * a hard reload still shows fresh content.
+ */
+const EDGE_TTL = Number(import.meta.env.PUBLIC_EDGE_CACHE_TTL ?? 60);
+const EDGE_SWR = Number(import.meta.env.PUBLIC_EDGE_CACHE_SWR ?? 3600);
+
 function attachSecurityHeaders(res: Response): Response {
   const headers = new Headers(res.headers);
   for (const [k, v] of Object.entries(BASE_HEADERS)) {
@@ -252,6 +280,26 @@ function attachSecurityHeaders(res: Response): Response {
   const ctype = res.headers.get('content-type') || '';
   if (ctype.includes('text/html') && !headers.has('Content-Security-Policy')) {
     headers.set('Content-Security-Policy', CSP);
+  }
+  /*
+   * Only when nothing already said otherwise. API routes set `no-store`
+   * deliberately (hatch-verify, the auth endpoints), and a page that opts out
+   * via edgeCache(Astro, { noCache: true }) must keep that — so an existing
+   * header always wins, exactly as with the two above.
+   *
+   * Only 2xx: caching a 404 or a 500 for a minute turns a transient WordPress
+   * blip into a minute of a broken site.
+   */
+  if (
+    ctype.includes('text/html') &&
+    !headers.has('Cache-Control') &&
+    res.status >= 200 && res.status < 300 &&
+    EDGE_TTL > 0
+  ) {
+    headers.set(
+      'Cache-Control',
+      `public, max-age=0, s-maxage=${EDGE_TTL}, stale-while-revalidate=${EDGE_SWR}`,
+    );
   }
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
