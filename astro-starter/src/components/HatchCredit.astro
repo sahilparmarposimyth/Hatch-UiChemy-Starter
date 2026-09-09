@@ -1,6 +1,6 @@
 ---
 /**
- * "Built by Hatch" footer credit. Renders only when the
+ * "Built by UiChemy" footer credit. Renders only when the
  * built_by_hatch feature flag is on.
  */
 interface Props {
@@ -10,12 +10,15 @@ const { show } = Astro.props;
 ---
 {show && (
   <a
-    href="https://hatch.adityaarsharma.com"
+    href="https://uichemy.com"
     target="_blank"
     rel="noopener noreferrer"
     class="inline-flex items-center gap-1.5 text-[12px] text-hatch-fg-subtle hover:text-hatch-fg transition-colors group"
   >
+    {/* Hatch's chick mark. Commented out, not deleted, so restoring it is
+        a one-line revert.
     <span aria-hidden="true" class="group-hover:animate-bounce inline-block">🐣</span>
-    <span>Built by <span class="text-hatch-fg-muted font-medium group-hover:text-hatch-fg group-hover:underline">Hatch</span></span>
+    */}
+    <span>Built by <span class="text-hatch-fg-muted font-medium group-hover:text-hatch-fg group-hover:underline">UiChemy</span></span>
   </a>
 )}

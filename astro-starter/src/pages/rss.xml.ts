@@ -13,7 +13,7 @@ export const GET: APIRoute = async () => {
   ]);
 
   const site = features.site.url || import.meta.env.PUBLIC_SITE_URL || '';
-  const title = escapeXml(features.site.name || 'Hatch');
+  const title = escapeXml(features.site.name || 'UiChemy');
   const description = escapeXml(features.site.description || '');
   const buildDate = new Date().toUTCString();
 

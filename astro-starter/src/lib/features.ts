@@ -250,8 +250,8 @@ const FALLBACK: HatchFeatures = {
   perf: PERF_FALLBACK,
   features: {},
   site: {
-    name: 'Hatch',
-    description: 'Headless WordPress, powered by Hatch.',
+    name: 'UiChemy',
+    description: 'Headless WordPress, rendered by Astro.',
     url: import.meta.env.PUBLIC_SITE_URL || '',
     language: 'en-US',
     icon_url: '',

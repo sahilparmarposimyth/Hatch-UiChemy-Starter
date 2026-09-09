@@ -70,7 +70,7 @@ const [features, primaryMenu, footerMenu, codeSnippets] = await Promise.all([
   getMenus('footer'),
   getCodeSnippets(),
 ]);
-const siteName = features.site.name || 'Hatch';
+const siteName = features.site.name || 'UiChemy';
 const siteDescription = features.site.description || '';
 const lang = (features.site.language || 'en-US').split('-')[0];
 const iconUrl = features.site.icon_url || '';
