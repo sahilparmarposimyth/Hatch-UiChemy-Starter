@@ -18,8 +18,48 @@ const BACKEND = (import.meta.env.HATCH_IMG_BACKEND || 'https://hatch-uichemy-sta
 // on behalf of the frontend origin. Restrict to hosts we intentionally
 // serve images from: the configured WP backend, the site's own origin, and
 // an optional operator-supplied comma-separated list.
+/*
+ * Hosts an imported design actually serves its images from.
+ *
+ * Built in rather than left to configuration, because without them a UiChemy
+ * import renders no images at all: those designs keep their media on template
+ * CDNs, never in the WP media library, so every one of them fell outside an
+ * allowlist that only ever held the WP host. Measured on one real page — all 61
+ * images refused with 400 {"error":"url host not allowed"}:
+ *
+ *   24  cdn.prod.website-files.com
+ *   18  img-library.uichemy.com
+ *   16  assets.lummi.ai / www.lummi.ai
+ *    3  assets.uichemy.com
+ *
+ * PUBLIC_IMG_ALLOWED_HOSTS exists for exactly this and nothing writes it, so
+ * relying on it meant relying on a knob no deploy path sets. Defaults here need
+ * no broker change to take effect.
+ *
+ * The SSRF guard this list belongs to is about internal targets — cloud
+ * metadata, admin dashboards on private ranges. These are public image CDNs
+ * reachable server-side with no credentials, so allowing them lets nobody fetch
+ * anything they could not already fetch directly.
+ *
+ * EXACT hosts only: isAllowedSrc matches with `hosts.has(host)`, so a wildcard
+ * is a hostname that matches nothing rather than a pattern. Every subdomain
+ * needs its own entry. Extend via PUBLIC_IMG_ALLOWED_HOSTS rather than editing
+ * this list.
+ */
+const DEFAULT_ALLOWED_HOSTS = [
+  // UiChemy's own asset hosts.
+  'assets.uichemy.com',
+  'img-library.uichemy.com',
+  // Webflow's CDN — UiChemy templates are authored against it.
+  'cdn.prod.website-files.com',
+  // Lummi, the stock imagery in the shipped templates.
+  'assets.lummi.ai',
+  'www.lummi.ai',
+];
+
 function buildAllowedHosts(): Set<string> {
   const hosts = new Set<string>();
+  for (const h of DEFAULT_ALLOWED_HOSTS) hosts.add(h);
   const add = (raw?: string | null) => {
     if (!raw) return;
     try { hosts.add(new URL(raw).host.toLowerCase()); } catch { /* skip malformed */ }
