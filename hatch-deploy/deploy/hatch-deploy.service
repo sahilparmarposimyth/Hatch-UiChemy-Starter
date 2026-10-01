@@ -1,0 +1,41 @@
+# Hatch deploy broker. Installed by deploy/install.sh, which substitutes the
+# __APP_DIR__ and __USER__ placeholders.
+[Unit]
+Description=Hatch deploy broker
+Documentation=https://github.com/eticastudio/hatch/tree/main/hatch-deploy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+Group=__USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=__APP_DIR__/.env
+ExecStart=/usr/bin/env node server.js
+
+# A build is 60-90s of git + npm + astro. Give a restart room rather than
+# tripping systemd's rate limiter while something upstream is flapping.
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Builds are staged under the system temp dir, so PrivateTmp would put them in a
+# namespace of their own — fine, and it also means a crashed build cannot leave
+# clutter in the host's /tmp.
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+
+# The tickets, and therefore the credentials passed to /prepare, live only in
+# this process's memory. Keep them out of a core dump.
+LimitCORE=0
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hatch-deploy
+
+[Install]
+WantedBy=multi-user.target

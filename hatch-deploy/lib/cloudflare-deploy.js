@@ -25,15 +25,81 @@
  */
 
 import { spawn } from 'node:child_process';
-import { mkdtemp, rm, writeFile, chmod } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { buildEnv } from './security.js';
+import { imgAllowedHosts } from './img-hosts.js';
 
-const MAX_CONCURRENT_BUILDS = 3;
+/*
+ * Each concurrent build is its own `npm install` + `astro build`, which is
+ * roughly a gigabyte of RAM and a node_modules tree on disk. Three is right for
+ * a 4 GB VPS and will OOM a 512 MB container, so it is settable — a small
+ * managed instance should run 1.
+ */
+const MAX_CONCURRENT_BUILDS = Math.max(
+	1,
+	parseInt(process.env.HATCH_MAX_CONCURRENT_BUILDS || '3', 10) || 3
+);
 const BUILD_TIMEOUT_MS = 10 * 60 * 1000;
+
+/*
+ * How many times to try the clone before giving up.
+ *
+ * A real deploy failed with `Failed to connect to github.com port 443 after
+ * 134096 ms` — DNS resolved, the TCP connect simply never completed — on a run
+ * whose predecessor had cloned the same repo without trouble. Flaky egress, not
+ * misconfiguration, and with one attempt every deploy is a coin toss.
+ */
+const CLONE_ATTEMPTS = 3;
+
+/*
+ * Cap on ONE clone attempt. Generous for a 32 MB shallow clone on a slow box,
+ * short enough that three attempts plus backoff still leave most of
+ * BUILD_TIMEOUT_MS for the install and the Astro build.
+ */
+const CLONE_TIMEOUT_MS = 90 * 1000;
+
+/*
+ * How many times to try the dependency install.
+ *
+ * `npm error network aborted` with ECONNRESET is a socket torn down MID-STREAM,
+ * which npm treats as fatal — --fetch-retries governs request retries and never
+ * gets a look in, which is why adding it changed nothing. The retry has to wrap
+ * the whole command.
+ */
+const INSTALL_ATTEMPTS = 3;
 const HATCH_REPO = process.env.HATCH_REPO || 'https://github.com/adityaarsharma/hatch.git';
 const HATCH_BRANCH = process.env.HATCH_BRANCH || 'main';
+
+/**
+ * A repo URL that is safe to put in the build log.
+ *
+ * The clone URL is echoed into progress output, and that output is stored on the
+ * ticket, served by /status and rendered in the browser. A private HATCH_REPO is
+ * commonly authenticated by embedding credentials in the URL
+ * (`https://x-access-token:<token>@github.com/…`), which would therefore print
+ * the token in plaintext to anyone watching the build — including through the
+ * status API.
+ *
+ * Strips userinfo and leaves a marker so it is obvious credentials were used.
+ * scp-style SSH remotes (`git@github.com:owner/repo.git`) are not valid URLs and
+ * throw here; they carry no secret, so they pass through untouched.
+ *
+ * @param {string} u Repo URL, possibly containing credentials.
+ * @returns {string} The same URL with any username/password removed.
+ */
+function redactRepoUrl(u) {
+	try {
+		const url = new URL(String(u));
+		if (!url.username && !url.password) return String(u);
+		url.username = '';
+		url.password = '';
+		return url.toString().replace('://', '://***@');
+	} catch {
+		return String(u);
+	}
+}
 
 let activeBuilds = 0;
 const buildQueue = [];
@@ -76,10 +142,18 @@ function runCmd(cmd, args, opts = {}) {
 		};
 		proc.stdout.on('data', (c) => onLine(c, false));
 		proc.stderr.on('data', (c) => onLine(c, true));
+		/*
+		 * Per-command cap, defaulting to the whole-build one. The clone needs its
+		 * own: git exposes no connect timeout, so a blackholed TCP connect to
+		 * github.com sat for 134 SECONDS on a real deploy before curl gave up.
+		 * Under the 10-minute default, three retries of that would eat most of
+		 * the build budget and still be waiting.
+		 */
+		const limitMs = opts.timeoutMs || BUILD_TIMEOUT_MS;
 		const killer = setTimeout(() => {
 			proc.kill('SIGKILL');
-			reject(new Error(`Timeout after ${BUILD_TIMEOUT_MS / 1000}s: ${cmd} ${args.join(' ')}`));
-		}, BUILD_TIMEOUT_MS);
+			reject(new Error(`Timeout after ${limitMs / 1000}s: ${cmd} ${args.join(' ')}`));
+		}, limitMs);
 		proc.on('close', (code) => {
 			clearTimeout(killer);
 			if (code === 0) resolve({ stdout, stderr });
@@ -151,8 +225,35 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 		progress('📁 Setting up build directory…');
 		workDir = await mkdtemp(path.join(tmpdir(), 'hatch-cf-'));
 
-		progress(`🐙 Cloning ${HATCH_REPO} (branch ${HATCH_BRANCH})…`);
-		await runCmd('git', ['clone', '--depth', '1', '--branch', HATCH_BRANCH, HATCH_REPO, workDir], { onProgress: progress });
+		progress(`🐙 Cloning ${redactRepoUrl(HATCH_REPO)} (branch ${HATCH_BRANCH})…`);
+		/*
+		 * Two different stalls, two different guards. http.lowSpeedLimit/Time
+		 * covers a transfer that starts and then crawls — git aborts once it sits
+		 * under 1 KB/s for 30s. It does NOT cover a connect that never completes,
+		 * which is the failure actually seen, because git exposes no connect
+		 * timeout at all. That is what timeoutMs is for.
+		 *
+		 * workDir is recreated between attempts: git leaves a partial tree behind
+		 * often enough, and `git clone` into a non-empty directory fails outright,
+		 * which would turn one flaky attempt into a guaranteed failure.
+		 */
+		for (let attempt = 1; ; attempt++) {
+			try {
+				await runCmd('git', [
+					'-c', 'http.lowSpeedLimit=1000',
+					'-c', 'http.lowSpeedTime=30',
+					'clone', '--depth', '1', '--single-branch',
+					'--branch', HATCH_BRANCH, HATCH_REPO, workDir,
+				], { onProgress: progress, timeoutMs: CLONE_TIMEOUT_MS });
+				break;
+			} catch (err) {
+				if (attempt >= CLONE_ATTEMPTS) throw err;
+				progress(`⚠️  Clone attempt ${attempt} of ${CLONE_ATTEMPTS} failed, retrying…`);
+				await rm(workDir, { recursive: true, force: true });
+				await mkdir(workDir, { recursive: true });
+				await new Promise((resolve) => setTimeout(resolve, attempt * 5000));
+			}
+		}
 
 		const astroDir = path.join(workDir, 'astro-starter');
 
@@ -163,13 +264,64 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 			`WP_API_PASS=${ticket.wp_pass}`,
 			`HATCH_WEBHOOK_SECRET=${ticket.webhook_secret}`,
 			`PUBLIC_SITE_URL=https://placeholder.workers.dev`,
+			// Hosts the deployed frontend's /img proxy may fetch from. Build-time
+			// only: PUBLIC_ is Vite's envPrefix, so this is inlined into the bundle
+			// and cannot be changed on the host afterwards. Empty here is what made
+			// every template-CDN image 400 with "url host not allowed".
+			`PUBLIC_IMG_ALLOWED_HOSTS=${imgAllowedHosts(ticket)}`,
 			``,
 		].join('\n');
 		await writeFile(path.join(astroDir, '.env'), envContent);
 		await chmod(path.join(astroDir, '.env'), 0o600);
 
 		progress('📦 Installing dependencies (npm install)…');
-		await runCmd('npm', ['install', '--no-audit', '--no-fund', '--prefer-offline'], { cwd: astroDir, onProgress: progress });
+		/*
+		 * A cold container has no npm cache, so this pulls the whole Astro
+		 * dependency tree over the network on every deploy — and on this instance
+		 * it kept dying with `npm error code ECONNRESET / npm error network
+		 * aborted`.
+		 *
+		 * My first pass added --fetch-retries here and it changed nothing, for a
+		 * reason worth recording: `network aborted` is a socket torn down
+		 * MID-STREAM, and npm treats that as fatal. --fetch-retries governs
+		 * retrying a *request*, so it never got a look in. The retry has to wrap
+		 * the whole command, which is what the loop below does.
+		 *
+		 * --prefer-offline is dropped: there is no cache to prefer on the first
+		 * attempt, and it only obscures what the install is doing.
+		 */
+		for (let attempt = 1; ; attempt++) {
+			try {
+				await runCmd('npm', [
+					'install',
+					'--no-audit',
+					'--no-fund',
+					/*
+					 * Fewer parallel sockets. Concurrency is what provokes the
+					 * resets: npm opens a dozen tarball streams at once, and on
+					 * throttled egress one of them gets torn down and takes the
+					 * whole install with it.
+					 */
+					'--maxsockets=3',
+					'--fetch-retries=5',
+					'--fetch-retry-mintimeout=20000',
+					'--fetch-retry-maxtimeout=120000',
+					'--fetch-timeout=600000',
+				], { cwd: astroDir, onProgress: progress });
+				break;
+			} catch (err) {
+				if (attempt >= INSTALL_ATTEMPTS) throw err;
+				/*
+				 * Nothing is cleaned between attempts, deliberately. npm's cache
+				 * keeps every tarball it managed to finish, so attempt 2 has less
+				 * to fetch than attempt 1 and attempt 3 less again — the retries
+				 * compound instead of starting over. Wiping node_modules here
+				 * (or using `npm ci`, which does it for you) would throw that away.
+				 */
+				progress(`⚠️  npm install attempt ${attempt} of ${INSTALL_ATTEMPTS} failed — retrying, keeping what the cache already has…`);
+				await new Promise((resolve) => setTimeout(resolve, attempt * 10000));
+			}
+		}
 
 		progress('🏗️  Building Astro (HATCH_TARGET=cf)…');
 		// v0.49.2 — pass WP creds in subprocess env so Vite's `define` block
@@ -186,6 +338,7 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 				WP_API_USER:           ticket.wp_user,
 				WP_API_PASS:           ticket.wp_pass,
 				HATCH_WEBHOOK_SECRET:  ticket.webhook_secret,
+				PUBLIC_IMG_ALLOWED_HOSTS: imgAllowedHosts(ticket),
 			},
 			onProgress: progress,
 		});

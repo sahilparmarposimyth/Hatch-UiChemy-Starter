@@ -11,15 +11,55 @@ import type { APIRoute } from 'astro';
  *
  * Cache the response aggressively — output is content-addressable.
  */
-const BACKEND = (import.meta.env.HATCH_IMG_BACKEND || 'https://hatch.adityaarsharma.com').replace(/\/$/, '');
+const BACKEND = (import.meta.env.HATCH_IMG_BACKEND || 'https://hatch-uichemy-starter.onrender.com').replace(/\/$/, '');
 
 // Backlog #161 — SSRF allowlist. Without this the proxy will fetch any
 // attacker-controlled URL (169.254.169.254, internal admin dashboards, etc.)
 // on behalf of the frontend origin. Restrict to hosts we intentionally
 // serve images from: the configured WP backend, the site's own origin, and
 // an optional operator-supplied comma-separated list.
+/*
+ * Hosts an imported design actually serves its images from.
+ *
+ * Built in rather than left to configuration, because without them a UiChemy
+ * import renders no images at all: those designs keep their media on template
+ * CDNs, never in the WP media library, so every one of them fell outside an
+ * allowlist that only ever held the WP host. Measured on one real page — all 61
+ * images refused with 400 {"error":"url host not allowed"}:
+ *
+ *   24  cdn.prod.website-files.com
+ *   18  img-library.uichemy.com
+ *   16  assets.lummi.ai / www.lummi.ai
+ *    3  assets.uichemy.com
+ *
+ * PUBLIC_IMG_ALLOWED_HOSTS exists for exactly this and nothing writes it, so
+ * relying on it meant relying on a knob no deploy path sets. Defaults here need
+ * no broker change to take effect.
+ *
+ * The SSRF guard this list belongs to is about internal targets — cloud
+ * metadata, admin dashboards on private ranges. These are public image CDNs
+ * reachable server-side with no credentials, so allowing them lets nobody fetch
+ * anything they could not already fetch directly.
+ *
+ * EXACT hosts only: isAllowedSrc matches with `hosts.has(host)`, so a wildcard
+ * is a hostname that matches nothing rather than a pattern. Every subdomain
+ * needs its own entry. Extend via PUBLIC_IMG_ALLOWED_HOSTS rather than editing
+ * this list.
+ */
+const DEFAULT_ALLOWED_HOSTS = [
+  // UiChemy's own asset hosts.
+  'assets.uichemy.com',
+  'img-library.uichemy.com',
+  // Webflow's CDN — UiChemy templates are authored against it.
+  'cdn.prod.website-files.com',
+  // Lummi, the stock imagery in the shipped templates.
+  'assets.lummi.ai',
+  'www.lummi.ai',
+];
+
 function buildAllowedHosts(): Set<string> {
   const hosts = new Set<string>();
+  for (const h of DEFAULT_ALLOWED_HOSTS) hosts.add(h);
   const add = (raw?: string | null) => {
     if (!raw) return;
     try { hosts.add(new URL(raw).host.toLowerCase()); } catch { /* skip malformed */ }
@@ -67,8 +107,37 @@ export const GET: APIRoute = async ({ request, url }) => {
     });
   }
 
+  /*
+   * Resolve the source against THIS request before doing anything with it.
+   *
+   * Media from the WordPress library arrives as a same-origin RELATIVE path —
+   * `/img?url=/hatch-media/2026/09/Hand.png` — because that is what
+   * hatch-media/[...path].ts serves. isAllowedSrc() called `new URL(raw)` with
+   * no base, which THROWS on a relative path, so every one of those images was
+   * refused with "url host not allowed". The same-origin escape hatch below
+   * could never fire, because the code never got far enough to compare hosts.
+   *
+   * That made it a bug for the common case rather than an edge case: a site
+   * whose images live in the WP media library had none of them render. It only
+   * looked fine on sites whose images sat on a template CDN, where the URLs are
+   * already absolute.
+   *
+   * The absolute form is then used for BOTH the allowlist check and the
+   * backend hand-off, so the resizer receives something it can actually fetch,
+   * and so the failure redirect below is a valid absolute Location.
+   */
+  let absoluteSrc: string;
+  try {
+    absoluteSrc = new URL(src, url).toString();
+  } catch {
+    return new Response(JSON.stringify({ error: 'url invalid' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // Backlog #161 — reject non-allowlisted origins before touching backend.
-  if (!isAllowedSrc(src, url.host.toLowerCase())) {
+  if (!isAllowedSrc(absoluteSrc, url.host.toLowerCase())) {
     return new Response(JSON.stringify({ error: 'url host not allowed' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -76,7 +145,7 @@ export const GET: APIRoute = async ({ request, url }) => {
   }
 
   const backendUrl = new URL(BACKEND + '/img');
-  backendUrl.searchParams.set('url', src);
+  backendUrl.searchParams.set('url', absoluteSrc);
   if (w) backendUrl.searchParams.set('w', w);
   if (h) backendUrl.searchParams.set('h', h);
   backendUrl.searchParams.set('format', format === 'avif' ? 'avif' : 'webp');
@@ -92,11 +161,11 @@ export const GET: APIRoute = async ({ request, url }) => {
   } catch {
     // On timeout or network error, redirect to the original WP image as a
     // graceful fallback so the page never shows a broken-image icon.
-    return Response.redirect(src, 302);
+    return Response.redirect(absoluteSrc, 302);
   }
 
   if (!upstream.ok) {
-    return Response.redirect(src, 302);
+    return Response.redirect(absoluteSrc, 302);
   }
 
   return new Response(upstream.body, {

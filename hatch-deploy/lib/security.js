@@ -258,7 +258,14 @@ export function productionWarnings(env) {
 
 // ---------------------------------------------------------------- build environment
 
-const ENV_ALLOWLIST = ['PATH', 'HOME', 'USER', 'LANG', 'LC_ALL', 'TMPDIR', 'TEMP', 'TMP', 'SHELL', 'TERM', 'CI', 'NODE_OPTIONS', 'SystemRoot', 'ComSpec', 'PATHEXT'];
+const ENV_ALLOWLIST = [
+	'PATH', 'HOME', 'USER', 'LANG', 'LC_ALL', 'TZ', 'TMPDIR', 'TEMP', 'TMP', 'SHELL', 'TERM', 'CI', 'NODE_OPTIONS',
+	'SystemRoot', 'ComSpec', 'PATHEXT',
+	// Network plumbing a managed platform or corporate egress needs for git/npm to reach the
+	// internet. Not secrets.
+	'HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'http_proxy', 'https_proxy', 'no_proxy',
+	'NODE_EXTRA_CA_CERTS', 'SSL_CERT_FILE', 'SSL_CERT_DIR', 'GIT_SSL_CAINFO',
+];
 
 /**
  * Environment for a build subprocess: a short allowlist of the broker's own

@@ -99,6 +99,24 @@ const editionDate = new Date().toLocaleDateString(features.site.language || 'en-
 // Inline SVG for the color-mode button — sun + moon. Repeated three times
 // so each theme branch can style its own button shell without a shared
 // component pulling in tailwind classes the theme CSS would have to fight.
+
+/*
+ * Hatch's site-search box in the header, switched off for the UiChemy build.
+ *
+ * It is the ~180px white rounded field at the right of the header — easy to
+ * mistake for part of an imported design, which is what prompted this. It is
+ * not: it is this component, and it posts to /search, which searches WP
+ * POSTS. A site publishing designed pages has nothing for it to find.
+ *
+ * Four instances go together: the blog, tech and docs header variants plus
+ * the mobile drawer. Leaving the drawer one would put a search box behind the
+ * hamburger on phones and nowhere else, which is worse than either choice.
+ *
+ * Only matters where the header renders at all. On PAGES it is already gone,
+ * because [...slug].astro passes `bare` and takes the whole header with it —
+ * this additionally clears it from posts and the blog index.
+ */
+const SHOW_HEADER_SEARCH = false;
 ---
 
 {/* ================================ BLOG ================================ */}
@@ -126,10 +144,12 @@ const editionDate = new Date().toLocaleDateString(features.site.language || 'en-
           )}
         </nav>
       )}
+      { SHOW_HEADER_SEARCH && (
       <form role="search" method="get" action="/search" class="hatch-header-search hidden md:flex" aria-label="Site search">
         <label class="hatch-header-search__label" for="hatch-header-search-input"><span class="sr-only">Search</span></label>
         <input id="hatch-header-search-input" type="search" name="q" placeholder="Search" autocomplete="off" />
       </form>
+      ) }
       <button type="button" class="hatch-hamburger md:hidden inline-flex items-center justify-center w-10 h-10" aria-label="Open menu" aria-controls="hatch-mobile-drawer" aria-expanded="false">
         <svg class="h-5 w-5 hatch-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         <svg class="h-5 w-5 hatch-icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -159,9 +179,11 @@ const editionDate = new Date().toLocaleDateString(features.site.language || 'en-
           <a href={accountHref} data-hatch-auth-link class:list={[isActive(accountHref) ? 'is-active' : '']}>{authLabel}</a>
         )}
       </nav>
+      { SHOW_HEADER_SEARCH && (
       <form role="search" method="get" action="/search" class="hatch-header-search hidden md:flex" aria-label="Site search">
         <input type="search" name="q" placeholder="Search" autocomplete="off" aria-label="Search" />
       </form>
+      ) }
       <button type="button" class="hatch-hamburger md:hidden inline-flex items-center justify-center w-9 h-9" style="border: 1px solid var(--hatch-border); border-radius: 3px; color: var(--hatch-fg-muted);" aria-label="Open menu" aria-controls="hatch-mobile-drawer" aria-expanded="false">
         <svg class="h-4 w-4 hatch-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         <svg class="h-4 w-4 hatch-icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -191,9 +213,11 @@ const editionDate = new Date().toLocaleDateString(features.site.language || 'en-
           <a href={accountHref} data-hatch-auth-link class:list={[isActive(accountHref) ? 'is-active' : '']}>{authLabel}</a>
         )}
       </nav>
+      { SHOW_HEADER_SEARCH && (
       <form role="search" method="get" action="/search" class="hatch-header-search hidden md:flex" aria-label="Site search">
         <input type="search" name="q" placeholder="Search" autocomplete="off" aria-label="Search" />
       </form>
+      ) }
       <button type="button" class="hatch-hamburger hatch-docs-mobile-toggle md:hidden inline-flex items-center justify-center w-9 h-9" style="border-radius: 6px; color: var(--hatch-fg-muted);" aria-label="Open menu" aria-controls="hatch-mobile-drawer" aria-expanded="false">
         <svg class="h-4 w-4 hatch-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         <svg class="h-4 w-4 hatch-icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -225,9 +249,11 @@ const editionDate = new Date().toLocaleDateString(features.site.language || 'en-
 {/* ============================ SHARED DRAWER =========================== */}
 <div id="hatch-mobile-drawer" class="hatch-drawer md:hidden hidden border-t border-hatch-border bg-hatch-bg">
   <nav class="mx-auto px-5 sm:px-8 py-3 flex flex-col gap-1" aria-label="Primary mobile" style="max-width: var(--hatch-max-width, 1180px)">
+    { SHOW_HEADER_SEARCH && (
     <form role="search" method="get" action="/search" class="hatch-header-search hatch-header-search--mobile flex mb-2" aria-label="Site search">
       <input type="search" name="q" placeholder="Search" autocomplete="off" aria-label="Search" style="flex:1;padding:10px 12px;border:1px solid var(--hatch-border);border-radius:6px;background:var(--hatch-bg-2);color:var(--hatch-fg);font-size:14px;" />
     </form>
+    ) }
     {navItems.map((item) => (
       <a href={item.href} target={item.target || undefined}
          class:list={['px-3 py-3 rounded-md text-[14px] font-medium transition-colors',
