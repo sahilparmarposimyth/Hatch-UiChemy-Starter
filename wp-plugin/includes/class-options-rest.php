@@ -38,14 +38,8 @@ class Hatch_Options_Rest {
 		// v0.50.11 — /options was a legacy whitelist-based handler (10 keys).
 		// Superseded by hatch_react_options_save() in admin/dashboard.php which
 		// handles the React dispatcher's dot-path schema with the full key set.
-		// Registering both at the same priority shadowed the new handler and
-		// silently dropped every option not in the legacy whitelist. Removed.
 
-		register_rest_route( HATCH_REST_NAMESPACE, '/self-update', array(
-			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => array( __CLASS__, 'route_self_update' ),
-			'permission_callback' => array( __CLASS__, 'require_admin' ),
-		) );
+		// Self-update route removed in merged build per audit finding M-8.
 
 		register_rest_route( HATCH_REST_NAMESPACE, '/version', array(
 			'methods'             => WP_REST_Server::READABLE,
@@ -184,108 +178,20 @@ class Hatch_Options_Rest {
 	}
 
 	/**
-	 * POST — download the latest hatch.zip from GitHub raw and replace the
-	 * current plugin files in-place. Admin-only. Returns the result of the
-	 * download + extract + copy steps.
+	 * Self-update is permanently disabled.
 	 *
-	 * Strategy:
-	 *   1. Download https://raw.githubusercontent.com/adityaarsharma/hatch/main/hatch.zip
-	 *   2. Extract to a temp directory using WP_Filesystem
-	 *   3. Locate the wp-plugin/ folder inside the zip
-	 *   4. copy_dir() it on top of HATCH_PLUGIN_DIR (in place upgrade)
-	 *   5. Clean up the temp dir
-	 *
-	 * Note: WP_Filesystem may demand FTP creds on some hosts. On modern
-	 * hosting (TasteWP, Cloudways, RunCloud, most VPS), it falls back to
-	 * direct PHP filesystem access and just works.
+	 * The route used to download a zip from a personal GitHub repository and copy
+	 * it over this plugin's directory with no checksum, signature or version pin
+	 * (audit M-8). The route is no longer registered; this stub remains only so
+	 * nothing that still references the callback fatals. Update the plugin through
+	 * WordPress's own plugin updater.
 	 */
 	public static function route_self_update() {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/misc.php';
-
-		// Initialize WP_Filesystem in direct mode (no FTP prompts).
-		add_filter( 'filesystem_method', static function () { return 'direct'; } );
-		WP_Filesystem();
-		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			return new WP_Error( 'hatch_fs_unavailable', __( 'WP_Filesystem could not initialize. The host may require FTP credentials.', 'hatch' ), array( 'status' => 500 ) );
-		}
-
-		$zip_url = 'https://raw.githubusercontent.com/adityaarsharma/hatch/main/hatch.zip?_=' . time();
-		$tmp_zip = download_url( $zip_url, 45 );
-		if ( is_wp_error( $tmp_zip ) ) {
-			return new WP_Error( 'hatch_download_failed', $tmp_zip->get_error_message(), array( 'status' => 502 ) );
-		}
-
-		$extract_root = trailingslashit( get_temp_dir() ) . 'hatch-update-' . time();
-		wp_mkdir_p( $extract_root );
-
-		$unzip = unzip_file( $tmp_zip, $extract_root );
-		@unlink( $tmp_zip );
-
-		if ( is_wp_error( $unzip ) ) {
-			$wp_filesystem->delete( $extract_root, true );
-			return new WP_Error( 'hatch_unzip_failed', $unzip->get_error_message(), array( 'status' => 500 ) );
-		}
-
-		// The zip is built with `zip -r hatch.zip wp-plugin/` so the source is
-		// $extract_root/wp-plugin/. Verify before copy.
-		$source = trailingslashit( $extract_root ) . 'wp-plugin';
-		if ( ! $wp_filesystem->is_dir( $source ) ) {
-			$wp_filesystem->delete( $extract_root, true );
-			return new WP_Error( 'hatch_no_source', __( 'Expected wp-plugin/ folder not found inside zip.', 'hatch' ), array( 'status' => 500 ) );
-		}
-
-		// In-place overwrite of the existing plugin directory.
-		$dest = untrailingslashit( HATCH_PLUGIN_DIR );
-		$copy = copy_dir( $source, $dest );
-		$wp_filesystem->delete( $extract_root, true );
-
-		if ( is_wp_error( $copy ) ) {
-			return new WP_Error( 'hatch_copy_failed', $copy->get_error_message(), array( 'status' => 500 ) );
-		}
-
-		// Bust the WP cache for plugin metadata so the new version registers.
-		if ( function_exists( 'wp_clean_plugins_cache' ) ) {
-			wp_clean_plugins_cache();
-		}
-
-		// v0.40 — also refresh the installed companion theme. The theme lives
-		// at wp-content/themes/hatch-companion/ (separate from the plugin dir)
-		// so plugin updates don't touch it. We re-copy from the freshly
-		// extracted plugin files. Critical when the theme has a bug fix —
-		// e.g. v0.40's home_url filter fix that was preventing Gutenberg saves.
-		$theme_src   = $dest . '/companion-theme';
-		$theme_dest  = get_theme_root() . '/hatch-companion';
-		$theme_synced = false;
-		if ( $wp_filesystem->is_dir( $theme_src ) && $wp_filesystem->is_dir( $theme_dest ) ) {
-			$theme_copy = copy_dir( $theme_src, $theme_dest );
-			$theme_synced = ! is_wp_error( $theme_copy );
-		}
-
-		// Re-read the just-installed main file to report the new version.
-		$plugin_file = $dest . '/hatch.php';
-		$new_version = HATCH_VERSION; // current load is still old code
-		if ( file_exists( $plugin_file ) && function_exists( 'get_plugin_data' ) ) {
-			$pd = get_plugin_data( $plugin_file, false, false );
-			if ( ! empty( $pd['Version'] ) ) {
-				$new_version = $pd['Version'];
-			}
-		} else {
-			// Cheap version extraction without requiring get_plugin_data.
-			$contents = @file_get_contents( $plugin_file );
-			if ( $contents && preg_match( '/^\s*\*\s*Version:\s*([0-9.]+)/mi', $contents, $m ) ) {
-				$new_version = $m[1];
-			}
-		}
-
-		return new WP_REST_Response( array(
-			'ok'                  => true,
-			'previous_version'    => HATCH_VERSION,
-			'installed_version'   => $new_version,
-			'theme_synced'        => $theme_synced,
-			'message'             => __( 'Files replaced. The new code will run on the next request — current request still uses the previous version.', 'hatch' ),
-		), 200 );
+		return new WP_Error(
+			'hatch_no_self_update',
+			__( 'Self-update is disabled. Update the plugin from the WordPress Plugins screen.', 'hatch' ),
+			array( 'status' => 410 )
+		);
 	}
 }
 

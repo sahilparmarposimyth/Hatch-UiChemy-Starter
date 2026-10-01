@@ -64,7 +64,7 @@ class Hatch_Rest_Api {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'route_info' ),
-				'permission_callback' => array( $this, 'permission_authenticated' ),
+				'permission_callback' => array( $this, 'permission_admin' ),
 			)
 		);
 
@@ -235,6 +235,31 @@ class Hatch_Rest_Api {
 			)
 		);
 
+		// Unlock a password-protected post for a headless visitor. WordPress's own
+		// unlock is a cookie set on the WordPress origin, which a headless frontend
+		// never sees. This exchanges the post password for a short-lived signed token
+		// the frontend sends back as X-Hatch-Post-Token. Public by design (the visitor
+		// is anonymous); rate limited per client IP.
+		register_rest_route(
+			HATCH_REST_NAMESPACE,
+			'/content/unlock',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'route_content_unlock' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'slug'     => array(
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'password' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+
 		// v0.3.2 — Posts block list endpoint. Public; returns only published
 		// content with safe filters (taxonomy / term / author / orderby).
 		register_rest_route(
@@ -391,6 +416,7 @@ class Hatch_Rest_Api {
 			'post_type'      => $post_type,
 			'posts_per_page' => max( 1, min( 24, $per_page ?: 6 ) ),
 			'post_status'    => 'publish',
+			'has_password'   => false,
 			'orderby'        => is_string( $orderby ) ? sanitize_key( $orderby ) : 'date',
 			'order'          => is_string( $order_raw ) && 'asc' === strtolower( $order_raw ) ? 'ASC' : 'DESC',
 			'no_found_rows'  => true,
@@ -440,6 +466,105 @@ class Hatch_Rest_Api {
 		) );
 	}
 
+	/**
+	 * Seconds an unlock token stays valid.
+	 */
+	const UNLOCK_TTL = 86400;
+
+	/**
+	 * Failed/total unlock attempts allowed per client IP per window.
+	 */
+	const UNLOCK_MAX_ATTEMPTS = 10;
+	const UNLOCK_WINDOW       = 300;
+
+	private static function unlock_key(): string {
+		return wp_salt( 'auth' ) . '|hatch-post-unlock-v1';
+	}
+
+	/**
+	 * A password change must invalidate tokens issued under the old password.
+	 */
+	private static function unlock_fingerprint( WP_Post $post ): string {
+		return substr( hash_hmac( 'sha256', (string) $post->post_password, self::unlock_key() ), 0, 16 );
+	}
+
+	/**
+	 * Does this request carry a valid X-Hatch-Post-Token for THIS post?
+	 *
+	 * @param WP_Post         $post    Post being requested.
+	 * @param WP_REST_Request $request Request.
+	 * @return bool
+	 */
+	private static function unlock_token_valid( WP_Post $post, WP_REST_Request $request ): bool {
+		$token = (string) $request->get_header( 'x-hatch-post-token' );
+		if ( '' === $token || false === strpos( $token, '.' ) ) {
+			return false;
+		}
+		list( $body, $sig ) = explode( '.', $token, 2 );
+		$expected = hash_hmac( 'sha256', $body, self::unlock_key() );
+		if ( ! hash_equals( $expected, $sig ) ) {
+			return false;
+		}
+		$data = json_decode( (string) base64_decode( strtr( $body, '-_', '+/' ), true ), true );
+		if ( ! is_array( $data ) || empty( $data['id'] ) || empty( $data['exp'] ) || empty( $data['fp'] ) ) {
+			return false;
+		}
+		return (int) $data['id'] === (int) $post->ID
+			&& time() < (int) $data['exp']
+			&& hash_equals( self::unlock_fingerprint( $post ), (string) $data['fp'] );
+	}
+
+	/**
+	 * POST /content/unlock — exchange a post password for a signed token.
+	 *
+	 * Every failure (unknown slug, post not protected, wrong password) answers
+	 * the same way so the route cannot be used to discover protected posts.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function route_content_unlock( WP_REST_Request $request ) {
+		$ip     = class_exists( 'Hatch_Auth' ) ? Hatch_Auth::client_ip() : ( isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '0' );
+		$bucket = 'hatch_unlock_rl_' . md5( $ip );
+		$count  = (int) get_transient( $bucket );
+		if ( $count >= self::UNLOCK_MAX_ATTEMPTS ) {
+			return new WP_Error( 'hatch_unlock_rate_limited', __( 'Too many attempts. Try again in a few minutes.', 'hatch' ), array( 'status' => 429 ) );
+		}
+		set_transient( $bucket, $count + 1, self::UNLOCK_WINDOW );
+
+		$fail     = new WP_Error( 'hatch_unlock_failed', __( 'Incorrect password.', 'hatch' ), array( 'status' => 403 ) );
+		$slug     = sanitize_title( (string) $request->get_param( 'slug' ) );
+		$password = (string) $request->get_param( 'password' );
+		if ( '' === $slug || '' === $password ) {
+			return $fail;
+		}
+		$posts = get_posts( array(
+			'name'             => $slug,
+			'post_type'        => 'any',
+			'post_status'      => 'publish',
+			'has_password'     => true,
+			'numberposts'      => 1,
+			'suppress_filters' => true,
+		) );
+		if ( empty( $posts ) || ! hash_equals( (string) $posts[0]->post_password, $password ) ) {
+			return $fail;
+		}
+		$post = $posts[0];
+		$body = rtrim( strtr( base64_encode( (string) wp_json_encode( array(
+			'id'  => (int) $post->ID,
+			'exp' => time() + self::UNLOCK_TTL,
+			'fp'  => self::unlock_fingerprint( $post ),
+		) ) ), '+/', '-_' ), '=' );
+		delete_transient( $bucket );
+
+		return new WP_REST_Response( array(
+			'ok'         => true,
+			'id'         => (int) $post->ID,
+			'token'      => $body . '.' . hash_hmac( 'sha256', $body, self::unlock_key() ),
+			'expires_in' => self::UNLOCK_TTL,
+		), 200 );
+	}
+
 	public function route_content_by_slug( WP_REST_Request $request ) {
 		$slug = sanitize_title( (string) $request->get_param( 'slug' ) );
 		if ( '' === $slug ) {
@@ -467,6 +592,19 @@ class Hatch_Rest_Api {
 			) );
 			if ( ! $q->have_posts() ) continue;
 			$post = $q->posts[0];
+
+			if ( post_password_required( $post ) && ! current_user_can( 'edit_post', $post->ID ) && ! self::unlock_token_valid( $post, $request ) ) {
+				return new WP_REST_Response(
+					array(
+						'found'             => false,
+						'password_required' => true,
+						'id'                => (int) $post->ID,
+						'slug'              => (string) $post->post_name,
+					),
+					403
+				);
+			}
+
 			$thumb_id = (int) get_post_thumbnail_id( $post );
 			$thumb_url = $thumb_id ? (string) wp_get_attachment_image_url( $thumb_id, 'full' ) : '';
 			$thumb_alt = $thumb_id ? (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ) : '';

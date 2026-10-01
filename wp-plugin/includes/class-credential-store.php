@@ -25,10 +25,14 @@ class Hatch_Credential_Store {
 	/**
 	 * Derive a 32-byte encryption key from WP secret keys + site URL.
 	 * Never stored; recomputed on demand.
+	 *
+	 * Returns null if AUTH_KEY is undefined or empty to prevent fallback to a predictable key.
 	 */
-	private static function derive_key(): string {
-		$salt = defined( 'AUTH_KEY' ) ? AUTH_KEY : 'hatch-fallback-no-auth-key';
-		return hash_hmac( 'sha256', home_url() . '|hatch-cred-v1', $salt, true );
+	private static function derive_key(): ?string {
+		if ( ! defined( 'AUTH_KEY' ) || '' === trim( (string) AUTH_KEY ) ) {
+			return null;
+		}
+		return hash_hmac( 'sha256', home_url() . '|hatch-cred-v1', AUTH_KEY, true );
 	}
 
 	/**
@@ -48,6 +52,9 @@ class Hatch_Credential_Store {
 		}
 
 		$key = self::derive_key();
+		if ( null === $key ) {
+			return false;
+		}
 		$iv  = random_bytes( self::IV_LEN );
 		$tag = '';
 
@@ -93,6 +100,9 @@ class Hatch_Credential_Store {
 		$tag    = substr( $raw, self::IV_LEN, self::TAG_LEN );
 		$cipher = substr( $raw, self::IV_LEN + self::TAG_LEN );
 		$key    = self::derive_key();
+		if ( null === $key ) {
+			return '';
+		}
 
 		$plain = openssl_decrypt( $cipher, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv, $tag );
 

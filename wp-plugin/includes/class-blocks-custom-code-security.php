@@ -52,6 +52,28 @@ class Hatch_Blocks_Custom_Code_Security {
 		// Strip on REST output for non-capable readers.
 		add_filter( 'rest_prepare_post', array( $this, 'strip_for_rest_if_no_cap' ), 10, 3 );
 		add_filter( 'rest_prepare_page', array( $this, 'strip_for_rest_if_no_cap' ), 10, 3 );
+
+		// Strip on Hatch content filter for non-capable readers.
+		add_filter( 'hatch/content/html', array( $this, 'filter_hatch_content_html' ), 10, 2 );
+	}
+
+	/**
+	 * Strip custom-code blocks in Hatch /content REST endpoint for non-capable readers.
+	 *
+	 * @param string      $raw_html Raw or semi-rendered HTML content.
+	 * @param WP_Post|null $post     Post object if available.
+	 * @return string
+	 */
+	public function filter_hatch_content_html( $raw_html, $post = null ) {
+		unset( $post );
+		if ( ! is_string( $raw_html ) || '' === $raw_html ) {
+			return $raw_html;
+		}
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $raw_html;
+		}
+		$stripped = self::strip_custom_code_blocks( $raw_html );
+		return self::strip_rendered_custom_code( $stripped );
 	}
 
 	/**
@@ -110,8 +132,12 @@ class Hatch_Blocks_Custom_Code_Security {
 		if ( false === strpos( $content, 'wp:' . self::BLOCK_NAME ) ) {
 			return $content;
 		}
-		// Greedy regex on block comment delimiters.
-		$pattern = '/<!--\s*wp:hatch\/custom-code(?:\s+[^>]*?)?\s*(?:\/-->|-->[\s\S]*?<!--\s*\/wp:hatch\/custom-code\s*-->)/';
+		// H-6: use the real block parser — a regex over block comments can be
+		// defeated by a '>' (or '-->') inside a JSON attribute string.
+		if ( function_exists( 'parse_blocks' ) && function_exists( 'serialize_blocks' ) ) {
+			return serialize_blocks( self::remove_custom_code_from_blocks( parse_blocks( $content ) ) );
+		}
+		$pattern = '/<!--\s*wp:hatch\/custom-code(?:\s+.*?)?(?:\/-->|-->.*?<!--\s*\/wp:hatch\/custom-code\s*-->)/s';
 		return (string) preg_replace( $pattern, '', $content );
 	}
 
@@ -125,8 +151,33 @@ class Hatch_Blocks_Custom_Code_Security {
 		if ( false === strpos( $html, 'hatch-custom-code' ) ) {
 			return $html;
 		}
-		$pattern = '/<(div|section|iframe)[^>]*class="[^"]*hatch-custom-code[^"]*"[^>]*>[\s\S]*?<\/\1>/i';
-		return (string) preg_replace( $pattern, '', $html );
+		// H-6: walk the markup and drop each wrapper together with everything up to
+		// ITS OWN closing tag, counting nested tags of the same name — a lazy regex
+		// stops at the first closing tag and leaves the rest of the payload behind.
+		// Done on the raw string (no DOM round-trip) so surrounding markup is left
+		// byte-for-byte untouched.
+		$open_re = '/<(div|section|iframe)\b[^>]*\bclass\s*=\s*("[^"]*hatch-custom-code[^"]*"|\'[^\']*hatch-custom-code[^\']*\')[^>]*>/i';
+		for ( $guard = 0; $guard < 200; $guard++ ) {
+			if ( ! preg_match( $open_re, $html, $m, PREG_OFFSET_CAPTURE ) ) {
+				break;
+			}
+			$start = $m[0][1];
+			$tag   = strtolower( $m[1][0] );
+			$pos   = $start + strlen( $m[0][0] );
+			$depth = 1;
+			$end   = strlen( $html ); // Unclosed wrapper: drop to end of input, fail closed.
+			if ( preg_match_all( '/<(\/?)' . $tag . '\b[^>]*>/i', $html, $tags, PREG_OFFSET_CAPTURE | PREG_SET_ORDER, $pos ) ) {
+				foreach ( $tags as $t ) {
+					$depth += ( '' === $t[1][0] ) ? 1 : -1;
+					if ( 0 === $depth ) {
+						$end = $t[0][1] + strlen( $t[0][0] );
+						break;
+					}
+				}
+			}
+			$html = substr( $html, 0, $start ) . substr( $html, $end );
+		}
+		return $html;
 	}
 
 	/**
@@ -135,6 +186,40 @@ class Hatch_Blocks_Custom_Code_Security {
 	 * @return string
 	 */
 	public static function iframe_sandbox(): string {
-		return 'allow-scripts allow-forms allow-popups allow-same-origin';
+		return 'allow-scripts allow-forms allow-popups';
+	}
+	/**
+	 * Recursively drop hatch/custom-code blocks from a parsed block tree.
+	 *
+	 * @param array $blocks Output of parse_blocks().
+	 * @return array
+	 */
+	private static function remove_custom_code_from_blocks( array $blocks ): array {
+		$out = array();
+		foreach ( $blocks as $block ) {
+			if ( isset( $block['blockName'] ) && self::BLOCK_NAME === $block['blockName'] ) {
+				continue;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$block['innerBlocks'] = self::remove_custom_code_from_blocks( $block['innerBlocks'] );
+			}
+			$out[] = $block;
+		}
+		return $out;
+	}
+
+	/**
+	 * Strip custom-code markup (block comments and rendered wrappers) unless the
+	 * current reader holds unfiltered_html. Single entry point for every
+	 * Hatch/Protuno response path (H-6).
+	 *
+	 * @param string $content Block markup or rendered HTML.
+	 * @return string
+	 */
+	public static function strip_for_current_reader( string $content ): string {
+		if ( '' === $content || current_user_can( 'unfiltered_html' ) ) {
+			return $content;
+		}
+		return self::strip_rendered_custom_code( self::strip_custom_code_blocks( $content ) );
 	}
 }

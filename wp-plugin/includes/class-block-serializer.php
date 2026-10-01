@@ -112,9 +112,13 @@ class Hatch_Block_Serializer {
 			return current_user_can( 'edit_post', $id );
 		}
 
-		// View context = post must be public.
+		// View context = post must be public and not password-protected.
 		if ( ! in_array( $post->post_status, $public_statuses, true ) ) {
 			return new WP_Error( 'hatch_block_not_public', __( 'Post is not public.', 'hatch' ), array( 'status' => 403 ) );
+		}
+		// Security (H-3): Password-protected posts must not expose block trees.
+		if ( post_password_required( $post ) && ! current_user_can( 'edit_post', $id ) ) {
+			return new WP_Error( 'hatch_block_password_required', __( 'Post is password-protected.', 'hatch' ), array( 'status' => 403 ) );
 		}
 		return true;
 	}
@@ -133,6 +137,10 @@ class Hatch_Block_Serializer {
 		}
 
 		$raw    = (string) $post->post_content;
+		// H-6: readers without unfiltered_html never receive custom-code blocks.
+		if ( class_exists( 'Hatch_Blocks_Custom_Code_Security' ) ) {
+			$raw = Hatch_Blocks_Custom_Code_Security::strip_for_current_reader( $raw );
+		}
 		$tree   = self::serialize_content( $raw );
 		$meta   = array(
 			'id'         => $post->ID,

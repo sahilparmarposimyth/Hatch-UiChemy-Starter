@@ -30,103 +30,8 @@ class Hatch_Headless_Forms {
 	public static function register_routes(): void {
 		// v0.50.14 — Hatch does not bridge form submissions anymore. Form
 		// plugins (Fluent / Gravity / WPForms / CF7) expose their own REST
-		// endpoints and the Astro frontend talks to them directly. Surfacing
-		// "/hatch/v1/forms/*" was a duplicate path that confused users about
-		// which endpoint to call. Plugin Bridge in the Content tab still
-		// auto-detects whichever form plugin is installed so the user knows
-		// the integration works — just not via this class.
-		return;
-		register_rest_route( HATCH_REST_NAMESPACE, '/forms/submit', array(
-			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => array( __CLASS__, 'route_submit' ),
-			'permission_callback' => '__return_true',
-		) );
-		// v0.24: native embed for Fluent Forms / WPForms / Gravity. Returns
-		// pre-rendered HTML + the script/style URLs that the form plugin
-		// would normally enqueue on a classic-WP page. The Astro side just
-		// drops the HTML in via set:html and lazy-loads the assets.
-		register_rest_route( HATCH_REST_NAMESPACE, '/forms/(?P<id>\d+)/embed', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( __CLASS__, 'route_embed' ),
-			'permission_callback' => '__return_true',
-		) );
-	}
-
-	/**
-	 * GET /hatch/v1/forms/{id}/embed — render the form plugin's own shortcode.
-	 *
-	 * The plugin's CSS/JS would normally enqueue when the shortcode runs.
-	 * We capture both the HTML and the asset URLs so the frontend gets a
-	 * complete, working form — including the plugin's validation + AJAX.
-	 *
-	 * @param WP_REST_Request $req
-	 * @return WP_REST_Response
-	 */
-	public static function route_embed( WP_REST_Request $req ): WP_REST_Response {
-		$id  = (int) $req['id'];
-		$det = Hatch_Integrations::detect_forms();
-
-		$shortcode = '';
-		if ( 'fluent_forms' === $det['slug'] ) {
-			$shortcode = sprintf( '[fluentform id="%d"]', $id );
-		} elseif ( 'wpforms' === $det['slug'] ) {
-			$shortcode = sprintf( '[wpforms id="%d"]', $id );
-		} elseif ( 'gravity' === $det['slug'] ) {
-			$shortcode = sprintf( '[gravityform id="%d" title="false" description="false"]', $id );
-		}
-
-		if ( '' === $shortcode ) {
-			return new WP_REST_Response( array(
-				'ok'      => false,
-				'message' => 'No supported form plugin detected. Install Fluent Forms.',
-			), 200 );
-		}
-
-		// Run the shortcode + capture the enqueued asset URLs.
-		ob_start();
-		$html = do_shortcode( $shortcode );
-		$html = $html . ob_get_clean();
-
-		$scripts = self::collect_enqueued_assets( 'wp_scripts' );
-		$styles  = self::collect_enqueued_assets( 'wp_styles' );
-
-		return new WP_REST_Response( array(
-			'ok'        => true,
-			'backend'   => $det['slug'],
-			'form_id'   => $id,
-			'html'      => $html,
-			'scripts'   => $scripts,
-			'styles'    => $styles,
-		), 200 );
-	}
-
-	/**
-	 * Snapshot the URLs of every currently-enqueued asset from a registry.
-	 *
-	 * @param string $kind 'wp_scripts' | 'wp_styles'
-	 * @return array<int,string>
-	 */
-	private static function collect_enqueued_assets( string $kind ): array {
-		$registry = ( 'wp_scripts' === $kind ) ? wp_scripts() : wp_styles();
-		if ( ! $registry ) {
-			return array();
-		}
-		$out = array();
-		foreach ( (array) $registry->queue as $handle ) {
-			$data = $registry->registered[ $handle ] ?? null;
-			if ( ! $data || empty( $data->src ) ) {
-				continue;
-			}
-			$src = $data->src;
-			if ( str_starts_with( $src, '/' ) && ! str_starts_with( $src, '//' ) ) {
-				// v0.50.4 — home_url, not site_url. WP_HOME (public address) is the
-				// correct origin for form actions; site_url returns the wp-admin
-				// install URL which differs in Bedrock / WP_SITEURL != WP_HOME setups.
-				$src = home_url( $src );
-			}
-			$out[] = (string) $src;
-		}
-		return array_values( array_unique( $out ) );
+		// endpoints and the Astro frontend talks to them directly. Dead routes
+		// removed per audit finding L-4.
 	}
 
 	public static function register_cpt(): void {
@@ -274,13 +179,10 @@ class Hatch_Headless_Forms {
 	}
 
 	private static function ip(): string {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
-		if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
-			$ip = (string) $_SERVER['HTTP_CF_CONNECTING_IP'];
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ip = trim( explode( ',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'] )[0] );
+		if ( class_exists( 'Hatch_Auth' ) ) {
+			return Hatch_Auth::client_ip();
 		}
-		return preg_replace( '/[^0-9a-fA-F:\.]/', '', $ip ) ?? '';
+		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
 	}
 }
 

@@ -320,15 +320,16 @@ function hatch_silence_rest_errors(): void {
  */
 add_action( 'rest_api_init', 'hatch_cors_headers', 15 );
 function hatch_cors_headers(): void {
-	remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+	// L-5: decide BEFORE hooking, so requests for other plugins' REST routes
+	// never have a Hatch filter attached at all.
+	$path = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+	$is_hatch_or_protuno = ( false !== strpos( $path, '/wp-json/hatch/v1/' ) || false !== strpos( $path, '/?rest_route=/hatch/v1/' )
+		|| false !== strpos( $path, '/wp-json/protuno/v1/' ) || false !== strpos( $path, '/?rest_route=/protuno/v1/' )
+		|| false !== strpos( $path, 'rest_route=%2Fhatch%2Fv1' ) || false !== strpos( $path, 'rest_route=%2Fprotuno%2Fv1' ) );
+	if ( ! $is_hatch_or_protuno ) {
+		return;
+	}
 	add_filter( 'rest_pre_serve_request', function ( $value ) {
-		// Only adjust headers for our own namespace.
-		$rest_route = $GLOBALS['wp_rest_server'] ?? null;
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$path = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
-		if ( false === strpos( $path, '/wp-json/hatch/v1/' ) && false === strpos( $path, '/?rest_route=/hatch/v1/' ) ) {
-			return $value;
-		}
 
 		$origin     = isset( $_SERVER['HTTP_ORIGIN'] ) ? esc_url_raw( (string) $_SERVER['HTTP_ORIGIN'] ) : '';
 		$frontend   = untrailingslashit( (string) get_option( 'hatch_frontend_url', '' ) );
@@ -348,6 +349,15 @@ function hatch_cors_headers(): void {
 			// the wizard writes hatch_frontend_url explicitly; the explicit
 			// allowlist above is now the only accepted path.
 		}
+
+		// WordPress core's rest_send_cors_headers() has already run and reflects ANY
+		// Origin with credentials allowed. Our allowlist is meaningless unless that
+		// is undone for these namespaces; auth here is Bearer-header, so credentialed
+		// CORS is never needed.
+		header_remove( 'Access-Control-Allow-Origin' );
+		header_remove( 'Access-Control-Allow-Credentials' );
+		header_remove( 'Access-Control-Allow-Methods' );
+		header_remove( 'Access-Control-Allow-Headers' );
 
 		if ( $is_allowed ) {
 			header( 'Access-Control-Allow-Origin: ' . $origin );
@@ -857,10 +867,10 @@ final class Hatch {
 		}
 
 		// V0.1 defaults.
-		add_option( 'hatch_security_harden_rest', 1 );
-		add_option( 'hatch_security_disable_xmlrpc', 1 );
-		add_option( 'hatch_security_block_user_enum', 1 );
-		add_option( 'hatch_security_force_noindex', 1 );
+		add_option( 'hatch_security_harden_rest', 0 );
+		add_option( 'hatch_security_disable_xmlrpc', 0 );
+		add_option( 'hatch_security_block_user_enum', 0 );
+		add_option( 'hatch_security_force_noindex', 0 );
 		add_option( 'hatch_revalidate_endpoint', '' );
 
 		// V0.2 defaults.

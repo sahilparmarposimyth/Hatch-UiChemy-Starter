@@ -22,6 +22,9 @@
  *     "workdir": "/var/www/hatch-frontend",
  *     "pm2_name": "hatch-frontend",
  *     "wp_url": "https://cms.mysite.com",
+ *     "tls_cert": "/etc/hatch-agent/tls/cert.pem",   // served over HTTPS; the plugin pins this key
+ *     "tls_key":  "/etc/hatch-agent/tls/key.pem",
+ *     "allow_insecure_http": false,                    // dev only — refuse to start without TLS otherwise
  *     "allowed_origin_ip": ""   // optional — restrict to one IP
  *   }
  *
@@ -37,13 +40,14 @@
 'use strict';
 
 const http      = require( 'http' );
+const https     = require( 'https' );
 const fs        = require( 'fs' );
 const path      = require( 'path' );
 const crypto    = require( 'crypto' );
 const { spawn, execFile } = require( 'child_process' );
 const os        = require( 'os' );
 
-const AGENT_VERSION = '0.1.0';
+const AGENT_VERSION = '0.2.0';
 const CONFIG_PATH   = process.env.HATCH_AGENT_CONFIG || '/etc/hatch-agent/config.json';
 const HMAC_WINDOW_S = 300;          // 5 minutes
 const NONCE_TTL_MS  = 6 * 60 * 1000; // remember nonces for 6 min (a bit longer than window)
@@ -63,6 +67,8 @@ const BIND    = String( config.bind || '0.0.0.0' );
 const WORKDIR = String( config.workdir || '/var/www/hatch-frontend' );
 const PM2NAME = String( config.pm2_name || 'hatch-frontend' );
 const WP_URL  = String( config.wp_url || '' );
+const TLS_CERT = String( config.tls_cert || '/etc/hatch-agent/tls/cert.pem' );
+const TLS_KEY  = String( config.tls_key  || '/etc/hatch-agent/tls/key.pem' );
 
 if ( SECRET.length < 32 ) {
 	console.error( '[hatch-agent] FATAL: secret missing or too short (<32 chars)' );
@@ -77,12 +83,21 @@ setInterval( () => {
 }, 60_000 ).unref();
 
 // ---------- helpers ----------
+// Every response is signed with the shared secret so the plugin can tell a real
+// agent reply from one forged or altered on the network:
+//   HMAC-SHA256( secret, `${timestamp}.${nonce}.${body}` )
 function jsonResponse( res, code, obj ) {
-	const body = JSON.stringify( obj );
+	const body  = JSON.stringify( obj );
+	const ts    = String( Math.floor( Date.now() / 1000 ) );
+	const nonce = crypto.randomBytes( 16 ).toString( 'hex' );
+	const sig   = crypto.createHmac( 'sha256', SECRET ).update( `${ts}.${nonce}.${body}` ).digest( 'hex' );
 	res.writeHead( code, {
 		'Content-Type': 'application/json',
 		'Content-Length': Buffer.byteLength( body ),
 		'X-Hatch-Agent-Version': AGENT_VERSION,
+		'X-Hatch-Timestamp': ts,
+		'X-Hatch-Nonce': nonce,
+		'X-Hatch-Signature': sig,
 	} );
 	res.end( body );
 }
@@ -178,7 +193,7 @@ async function pm2Status() {
 }
 
 // ---------- request handler ----------
-const server = http.createServer( async ( req, res ) => {
+async function handler( req, res ) {
 	try {
 		// Optional IP allowlist
 		if ( config.allowed_origin_ip ) {
@@ -265,10 +280,29 @@ const server = http.createServer( async ( req, res ) => {
 		console.error( '[hatch-agent] handler error:', e );
 		return jsonResponse( res, 500, { error: 'internal: ' + e.message } );
 	}
-} );
+}
+
+// ---------- transport ----------
+// HTTPS with the certificate generated at install time. The plugin pins this
+// certificate's public key the first time you click Verify connection, so a
+// self-signed cert is fine and the key must stay the same across restarts.
+let server;
+if ( fs.existsSync( TLS_CERT ) && fs.existsSync( TLS_KEY ) ) {
+	server = https.createServer( {
+		cert: fs.readFileSync( TLS_CERT ),
+		key:  fs.readFileSync( TLS_KEY ),
+		minVersion: 'TLSv1.2',
+	}, handler );
+} else if ( config.allow_insecure_http === true ) {
+	console.warn( '[hatch-agent] WARNING: no TLS certificate, serving plain HTTP (allow_insecure_http=true)' );
+	server = http.createServer( handler );
+} else {
+	console.error( '[hatch-agent] FATAL: TLS certificate not found at', TLS_CERT, '— re-run the installer, or set allow_insecure_http for local development.' );
+	process.exit( 1 );
+}
 
 server.listen( PORT, BIND, () => {
-	console.log( `[hatch-agent] v${AGENT_VERSION} listening on ${BIND}:${PORT} (workdir: ${WORKDIR})` );
+	console.log( `[hatch-agent] v${AGENT_VERSION} listening on ${BIND}:${PORT} (${server instanceof https.Server ? 'https' : 'http'}, workdir: ${WORKDIR})` );
 } );
 
 process.on( 'SIGTERM', () => { server.close( () => process.exit( 0 ) ); } );
