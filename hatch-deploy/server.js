@@ -30,6 +30,15 @@ import { deployToVercel }     from './lib/vercel-deploy.js';
 import { deployToCloudflare } from './lib/cloudflare-deploy.js';
 import { registerImgProxy }   from './lib/img-proxy.js';
 import { registerOgImage }    from './lib/og-image.js';
+import {
+	securityHeaders,
+	validatePrepare,
+	createRateLimiter,
+	makeRedactor,
+	safeProjectUrl,
+	notifyWordPress,
+	productionWarnings,
+} from './lib/security.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +49,10 @@ const BASE_URL = (process.env.HATCH_DEPLOY_BASE || 'https://hatch.adityaarsharma
 
 const app = express();
 app.disable('x-powered-by');
+// Behind a reverse proxy (RunCloud/nginx) set HATCH_TRUST_PROXY=1 so req.ip is
+// the real client and the /prepare rate limit keys on the visitor, not the proxy.
+if (process.env.HATCH_TRUST_PROXY === '1') app.set('trust proxy', 1);
+app.use(securityHeaders);
 app.use(express.json({ limit: '32kb' }));
 
 // --------------------------------------------------------------------------
@@ -1951,31 +1964,36 @@ const PROVIDERS = {
 	},
 };
 
+// /prepare is callable by anyone on the internet, so it is rate limited, the
+// ticket store is capped, and every field is validated (HTTPS only, no private
+// network targets, no control characters, return_url on the same WordPress site).
+// See lib/security.js.
+const prepareLimiter = createRateLimiter({ max: 20, windowMs: 10 * 60 * 1000 });
+const MAX_LIVE_TICKETS = 500;
+
 function makePrepareHandler(providerKey) {
 	const cfg = PROVIDERS[providerKey];
-	return (req, res) => {
-		const b = req.body || {};
-		const required = ['wp_url', 'wp_user', 'wp_pass', 'webhook_secret', 'return_url'];
-		const missing = required.filter((k) => !b[k]);
-		if (missing.length) {
-			return res.status(400).json({ error: 'missing_fields', missing });
+	return async (req, res) => {
+		if (!prepareLimiter(req.ip || 'unknown')) {
+			return res.status(429).json({ error: 'rate_limited' });
 		}
-		const providerToken = String(b[cfg.tokenKey] || '').trim();
-		if (!providerToken || providerToken.length < 20) {
-			return res.status(400).json({ error: 'missing_or_short_token', need: cfg.tokenKey });
+		if (tickets.size >= MAX_LIVE_TICKETS) {
+			return res.status(503).json({ error: 'busy', detail: 'Too many deploys in progress. Try again shortly.' });
 		}
-		try { new URL(b.wp_url); new URL(b.return_url); }
-		catch { return res.status(400).json({ error: 'invalid_url' }); }
-
+		const checked = await validatePrepare(req.body || {}, cfg.tokenKey);
+		if (!checked.ok) {
+			return res.status(400).json({ error: checked.error, detail: checked.detail });
+		}
+		const v = checked.value;
 		const ticket = newTicket({
 			stage: 'token_attached',
 			provider: providerKey,
-			wp_url: b.wp_url,
-			wp_user: b.wp_user,
-			wp_pass: b.wp_pass,
-			webhook_secret: b.webhook_secret,
-			return_url: b.return_url,
-			[cfg.tokenKey]: providerToken,
+			wp_url: v.wp_url,
+			wp_user: v.wp_user,
+			wp_pass: v.wp_pass,
+			webhook_secret: v.webhook_secret,
+			return_url: v.return_url,
+			[cfg.tokenKey]: v.token,
 		});
 		res.json({ ticket, expires_in: TICKET_TTL_MS / 1000 });
 	};
@@ -2011,14 +2029,26 @@ function makeBuildHandler(providerKey) {
 			return res.status(400).type('html').send(html('No token', `<h1>No ${cfg.label} token attached to ticket</h1><p>Restart from WordPress.</p>`));
 		}
 
-		// Mark building + spawn the async pipeline.
+		// A build already running for this ticket must not be started twice
+		// (a refreshed tab would otherwise run a second pipeline).
+		const alreadyRunning = ticket.stage === 'building';
+
+		// Everything sensitive this build touches. Nothing in this list may ever
+		// reach a log line, a status response, or an error message.
+		const redact = makeRedactor([ticket.wp_pass, ticket.webhook_secret, providerToken]);
+		const notifyInfo = { wpUrl: ticket.wp_url, secret: ticket.webhook_secret, ticketId, provider: providerKey };
+
+		// Mark building + spawn the async pipeline (once: a reloaded log page just
+		// re-attaches to the build that is already running).
+		if (!alreadyRunning) {
 		updateTicket(ticketId, { stage: 'building', build_log: [], error: null });
 		(async () => {
+			let outcome = 'failed';
 			try {
 				const runnerArgs = { ticket, onProgress: (line) => {
 					const t = tickets.get(ticketId);
 					if (!t) return;
-					t.data.build_log = (t.data.build_log || []).concat([line]).slice(-300);
+					t.data.build_log = (t.data.build_log || []).concat([redact(line)]).slice(-300);
 					t.expires_at = Date.now() + TICKET_TTL_MS;
 				}};
 				// Pass the right-named token key to each runner.
@@ -2026,21 +2056,36 @@ function makeBuildHandler(providerKey) {
 				if (providerKey === 'cloudflare')  runnerArgs.cfToken     = providerToken;
 
 				const { project_url, project_name } = await cfg.runner(runnerArgs);
+				// The URL is rendered as a link and sent back to WordPress: https only.
+				const safeUrl = safeProjectUrl(project_url);
+				if (!safeUrl) throw new Error('The deploy finished but returned an unexpected site address.');
+				outcome = 'success';
 				updateTicket(ticketId, {
 					stage: 'complete',
-					project_url,
+					project_url: safeUrl,
 					project_name,
 					[cfg.tokenKey]: undefined, // drop the token from memory
 				});
 			} catch (err) {
-				console.error(`[hatch-deploy] ${providerKey} build failed:`, err);
+				console.error(`[hatch-deploy] ${providerKey} build failed:`, redact((err && err.stack) || err));
 				updateTicket(ticketId, {
 					stage: 'failed',
-					error: err.message || String(err),
+					error: redact((err && err.message) || String(err)),
 					[cfg.tokenKey]: undefined,
 				});
+			} finally {
+				// The build is over: the WordPress credential and webhook secret have
+				// no further use here. Wipe them, then tell WordPress (signed, server
+				// to server) so it keeps the credential on success or revokes it on
+				// failure even if the visitor already closed the tab.
+				updateTicket(ticketId, { wp_pass: undefined, webhook_secret: undefined });
+				const acknowledged = await notifyWordPress({ ...notifyInfo, status: outcome });
+				if (!acknowledged) {
+					console.warn(`[hatch-deploy] ${providerKey}: WordPress did not acknowledge the finish notice; it will settle the credential on its own.`);
+				}
 			}
 		})();
+		}
 
 		// Stream the build log page — terminal aesthetic: traffic-light dots,
 		// monospace stream, color-coded lines (green=ok, yellow=warn, red=err,
@@ -2071,7 +2116,7 @@ function makeBuildHandler(providerKey) {
 			</div>
 
 			<p style="margin-top: 16px; font-size: 12.5px; color: var(--fg-subtle);">
-				Build runs server-side on the Hatch broker. Your ${cfg.label} token lives in memory for the build duration only — dropped on completion or failure.
+				Build runs server-side on the Hatch broker. Your ${cfg.label} token lives in memory for the build duration only — dropped on completion or failure. The site's read-only WordPress credential is wiped from this server the moment the build ends.
 			</p>
 
 			<script>
@@ -2351,4 +2396,7 @@ app.listen(PORT, () => {
 	console.log(`[hatch-deploy] listening on :${PORT}`);
 	console.log(`[hatch-deploy] Vercel: template-URL only (no OAuth)`);
 	console.log(`[hatch-deploy] repo: ${REPO}`);
+	for (const warning of productionWarnings(process.env)) {
+		console.warn(`[hatch-deploy] WARNING: ${warning}`);
+	}
 });
