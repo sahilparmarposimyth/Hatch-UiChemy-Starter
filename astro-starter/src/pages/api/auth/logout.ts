@@ -1,9 +1,11 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clearSessionCookie, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
- * Same-origin logout proxy. Forwards the hatch_jwt cookie so WP can
- * emit a clearing Set-Cookie, which we relay back to the browser.
+ * Same-origin logout proxy. Sends the session JWT to WordPress as a Bearer
+ * header so the plugin can revoke it server-side (WP session + token id), then
+ * always clears the cookie on this origin, even if WordPress is unreachable.
  * CLEAN-ROOM ORIGINAL. Zero lines copied from any external repo.
  */
 
@@ -11,37 +13,24 @@ export const prerender = false;
 
 const WP_BASE = (WP_API_URL || '').replace(/\/wp\/v2\/?$/, '').replace(/\/$/, '');
 
-function json(body: unknown, status: number): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+function signedOut(requestUrl: string): Response {
+  const h = new Headers({ 'Content-Type': 'application/json' });
+  h.append('set-cookie', clearSessionCookie(requestUrl));
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: h });
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!WP_BASE) return json({ ok: true }, 200); // Nothing to clear.
+  const auth = sessionAuthHeaders(request);
+  if (!WP_BASE || !auth.Authorization) return signedOut(request.url);
 
-  let upstream: Response;
   try {
-    upstream = await fetch(`${WP_BASE}/hatch/v1/auth/logout`, {
+    await fetch(`${WP_BASE}/hatch/v1/auth/logout`, {
       method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Cookie: request.headers.get('cookie') || '',
-      },
+      headers: { Accept: 'application/json', ...auth },
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    // Even on upstream failure, clear the local cookie so the client is signed out.
-    const h = new Headers({ 'Content-Type': 'application/json' });
-    h.append('set-cookie', 'hatch_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: h });
+    /* Revocation is best-effort; the visitor is signed out locally regardless. */
   }
-
-  const text = await upstream.text();
-  let body: unknown;
-  try { body = JSON.parse(text); } catch { body = { ok: true }; }
-
-  const headers = new Headers({ 'Content-Type': 'application/json' });
-  const setCookie = upstream.headers.get('set-cookie');
-  if (setCookie) headers.append('set-cookie', setCookie);
-  else headers.append('set-cookie', 'hatch_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
-  return new Response(JSON.stringify(body), { status: upstream.status, headers });
+  return signedOut(request.url);
 };

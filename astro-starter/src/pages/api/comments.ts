@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clientIpHeaders, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
  * Same-origin comment submit proxy.
@@ -49,7 +50,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         // WordPress sees the frontend as the client; pass the real visitor IP
         // through so comment moderation, rate limiting and spam checks still
         // key off the visitor rather than the edge worker.
-        'X-Forwarded-For': clientAddress || '',
+        ...clientIpHeaders(clientAddress),
+        // Signed-in visitors comment as themselves (Bearer header only).
+        ...sessionAuthHeaders(request),
         'User-Agent': request.headers.get('user-agent') || 'Hatch-Comment-Proxy/1.0',
       },
       signal: AbortSignal.timeout(15_000),

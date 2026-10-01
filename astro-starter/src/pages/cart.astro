@@ -15,6 +15,7 @@
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import { WP_API_URL } from 'astro:env/server';
+import { cookiesForWordPress, sessionAuthHeaders } from '@/lib/wp-auth';
 
 const base = (WP_API_URL || '').replace(/\/wp-json(\/.*)?$/, '').replace(/\/$/, '');
 
@@ -58,7 +59,9 @@ try {
   const res = await fetch(`${base}/wp-json/wc/store/v1/cart`, {
     headers: {
       Accept: 'application/json',
-      Cookie: Astro.request.headers.get('cookie') || '',
+      // Woo guest-cart cookies only; identity travels as a Bearer header.
+      Cookie: cookiesForWordPress(Astro.request),
+      ...sessionAuthHeaders(Astro.request),
     },
   });
   if (res.ok) {

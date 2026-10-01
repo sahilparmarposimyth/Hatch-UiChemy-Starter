@@ -17,6 +17,7 @@
  *   - Geo / A/B / feature-flag routing
  */
 import { defineMiddleware } from 'astro:middleware';
+import { refreshSessionIfDue } from '@/lib/wp-auth';
 
 interface Redirect {
   from: string;     // source path, may contain wildcards "*"
@@ -27,6 +28,8 @@ interface Redirect {
 
 import { WP_API_URL, WP_API_USER, WP_API_PASS } from 'astro:env/server';
 const WP_API  = WP_API_URL  || '';
+// REST base without the /wp/v2 suffix, e.g. https://cms.example.com/wp-json
+const WP_ORIGIN = WP_API.replace(/\/wp\/v2\/?$/, '').replace(/\/$/, '');
 const WP_USER = WP_API_USER || '';
 const WP_PASS = WP_API_PASS || '';
 const REDIRECTS_TTL_MS = 5 * 60 * 1000;
@@ -307,6 +310,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
+  // Sliding session: a signed-in visitor whose token is in its last ~2 hours gets a
+  // fresh one on their next page view (see lib/wp-auth.ts). Page loads only.
+  let refreshedCookies: string[] = [];
+  if (
+    (context.request.method === 'GET' || context.request.method === 'HEAD') &&
+    !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_astro/') && !url.pathname.startsWith('/img')
+  ) {
+    refreshedCookies = await refreshSessionIfDue(context.request, WP_ORIGIN);
+  }
+
   const res = await next();
-  return attachSecurityHeaders(res);
+  const out = attachSecurityHeaders(res);
+  for (const cookie of refreshedCookies) out.headers.append('set-cookie', cookie);
+  return out;
 });

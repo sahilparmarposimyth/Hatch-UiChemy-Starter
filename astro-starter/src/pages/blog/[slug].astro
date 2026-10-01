@@ -16,7 +16,8 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PostCard from '@/components/PostCard.astro';
 import HatchComments from '@/components/HatchComments.astro';
-import { getPostBySlug, getAdjacent, getSeoHead, getRelatedPosts, getSchema } from '@/lib/hatch';
+import { getPostBySlug, getAdjacent, getSeoHead, getRelatedPosts, getSchema, isPasswordProtected } from '@/lib/hatch';
+import { getUnlockToken, unlockUrl } from '@/lib/unlock';
 import HatchSchema from '@/components/HatchSchema.astro';
 import { fetchPostBlocks } from '@/lib/blocks';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
@@ -36,8 +37,14 @@ import { getFeatures, hasFeature, rewriteContentImages } from '@/lib/features';
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/blog');
 
-const post = await getPostBySlug(slug);
-if (!post) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const post = await getPostBySlug(slug, getUnlockToken(Astro.request, slug));
+if (!post) {
+  // A password-protected post answers 403 until the visitor unlocks it: send them
+  // to the password prompt rather than the 404 page.
+  if (await isPasswordProtected(slug)) return Astro.redirect(unlockUrl(slug, Astro.url.pathname), 302);
+  Astro.response.status = 404;
+  return Astro.rewrite('/404');
+}
 
 const features = await getFeatures();
 const aesthetic = features.aesthetic;

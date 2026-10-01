@@ -24,8 +24,8 @@ function secretsMatch(a: unknown, b: unknown): boolean {
  *
  * Accepts BOTH GET and POST so the WP-side `wp_remote_post` (which doesn't
  * set an Origin header and would 403 against Astro's checkOrigin guard) can
- * fall back to GET. The secret travels in the query string either way; the
- * Hatch_Revalidate class also includes it as an `X-Hatch-Secret` header.
+ * fall back to GET. The secret is accepted ONLY in the `X-Hatch-Secret`
+ * header (what Hatch_Revalidate sends); `?secret=` is no longer read.
  *
  * Behavior depends on host:
  *  - Cloudflare Workers: purge tags via Cache API
@@ -36,7 +36,10 @@ function secretsMatch(a: unknown, b: unknown): boolean {
  * the in-process features cache so the next page render re-fetches WP.
  */
 const handle = async ({ request, url }: Parameters<APIRoute>[0]): Promise<Response> => {
-  const secret = url.searchParams.get('secret') || request.headers.get('x-hatch-secret') || '';
+  // Header only. A secret in the query string is written to every access log,
+  // CDN log and Referer between here and WordPress; the plugin sends the header.
+  void url;
+  const secret = request.headers.get('x-hatch-secret') || '';
   const expected = HATCH_WEBHOOK_SECRET;
 
   if (!expected || !secretsMatch(secret, expected)) {

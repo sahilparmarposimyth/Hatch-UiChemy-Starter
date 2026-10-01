@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { cookiesForWordPress, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
  * Same-origin proxy for WC Stripe's `wc_stripe_verify_intent` AJAX action.
@@ -47,13 +48,13 @@ export const GET: APIRoute = async ({ request }) => {
   if (intentId) target.searchParams.set('intent_id', intentId);
   if (redirectTo) target.searchParams.set('redirect_to', redirectTo);
 
-  const cookie = request.headers.get('cookie') || '';
+  const cookie = cookiesForWordPress(request);
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), 10000);
   try {
     const upstream = await fetch(target.toString(), {
       method: 'GET',
-      headers: { Accept: 'text/html,*/*', ...(cookie ? { Cookie: cookie } : {}) },
+      headers: { Accept: 'text/html,*/*', ...(cookie ? { Cookie: cookie } : {}), ...sessionAuthHeaders(request) },
       redirect: 'manual',
       signal: abort.signal,
     });

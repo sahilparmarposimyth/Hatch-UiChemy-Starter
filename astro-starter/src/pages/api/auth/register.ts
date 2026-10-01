@@ -1,9 +1,13 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clientIpHeaders, redactToken, relaySessionCookie } from '@/lib/wp-auth';
 
 /**
  * Same-origin registration proxy.
  * CLEAN-ROOM ORIGINAL. Zero lines copied from any external repo.
+ *
+ * Registration auto-signs the visitor in, so the response carries the same
+ * `hatch_jwt` cookie as login. Only that cookie is relayed; see lib/wp-auth.ts.
  */
 
 export const prerender = false;
@@ -28,7 +32,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'X-Forwarded-For': clientAddress || '',
+        ...clientIpHeaders(clientAddress),
         'User-Agent': request.headers.get('user-agent') || 'Hatch-Auth-Proxy/1.0',
       },
       signal: AbortSignal.timeout(15_000),
@@ -42,20 +46,6 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   try { body = JSON.parse(text); } catch { return json({ message: 'Unexpected response.' }, 502); }
 
   const headers = new Headers({ 'Content-Type': 'application/json' });
-  // Register auto-logs in via the same success_response path in class-auth.php,
-  // which now emits hatch_jwt + wordpress_logged_in_* + wp-settings-* Set-Cookie
-  // headers. Forward each entry separately and strip Domain= so they attach to
-  // the Astro origin instead of the internal WP hostname.
-  const setCookies: string[] = typeof (upstream.headers as any).getSetCookie === 'function'
-    ? (upstream.headers as any).getSetCookie()
-    : [];
-  if (setCookies.length === 0) {
-    upstream.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') setCookies.push(value);
-    });
-  }
-  for (const raw of setCookies) {
-    headers.append('set-cookie', raw.replace(/;\s*Domain=[^;]+/i, ''));
-  }
-  return new Response(JSON.stringify(body), { status: upstream.status, headers });
+  relaySessionCookie(upstream, headers, request.url);
+  return new Response(JSON.stringify(redactToken(body)), { status: upstream.status, headers });
 };

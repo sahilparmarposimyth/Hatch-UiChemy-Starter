@@ -1,14 +1,14 @@
 /**
- * Revalidation webhook. Accepts GET or POST; secret in `?secret=` or
- * `x-hatch-secret` header. Mirrors the Astro starter contract.
+ * Revalidation webhook. Accepts GET or POST; secret in the
+ * `x-hatch-secret` header only. Mirrors the Astro starter contract.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { clearFeaturesCache } from '@/lib/features';
 import { revalidatePath } from 'next/cache';
 
 async function handle(req: NextRequest) {
-  const url = new URL(req.url);
-  const secret = url.searchParams.get('secret') || req.headers.get('x-hatch-secret') || '';
+  // Header only: a query-string secret ends up in every access log.
+  const secret = req.headers.get('x-hatch-secret') || '';
   const expected = process.env.HATCH_WEBHOOK_SECRET || '';
   if (!expected || secret !== expected) {
     return NextResponse.json({ ok: false, error: 'Invalid secret' }, { status: 401 });

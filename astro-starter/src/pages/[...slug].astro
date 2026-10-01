@@ -13,7 +13,8 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import HatchImage from '@/components/HatchImage.astro';
 import HatchForm from '@/components/HatchForm.astro';
-import { getPageBySlug, getContentBySlug } from '@/lib/hatch';
+import { getPageBySlug, getContentBySlug, isPasswordProtected } from '@/lib/hatch';
+import { getUnlockToken, unlockUrl } from '@/lib/unlock';
 import { getFeatures, rewriteContentImages } from '@/lib/features';
 
 const { slug } = Astro.params;
@@ -27,13 +28,14 @@ if (!slugStr) {
 // (preserves the legacy fast-path), then any CPT (products, courses, docs,
 // portfolio, …) via the universal /hatch/v1/content endpoint. Normalised
 // shape so the template below doesn't care about post type.
+const unlockToken = getUnlockToken(Astro.request, slugStr);
 const [pageOrigin, features] = await Promise.all([
-  getPageBySlug(slugStr),
+  getPageBySlug(slugStr, unlockToken),
   getFeatures(),
 ]);
 
 const page = pageOrigin ?? await (async () => {
-  const cpt = await getContentBySlug(slugStr);
+  const cpt = await getContentBySlug(slugStr, unlockToken);
   if (!cpt) return null;
   // v0.50.31 — Always provide an excerpt for meta description: use the WP
   // excerpt if set, otherwise derive a 155-char snippet from the post body
@@ -55,6 +57,8 @@ const page = pageOrigin ?? await (async () => {
 })();
 
 if (!page) {
+  // Password-protected content answers 403 until unlocked: prompt, don't 404.
+  if (await isPasswordProtected(slugStr)) return Astro.redirect(unlockUrl(slugStr, Astro.url.pathname), 302);
   // v0.50.31 — Rewrite to the themed 404 instead of returning a plain
   // text Response. Astro keeps the 404 status code via the response
   // object below; the rewrite emits the per-theme 404 layout the user

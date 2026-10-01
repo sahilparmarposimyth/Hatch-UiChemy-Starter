@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clientIpHeaders, cookiesForWordPress, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
  * Same-origin proxy for Hatch plugin REST routes (/hatch/v1/*).
@@ -16,9 +17,16 @@ export const prerender = false;
 
 const WP_BASE = (WP_API_URL || '').replace(/\/wp-json(\/.*)?$/, '').replace(/\/$/, '');
 
-const FORWARD_REQ_HEADERS = ['content-type', 'x-wp-nonce', 'authorization', 'accept'];
+const FORWARD_REQ_HEADERS = ['content-type', 'x-wp-nonce', 'accept'];
 
-async function proxy(request: Request, path: string | undefined): Promise<Response> {
+/**
+ * Only what this site actually calls is reachable through the proxy: reading
+ * one order by id. Everything else under /hatch/v1/ (settings, auth, deploy,
+ * diagnostics) is deliberately NOT exposed on the public origin.
+ */
+const ALLOWED = /^order\/\d+$/;
+
+async function proxy(request: Request, path: string | undefined, clientAddress?: string): Promise<Response> {
   if (!WP_BASE) {
     return new Response(JSON.stringify({ code: 'hatch_wp_api_url_missing' }), {
       status: 500,
@@ -26,6 +34,12 @@ async function proxy(request: Request, path: string | undefined): Promise<Respon
     });
   }
   const cleanPath = (path || '').replace(/^\/+/, '').replace(/\.\./g, '');
+  if (request.method !== 'GET' || !ALLOWED.test(cleanPath)) {
+    return new Response(JSON.stringify({ code: 'hatch_proxy_forbidden' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   const url = new URL(request.url);
   const target = `${WP_BASE}/wp-json/hatch/v1/${cleanPath}${url.search}`;
 
@@ -34,8 +48,9 @@ async function proxy(request: Request, path: string | undefined): Promise<Respon
     const v = request.headers.get(h);
     if (v) outHeaders[h] = v;
   }
-  const cookie = request.headers.get('cookie');
+  const cookie = cookiesForWordPress(request);
   if (cookie) outHeaders['cookie'] = cookie;
+  Object.assign(outHeaders, sessionAuthHeaders(request), clientIpHeaders(clientAddress));
 
   const body = ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer();
 
@@ -67,8 +82,8 @@ async function proxy(request: Request, path: string | undefined): Promise<Respon
   return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
 }
 
-export const GET: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const POST: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const PUT: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const DELETE: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const OPTIONS: APIRoute = ({ request, params }) => proxy(request, params.path as string);
+export const GET: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const POST: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const PUT: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const DELETE: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const OPTIONS: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);

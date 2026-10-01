@@ -33,10 +33,13 @@
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import { WP_API_URL, PUBLIC_STRIPE_KEY, PUBLIC_PAYPAL_CLIENT_ID } from 'astro:env/server';
+import { cookiesForWordPress, sessionAuthHeaders } from '@/lib/wp-auth';
 
 const base = (WP_API_URL || '').replace(/\/wp-json(\/.*)?$/, '').replace(/\/$/, '');
 
-const cookie = Astro.request.headers.get('cookie') || '';
+// Woo guest-cart cookies only; identity travels as a Bearer header.
+const cookie = cookiesForWordPress(Astro.request);
+const authHeaders = sessionAuthHeaders(Astro.request);
 
 let nonce = '';
 let cartToken = '';
@@ -46,7 +49,7 @@ let fetchErr = '';
 
 try {
   const cartRes = await fetch(`${base}/wp-json/wc/store/v1/cart`, {
-    headers: { Accept: 'application/json', Cookie: cookie },
+    headers: { Accept: 'application/json', Cookie: cookie, ...authHeaders },
   });
   if (cartRes.ok) {
     nonce = cartRes.headers.get('nonce') || cartRes.headers.get('Nonce') || '';
@@ -60,6 +63,7 @@ try {
       headers: {
         Accept: 'application/json',
         Cookie: cookie,
+        ...authHeaders,
         Nonce: nonce,
         ...(cartToken ? { 'Cart-Token': cartToken } : {}),
       },
