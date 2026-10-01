@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clientIpHeaders, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
  * Guest comment submit proxy (same-origin).
@@ -42,7 +43,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       body: form,
       headers: {
         Accept: 'application/json',
-        'X-Forwarded-For': clientAddress || '',
+        ...clientIpHeaders(clientAddress),
+        // Signed-in visitors comment as themselves (Bearer header only).
+        ...sessionAuthHeaders(request),
         'User-Agent': request.headers.get('user-agent') || 'Hatch-Comment-Proxy/1.0',
       },
       signal: AbortSignal.timeout(15_000),

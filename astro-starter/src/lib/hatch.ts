@@ -259,12 +259,12 @@ function hatchContentToPost(c: HatchContent): Post {
   } as Post;
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export async function getPostBySlug(slug: string, unlockToken = ''): Promise<Post | null> {
   // v0.1.4 — use the public /hatch/v1/content endpoint instead of the
   // auth-required /wp/v2/posts. Eliminates the "stale Astro .env App
   // Password silently 404s every page" failure mode that bit real users.
   // The endpoint enforces post_status: publish, so it's safe public.
-  const content = await getContentBySlug(slug);
+  const content = await getContentBySlug(slug, unlockToken);
   if (!content || content.type !== 'post') return null;
   return hatchContentToPost(content);
 }
@@ -330,10 +330,10 @@ export async function getAdjacent(slug: string): Promise<{ prev: Post | null; ne
  * [...slug].astro catch-all route to render WP Pages on the frontend at
  * /<page-slug>. Returns null if no published Page matches.
  */
-export async function getPageBySlug(slug: string): Promise<Post | null> {
+export async function getPageBySlug(slug: string, unlockToken = ''): Promise<Post | null> {
   // v0.1.4 — same fix path as getPostBySlug. Use the public resolver so
   // pages don't 404 when the Astro .env App Password is stale or missing.
-  const content = await getContentBySlug(slug);
+  const content = await getContentBySlug(slug, unlockToken);
   if (!content || content.type !== 'page') return null;
   return hatchContentToPost(content);
 }
@@ -368,14 +368,34 @@ export interface HatchContent {
   seo?: HatchSeo;
   found?: boolean;
 }
-export async function getContentBySlug(slug: string): Promise<HatchContent | null> {
+/**
+ * `unlockToken` is the visitor's per-post token from POST /hatch/v1/content/unlock
+ * (see lib/unlock.ts). Without it a password-protected post answers 403.
+ */
+async function fetchContent(slug: string, unlockToken: string): Promise<Response | null> {
   if (!WP_API) return null;
   const origin = WP_API.replace(/\/wp-json\/wp\/v2\/?$/, '').replace(/\/$/, '');
   const url = usePlainPermalinks
     ? `${origin}/?rest_route=/hatch/v1/content&slug=${encodeURIComponent(slug)}`
     : `${origin}/wp-json/hatch/v1/content?slug=${encodeURIComponent(slug)}`;
-  const res = await fetch(url, { headers, cache: 'no-store' });
-  if (!res.ok) return null;
+  return fetch(url, { headers: unlockToken ? { ...headers, 'X-Hatch-Post-Token': unlockToken } : headers, cache: 'no-store' });
+}
+
+/**
+ * Does WordPress say this slug is a password-protected post that the visitor has
+ * not unlocked? Pages call this ONLY on the not-found path, to choose between the
+ * 404 page and the password prompt.
+ */
+export async function isPasswordProtected(slug: string): Promise<boolean> {
+  const res = await fetchContent(slug, '');
+  if (!res || res.status !== 403) return false;
+  const data = await res.json().catch(() => null);
+  return !!data && data.password_required === true;
+}
+
+export async function getContentBySlug(slug: string, unlockToken = ''): Promise<HatchContent | null> {
+  const res = await fetchContent(slug, unlockToken);
+  if (!res || !res.ok) return null;
   const data = await res.json().catch(() => null);
   if (!data || data.found !== true) return null;
   return data as HatchContent;

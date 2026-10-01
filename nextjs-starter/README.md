@@ -24,7 +24,7 @@ Open http://localhost:3000.
 | `/blog` | Posts archive |
 | `/blog/[slug]` | Single post |
 | `/search?q=…` | WP REST `?search=` |
-| `/api/revalidate?secret=…` | Cache-bust webhook (POST or GET) |
+| `/api/revalidate` (header `X-Hatch-Secret`) | Cache-bust webhook (POST or GET) |
 | `/robots.txt` `/rss.xml` `/sitemap.xml` | Standard feeds |
 | `/img?url=…&w=…` | Same-origin image proxy |
 

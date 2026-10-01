@@ -28,6 +28,7 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, mkdir, rename, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { buildEnv } from './security.js';
 import { imgAllowedHosts } from './img-hosts.js';
 import { projectNameFor } from './project-name.js';
 
@@ -129,7 +130,9 @@ function runCmd(cmd, args, opts = {}) {
 		const proc = spawn(cmd, args, {
 			stdio: ['ignore', 'pipe', 'pipe'],
 			cwd: opts.cwd,
-			env: { ...process.env, ...(opts.env || {}) },
+			// Allowlisted environment, NOT the broker's own: npm install runs third-party
+			// lifecycle scripts, which must never see the broker's secrets (lib/security.js).
+			env: buildEnv(opts.env),
 		});
 		let stdout = '';
 		let stderr = '';
@@ -362,7 +365,7 @@ export async function deployToVercel({ ticket, vercelToken, onProgress }) {
 		// We pass via env so the token never appears in process arg list.
 		const deployRes = await runCmd('npx', [
 			'--yes',
-			'vercel@latest',
+			`vercel@${process.env.HATCH_VERCEL_CLI_VERSION || 'latest'}`, // set HATCH_VERCEL_CLI_VERSION to pin
 			'deploy',
 			'--prebuilt',
 			'--prod',

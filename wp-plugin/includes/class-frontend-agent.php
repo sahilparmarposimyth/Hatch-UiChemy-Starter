@@ -7,7 +7,7 @@
  *
  *   1. User clicks "Set up Agent" in WP admin
  *   2. WP generates: HMAC shared secret + one-time install token (10 min TTL)
- *   3. WP shows: curl <wp-url>?hatch_agent_token=XXX | sudo bash
+ *   3. WP shows: curl -H "X-Hatch-Agent-Token: XXX" <wp-url>/hatch-agent-installer | sudo bash
  *   4. User runs that on their VPS as root
  *   5. The install script (served by Hatch_Frontend_Installer_Route) installs
  *      Node.js daemon at /opt/hatch-agent, registers systemd, opens firewall
@@ -40,6 +40,7 @@ class Hatch_Frontend_Agent {
 	const OPT_FRONTEND_URL    = 'hatch_agent_frontend_url';
 	const OPT_GIT_REPO        = 'hatch_agent_git_repo';
 	const OPT_GIT_BRANCH      = 'hatch_agent_git_branch';
+	const OPT_CERT_PIN        = 'hatch_agent_cert_pin';        // base64 sha256 of the agent certificate's public key (SPKI).
 
 	/** Token transient for one-time install URL */
 	const TRANSIENT_INSTALL_TOKEN = 'hatch_agent_install_token';
@@ -143,17 +144,25 @@ class Hatch_Frontend_Agent {
 		unset( $request );
 		// Generate a fresh agent secret (replaces any previous one).
 		$secret = wp_generate_password( 48, false );
-		$this->store_secret( $secret );
+		$stored = $this->store_secret( $secret );
+		if ( is_wp_error( $stored ) ) {
+			return new WP_REST_Response(
+				array( 'error' => $stored->get_error_message() ),
+				501
+			);
+		}
 
 		// One-time token for the install script URL.
 		$token = wp_generate_password( 32, false );
 		set_transient( self::TRANSIENT_INSTALL_TOKEN, hash( 'sha256', $token ), self::INSTALL_TOKEN_TTL );
 
 		// Build the curl command for the user.
-		$installer_url = add_query_arg( 'hatch_agent_token', $token, home_url( '/hatch-agent-installer' ) );
+		// H-4: the token travels in a header, never the URL, so it stays out of
+		// access logs, proxy logs and shell/browser history.
+		$installer_url = home_url( '/hatch-agent-installer' );
 
 		return new WP_REST_Response( array(
-			'curl_command'  => 'curl -fsSL ' . esc_url_raw( $installer_url ) . ' | sudo bash',
+			'curl_command'  => 'curl -fsSL -H "X-Hatch-Agent-Token: ' . $token . '" ' . esc_url_raw( $installer_url ) . ' | sudo bash',
 			'expires_in'    => self::INSTALL_TOKEN_TTL,
 			'secret_preview'=> substr( $secret, 0, 6 ) . '…' . substr( $secret, -4 ),
 		), 200 );
@@ -168,8 +177,26 @@ class Hatch_Frontend_Agent {
 			return new WP_Error( 'hatch_invalid_host', __( 'Host must be in the form ip:port or hostname:port', 'hatch' ), array( 'status' => 400 ) );
 		}
 
+		// Pairing is the one moment a certificate may be trusted. Try normal CA
+		// verification first (a real certificate needs no pin); only if the TLS
+		// handshake itself is what fails, pin the agent's key (trust on first use).
+		$old_pin = (string) get_option( self::OPT_CERT_PIN, '' );
+		delete_option( self::OPT_CERT_PIN );
 		$response = $this->call_agent( $host, 'GET', '/v1/healthz', array() );
+		if ( is_wp_error( $response ) && 'hatch_agent_unreachable' === $response->get_error_code()
+			&& false !== stripos( $response->get_error_message(), 'ssl' ) ) {
+			$new_pin = self::fetch_spki_pin( $host );
+			if ( '' !== $new_pin ) {
+				update_option( self::OPT_CERT_PIN, $new_pin, false );
+				$response = $this->call_agent( $host, 'GET', '/v1/healthz', array() );
+			}
+		}
 		if ( is_wp_error( $response ) ) {
+			if ( '' !== $old_pin ) {
+				update_option( self::OPT_CERT_PIN, $old_pin, false ); // Failed re-pair: keep the old trust.
+			} else {
+				delete_option( self::OPT_CERT_PIN );
+			}
 			return $response;
 		}
 
@@ -302,12 +329,13 @@ class Hatch_Frontend_Agent {
 		$signing_string = $timestamp . '.' . $nonce . '.' . $method . '.' . $path . '.' . $body_json;
 		$signature      = hash_hmac( 'sha256', $signing_string, $secret );
 
-		// Allow self-signed certs from the agent (it generates its own).
+		// Allow overriding sslverify for development via filter; default to true (M-6).
+		$sslverify = (bool) apply_filters( 'hatch_agent_sslverify', true );
 		$args = array(
 			'method'      => $method,
 			'timeout'     => 30,
 			'redirection' => 1,
-			'sslverify'   => false,
+			'sslverify'   => $sslverify,
 			'headers'     => array(
 				'Content-Type'      => 'application/json',
 				'X-Hatch-Timestamp' => $timestamp,
@@ -320,12 +348,43 @@ class Hatch_Frontend_Agent {
 			$args['body'] = $body_json;
 		}
 
-		// Use HTTPS first; agent serves self-signed cert. Fall back to HTTP if HTTPS fails (local network).
+		// M-6: the agent ships a self-signed certificate. Once the operator has
+		// paired it, that certificate's public key is pinned (see pin_agent_cert()),
+		// and this request is accepted ONLY if the server presents that exact key —
+		// enforced by curl itself during the handshake, not by a separate probe.
+		$pin     = (string) get_option( self::OPT_CERT_PIN, '' );
+		$pin_cb  = null;
+		if ( '' !== $pin && defined( 'CURLOPT_PINNEDPUBLICKEY' ) ) {
+			$args['sslverify'] = false; // Chain trust is replaced by the key pin below.
+			$pin_cb            = static function ( $handle ) use ( $pin ) {
+				curl_setopt( $handle, CURLOPT_SSL_VERIFYPEER, false );
+				curl_setopt( $handle, CURLOPT_SSL_VERIFYHOST, 0 );
+				curl_setopt( $handle, CURLOPT_PINNEDPUBLICKEY, 'sha256//' . $pin );
+			};
+			add_action( 'http_api_curl', $pin_cb );
+		}
+
+		// Use HTTPS first. Only permit HTTP fallback for loopback or RFC1918 private IPs (M-6).
 		$url = 'https://' . $host . $path;
 		$res = wp_remote_request( $url, $args );
+		if ( $pin_cb ) {
+			remove_action( 'http_api_curl', $pin_cb );
+			if ( is_wp_error( $res ) ) {
+				// A pinned host that fails its handshake must never fall back to HTTP.
+				return new WP_Error( 'hatch_agent_pin_failed',
+					sprintf( __( 'Agent certificate did not match the pinned key (%s). Re-verify the connection if you replaced the agent.', 'hatch' ), $res->get_error_message() )
+				);
+			}
+		}
 		if ( is_wp_error( $res ) ) {
-			$url = 'http://' . $host . $path;
-			$res = wp_remote_request( $url, $args );
+			$host_only = explode( ':', $host )[0];
+			$is_private = ( 'localhost' === $host_only )
+				|| ( false !== filter_var( $host_only, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ? false : (bool) filter_var( $host_only, FILTER_VALIDATE_IP ) );
+
+			if ( $is_private ) {
+				$url = 'http://' . $host . $path;
+				$res = wp_remote_request( $url, $args );
+			}
 		}
 
 		if ( is_wp_error( $res ) ) {
@@ -336,6 +395,27 @@ class Hatch_Frontend_Agent {
 
 		$code = (int) wp_remote_retrieve_response_code( $res );
 		$body = (string) wp_remote_retrieve_body( $res );
+
+		// Responses must be signed with the shared secret (agent >= 0.2.0), or an
+		// attacker on the network could forge "update succeeded" / version data.
+		// A reply that is unsigned, mis-signed, or older than the signing window
+		// (replayed capture) is rejected. Filter exists only for lab setups.
+		$res_sig = (string) wp_remote_retrieve_header( $res, 'x-hatch-signature' );
+		if ( '' === $res_sig ) {
+			if ( (bool) apply_filters( 'hatch_agent_require_signed', true ) ) {
+				return new WP_Error( 'hatch_agent_unsigned', __( 'Agent response was not signed. Update the agent (re-run the installer) so replies can be authenticated.', 'hatch' ) );
+			}
+		} else {
+			$res_ts    = (string) wp_remote_retrieve_header( $res, 'x-hatch-timestamp' );
+			$res_nonce = (string) wp_remote_retrieve_header( $res, 'x-hatch-nonce' );
+			$expected  = hash_hmac( 'sha256', $res_ts . '.' . $res_nonce . '.' . $body, $secret );
+			if ( ! hash_equals( $expected, $res_sig ) ) {
+				return new WP_Error( 'hatch_agent_tampered', __( 'Agent response signature verification failed.', 'hatch' ) );
+			}
+			if ( ! ctype_digit( $res_ts ) || abs( time() - (int) $res_ts ) > 300 ) {
+				return new WP_Error( 'hatch_agent_stale', __( 'Agent response timestamp is outside the allowed window (replay, or clock drift).', 'hatch' ) );
+			}
+		}
 		$json = json_decode( $body, true );
 
 		if ( 200 !== $code ) {
@@ -354,11 +434,14 @@ class Hatch_Frontend_Agent {
 	 * Store secret encrypted at rest.
 	 *
 	 * @param string $secret Plaintext secret.
-	 * @return void
+	 * @return bool|WP_Error
 	 */
-	private function store_secret( string $secret ): void {
+	private function store_secret( string $secret ) {
 		$enc = $this->encrypt( $secret );
-		update_option( self::OPT_SECRET, $enc );
+		if ( is_wp_error( $enc ) ) {
+			return $enc;
+		}
+		return update_option( self::OPT_SECRET, $enc );
 	}
 
 	/**
@@ -370,6 +453,21 @@ class Hatch_Frontend_Agent {
 		$enc = (string) get_option( self::OPT_SECRET, '' );
 		if ( '' === $enc ) {
 			return '';
+		}
+		// Migration: older versions stored the secret as `plain:<base64>` on hosts
+		// without libsodium. Read it once, and immediately re-store it encrypted so
+		// an existing pairing keeps working instead of silently breaking. If no
+		// encryption is available the legacy value is left as it was and still works.
+		if ( 0 === strpos( $enc, 'plain:' ) ) {
+			$legacy = base64_decode( substr( $enc, 6 ), true );
+			if ( false === $legacy || '' === $legacy ) {
+				return '';
+			}
+			$upgraded = $this->encrypt( $legacy );
+			if ( ! is_wp_error( $upgraded ) ) {
+				update_option( self::OPT_SECRET, $upgraded );
+			}
+			return $legacy;
 		}
 		return $this->decrypt( $enc );
 	}
@@ -387,38 +485,41 @@ class Hatch_Frontend_Agent {
 	/**
 	 * Encrypt a credential for at-rest storage in wp_options.
 	 *
-	 * NOTE for WP.org plugin reviewers: the `base64_encode` / `base64_decode`
-	 * calls below are NOT obfuscation. They are the canonical way to encode
-	 * the binary output of libsodium's authenticated encryption
-	 * (`sodium_crypto_secretbox`) so it survives a TEXT column round-trip. The
-	 * stored format is `sodium:<base64(nonce||ciphertext)>`. The plaintext
-	 * never touches base64 alone — only the encrypted bytes do. Same pattern
-	 * shipped by core in `wp_signon_application_password()` and Jetpack.
+	 * Requires libsodium or OpenSSL AES-256-GCM; refuses to persist without encryption (M-5).
 	 *
 	 * @param string $plaintext Token to encrypt.
-	 * @return string `sodium:<b64>` (preferred) or `plain:<b64>` fallback when
-	 *                libsodium isn't available on the host PHP.
+	 * @return string|WP_Error `sodium:<b64>` or `gcm:<b64>`.
 	 */
-	private function encrypt( string $plaintext ): string {
+	private function encrypt( string $plaintext ) {
 		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
 			$nonce      = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
 			$ciphertext = sodium_crypto_secretbox( $plaintext, $nonce, $this->derive_key() );
 			return 'sodium:' . base64_encode( $nonce . $ciphertext );
 		}
-		// Fallback — base64 only (defense in depth via wp_salt-derived key would need openssl_encrypt).
-		return 'plain:' . base64_encode( $plaintext );
+		if ( function_exists( 'openssl_encrypt' ) ) {
+			$iv  = random_bytes( 12 );
+			$tag = '';
+			$enc = openssl_encrypt( $plaintext, 'aes-256-gcm', $this->derive_key(), OPENSSL_RAW_DATA, $iv, $tag, '', 16 );
+			if ( false !== $enc ) {
+				return 'gcm:' . base64_encode( $iv . $tag . $enc );
+			}
+		}
+		return new WP_Error(
+			'hatch_agent_no_crypto',
+			__( 'libsodium or OpenSSL unavailable; refusing to store agent secret in plaintext.', 'hatch' ),
+			array( 'status' => 501 )
+		);
 	}
 
 	/**
-	 * Inverse of encrypt(). See the encrypt() docblock above for the
-	 * libsodium-uses-base64 rationale.
+	 * Inverse of encrypt().
 	 *
 	 * @param string $enc Stored ciphertext envelope.
 	 * @return string Plaintext, or '' on failure (never throws).
 	 */
 	private function decrypt( string $enc ): string {
 		if ( 0 === strpos( $enc, 'sodium:' ) && function_exists( 'sodium_crypto_secretbox_open' ) ) {
-			$raw   = base64_decode( substr( $enc, 7 ), true );
+			$raw = base64_decode( substr( $enc, 7 ), true );
 			if ( false === $raw || strlen( $raw ) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + 1 ) {
 				return '';
 			}
@@ -427,11 +528,66 @@ class Hatch_Frontend_Agent {
 			$plain      = sodium_crypto_secretbox_open( $ciphertext, $nonce, $this->derive_key() );
 			return is_string( $plain ) ? $plain : '';
 		}
-		if ( 0 === strpos( $enc, 'plain:' ) ) {
-			$raw = base64_decode( substr( $enc, 6 ), true );
-			return is_string( $raw ) ? $raw : '';
+		if ( 0 === strpos( $enc, 'gcm:' ) && function_exists( 'openssl_decrypt' ) ) {
+			$raw = base64_decode( substr( $enc, 4 ), true );
+			if ( false !== $raw && strlen( $raw ) > 28 ) {
+				$iv  = substr( $raw, 0, 12 );
+				$tag = substr( $raw, 12, 16 );
+				$ct  = substr( $raw, 28 );
+				$dec = openssl_decrypt( $ct, 'aes-256-gcm', $this->derive_key(), OPENSSL_RAW_DATA, $iv, $tag );
+				return false !== $dec ? (string) $dec : '';
+			}
 		}
 		return '';
+	}
+
+	/**
+	 * Fetch the agent's TLS public key and return its pin: base64(sha256(SPKI DER)),
+	 * the format curl's CURLOPT_PINNEDPUBLICKEY expects. '' on any failure.
+	 *
+	 * Trust on first use: only called while the operator is explicitly pairing.
+	 *
+	 * @param string $host "host:port".
+	 * @return string
+	 */
+	private static function fetch_spki_pin( string $host ): string {
+		if ( ! function_exists( 'stream_socket_client' ) || ! function_exists( 'openssl_x509_read' ) ) {
+			return '';
+		}
+		$ctx = stream_context_create( array(
+			'ssl' => array(
+				'capture_peer_cert' => true,
+				'verify_peer'       => false,
+				'verify_peer_name'  => false,
+				'SNI_enabled'       => true,
+			),
+		) );
+		$errno  = 0;
+		$errstr = '';
+		$fp     = @stream_socket_client( 'ssl://' . $host, $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx );
+		if ( ! $fp ) {
+			return '';
+		}
+		$params = stream_context_get_params( $fp );
+		fclose( $fp );
+		if ( empty( $params['options']['ssl']['peer_certificate'] ) ) {
+			return '';
+		}
+		$pub = @openssl_pkey_get_public( $params['options']['ssl']['peer_certificate'] );
+		if ( ! $pub ) {
+			return '';
+		}
+		$details = openssl_pkey_get_details( $pub );
+		if ( empty( $details['key'] ) ) {
+			return '';
+		}
+		// The PEM body of a public key IS the SubjectPublicKeyInfo DER.
+		$pem = preg_replace( '/-----(BEGIN|END) PUBLIC KEY-----|\s+/', '', (string) $details['key'] );
+		$der = base64_decode( (string) $pem, true );
+		if ( false === $der || '' === $der ) {
+			return '';
+		}
+		return base64_encode( hash( 'sha256', $der, true ) );
 	}
 
 	/* ----------------------------------------------------------------

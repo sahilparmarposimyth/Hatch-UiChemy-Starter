@@ -86,6 +86,7 @@ class Hatch_Diagnostic {
 			self::check_rest_api_reachable(),
 			self::check_rest_api_authenticated(),
 			self::check_app_passwords_available(),
+			self::check_client_ip_trust(),
 			self::check_active_security_plugins(),
 			self::check_caching_plugins_safe(),
 			// Revalidation webhook check intentionally OMITTED in v0.18+ —
@@ -306,15 +307,10 @@ class Hatch_Diagnostic {
 	 * @return array
 	 */
 	private static function check_app_passwords_available(): array {
-		// WP's wp_is_application_passwords_available() is gated by is_ssl() in
-		// admin context — that flag is misleading on http:// rigs where APs
-		// genuinely work (Hatch installs a runtime REST-only override in
-		// Hatch_Security::enable_app_passwords_for_rest_basic_auth). Check the
-		// real signals instead: (a) WP_Application_Passwords class exists,
-		// (b) APs are not hard-disabled by constant, (c) the runtime override
-		// is loaded OR HTTPS is on. The strongest signal — and the one that
-		// matters in practice — is whether the current user can already pull
-		// an AP-authenticated REST response. If yes, APs work.
+		// WordPress core withholds Application Passwords on plain HTTP ON PURPOSE: HTTP
+		// Basic auth is base64, so every request would expose an administrator
+		// credential to anyone on the network path. Hatch no longer overrides that.
+		// This check reports what core says and, when it says no, how to fix it safely.
 		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
 			return self::fail(
 				'app_passwords',
@@ -335,29 +331,46 @@ class Hatch_Diagnostic {
 		}
 
 		$wp_says_available  = function_exists( 'wp_is_application_passwords_available' ) && wp_is_application_passwords_available();
-		$hatch_override_on  = has_filter( 'wp_is_application_passwords_available', array( Hatch_Security::instance(), 'enable_app_passwords_for_rest_basic_auth' ) );
 
 		if ( $wp_says_available ) {
 			return self::pass( 'app_passwords', __( 'Application Passwords', 'hatch' ), __( 'Application Passwords are enabled.', 'hatch' ) );
-		}
-
-		if ( $hatch_override_on ) {
-			// The runtime override only fires during REST + Basic-Auth requests,
-			// which is exactly the path the headless frontend uses. Admin-side
-			// callers still see false, but functionally APs work for the only
-			// caller that matters.
-			return self::pass(
-				'app_passwords',
-				__( 'Application Passwords', 'hatch' ),
-				__( 'Application Passwords are gated by HTTPS for browsers but enabled for the REST API by Hatch. Headless frontend auth works.', 'hatch' )
-			);
 		}
 
 		return self::fail(
 			'app_passwords',
 			__( 'Application Passwords', 'hatch' ),
 			__( 'Application Passwords are disabled or unavailable.', 'hatch' ),
-			__( 'Enable HTTPS, or define( "WP_APPLICATION_PASSWORDS_AVAILABLE", true ) in wp-config.php — or remove a plugin that disabled them.', 'hatch' ),
+			__( 'Serve the site over HTTPS (Application Passwords are withheld on plain HTTP because the credential would travel readable). On a local development site, set WP_ENVIRONMENT_TYPE to "local" in wp-config.php. Also check that no plugin disables them.', 'hatch' ),
+			''
+		);
+	}
+
+	/**
+	 * Behind a CDN or reverse proxy, does the rate limiter see real visitors?
+	 *
+	 * By default Hatch trusts only REMOTE_ADDR, which is safe everywhere (proxy
+	 * headers cannot be spoofed) but means that behind a CDN every visitor looks
+	 * like the same address: five failed logins lock EVERYONE out for five
+	 * minutes. This check tells the site owner when that is happening.
+	 *
+	 * @return array
+	 */
+	private static function check_client_ip_trust(): array {
+		$label = __( 'Client IP for rate limits', 'hatch' );
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+		$behind_cdn = ! empty( $_SERVER['HTTP_CF_CONNECTING_IP'] ) || ! empty( $_SERVER['HTTP_CF_RAY'] ) || ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+		// phpcs:enable
+		if ( ! $behind_cdn ) {
+			return self::pass( 'client_ip_trust', $label, __( 'Requests arrive directly; visitors are rate limited individually.', 'hatch' ) );
+		}
+		if ( get_option( 'hatch_trust_cf_ip', false ) ) {
+			return self::pass( 'client_ip_trust', $label, __( 'Behind a CDN, and the real visitor address is trusted from Cloudflare.', 'hatch' ) );
+		}
+		return self::warn(
+			'client_ip_trust',
+			$label,
+			__( 'This site is behind a CDN or proxy, so every visitor shares one login/order rate-limit bucket: a handful of failed logins can lock out all users for five minutes.', 'hatch' ),
+			__( 'If you use Cloudflare, enable trusted client IPs: run  wp option update hatch_trust_cf_ip 1  (WP-CLI) or set the hatch_trust_cf_ip option to 1. It is only honoured for requests that really come from Cloudflare addresses.', 'hatch' ),
 			''
 		);
 	}

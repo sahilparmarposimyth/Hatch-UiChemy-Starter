@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { WP_API_URL } from 'astro:env/server';
+import { clientIpHeaders, cookiesForWordPress, sessionAuthHeaders } from '@/lib/wp-auth';
 
 /**
  * Same-origin proxy for the WooCommerce Store API (/wc/store/v1/*).
@@ -34,7 +35,6 @@ const FORWARD_REQ_HEADERS = [
   'nonce',
   'cart-token',
   'x-wp-nonce',
-  'authorization',
   'accept',
 ];
 
@@ -45,7 +45,7 @@ const FORWARD_RES_HEADERS = [
   'content-type',
 ];
 
-async function proxy(request: Request, path: string | undefined): Promise<Response> {
+async function proxy(request: Request, path: string | undefined, clientAddress?: string): Promise<Response> {
   if (!WP_BASE) {
     return new Response(JSON.stringify({ code: 'hatch_wp_api_url_missing' }), {
       status: 500,
@@ -61,8 +61,12 @@ async function proxy(request: Request, path: string | undefined): Promise<Respon
     const v = request.headers.get(h);
     if (v) outHeaders[h] = v;
   }
-  const cookie = request.headers.get('cookie');
+  // Woo guest-cart cookies keep flowing. WordPress identity cookies never do:
+  // the visitor's identity goes as a Bearer header taken from the HttpOnly
+  // session cookie, never from a header the browser supplied itself.
+  const cookie = cookiesForWordPress(request);
   if (cookie) outHeaders['cookie'] = cookie;
+  Object.assign(outHeaders, sessionAuthHeaders(request), clientIpHeaders(clientAddress));
 
   const body = ['GET', 'HEAD'].includes(request.method)
     ? undefined
@@ -89,8 +93,8 @@ async function proxy(request: Request, path: string | undefined): Promise<Respon
   return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
 }
 
-export const GET: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const POST: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const PUT: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const DELETE: APIRoute = ({ request, params }) => proxy(request, params.path as string);
-export const OPTIONS: APIRoute = ({ request, params }) => proxy(request, params.path as string);
+export const GET: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const POST: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const PUT: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const DELETE: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);
+export const OPTIONS: APIRoute = ({ request, params, clientAddress }) => proxy(request, params.path as string, clientAddress);

@@ -153,13 +153,16 @@ class Hatch_App_Password_Helper {
 		}
 
 		$data = $result->get_data();
-		// Stash plaintext in a transient keyed to user for ONE display (5 min TTL).
+		// Stash encrypted in a transient keyed to user for ONE display (5 min TTL).
 		set_transient(
 			'hatch_app_pw_show_' . get_current_user_id(),
-			array(
-				'password' => $data['password'],
-				'username' => $data['username'],
-				'name'     => $data['name'],
+			self::encrypt_transient_payload(
+				array(
+					'password' => $data['password'],
+					'username' => $data['username'],
+					'name'     => $data['name'],
+					'uuid'     => isset( $data['uuid'] ) ? (string) $data['uuid'] : '',
+				)
 			),
 			5 * MINUTE_IN_SECONDS
 		);
@@ -191,7 +194,7 @@ class Hatch_App_Password_Helper {
 
 		// Idempotency — if a fresh password is already waiting, reuse it.
 		$key      = 'hatch_app_pw_show_' . $user_id;
-		$existing = get_transient( $key );
+		$existing = self::decrypt_transient_payload( get_transient( $key ) );
 		if ( is_array( $existing ) && ! empty( $existing['password'] ) ) {
 			return true;
 		}
@@ -205,10 +208,13 @@ class Hatch_App_Password_Helper {
 		$user = get_userdata( $user_id );
 		set_transient(
 			$key,
-			array(
-				'password' => (string) $unhashed_password,
-				'username' => $user ? $user->user_login : '',
-				'name'     => isset( $item['name'] ) ? sanitize_text_field( (string) $item['name'] ) : $name,
+			self::encrypt_transient_payload(
+				array(
+					'password' => (string) $unhashed_password,
+					'username' => $user ? $user->user_login : '',
+					'name'     => isset( $item['name'] ) ? sanitize_text_field( (string) $item['name'] ) : $name,
+					'uuid'     => isset( $item['uuid'] ) ? (string) $item['uuid'] : '',
+				)
 			),
 			5 * MINUTE_IN_SECONDS
 		);
@@ -216,17 +222,179 @@ class Hatch_App_Password_Helper {
 	}
 
 	/**
+	 * Username of the dedicated, least-privilege deploy service account.
+	 */
+	const SERVICE_USER_LOGIN = 'uichemy-deploy';
+
+	/**
+	 * Role granted to the deploy service account: read-only content access.
+	 */
+	const SERVICE_ROLE = 'hatch_deployer';
+
+	/**
+	 * Find or create the dedicated deploy service user (H-5).
+	 *
+	 * The deploy broker receives an Application Password, and an Application
+	 * Password inherits every capability of the user it belongs to. Minting it
+	 * for the current administrator hands the broker full site control, so it is
+	 * minted for a separate account that can only read content.
+	 *
+	 * @return int|WP_Error User ID.
+	 */
+	private static function ensure_service_user() {
+		if ( null === get_role( self::SERVICE_ROLE ) ) {
+			add_role(
+				self::SERVICE_ROLE,
+				__( 'UiChemy Deployer', 'hatch' ),
+				array(
+					'read'               => true,
+					'read_private_posts' => true,
+					'read_private_pages' => true,
+				)
+			);
+		}
+
+		$user = get_user_by( 'login', self::SERVICE_USER_LOGIN );
+		if ( $user ) {
+			// Never reuse an account that was elevated after we created it.
+			if ( user_can( $user, 'manage_options' ) || user_can( $user, 'edit_posts' ) ) {
+				return new WP_Error( 'hatch_service_user_privileged', __( 'The deploy service user has been given extra permissions; refusing to use it.', 'hatch' ) );
+			}
+			return (int) $user->ID;
+		}
+
+		$id = wp_insert_user(
+			array(
+				'user_login'   => self::SERVICE_USER_LOGIN,
+				'user_pass'    => wp_generate_password( 64, true, true ),
+				'user_email'   => 'uichemy-deploy@' . wp_parse_url( home_url(), PHP_URL_HOST ) . '.invalid',
+				'display_name' => 'UiChemy Deploy',
+				'role'         => self::SERVICE_ROLE,
+			)
+		);
+		return $id;
+	}
+
+	/**
+	 * Create a short-lived Application Password on the deploy service user.
+	 *
+	 * Returns the plaintext once; the caller must revoke it with
+	 * WP_Application_Passwords::delete_application_password() when done.
+	 *
+	 * @param string $name Label shown in the profile screen.
+	 * @return array{username:string,password:string,uuid:string,user_id:int}|null
+	 */
+	public static function create_service_credential( string $name ): ?array {
+		if ( ! class_exists( 'WP_Application_Passwords' ) || ! current_user_can( 'manage_options' ) ) {
+			return null;
+		}
+		$user_id = self::ensure_service_user();
+		if ( is_wp_error( $user_id ) ) {
+			return null;
+		}
+		$created = WP_Application_Passwords::create_new_application_password( $user_id, array( 'name' => $name ) );
+		if ( is_wp_error( $created ) || ! is_array( $created ) || ! isset( $created[0], $created[1] ) ) {
+			return null;
+		}
+		$user = get_userdata( $user_id );
+		return array(
+			'username' => $user ? $user->user_login : self::SERVICE_USER_LOGIN,
+			'password' => (string) $created[0],
+			'uuid'     => isset( $created[1]['uuid'] ) ? (string) $created[1]['uuid'] : '',
+			'user_id'  => (int) $user_id,
+		);
+	}
+
+	/**
 	 * Pop the one-time plaintext for display in the Connector tab.
 	 *
-	 * @return array|null  ['password','username','name'] or null.
+	 * @return array|null  ['password','username','name','uuid'] or null.
 	 */
 	public static function pop_fresh_password(): ?array {
 		$key  = 'hatch_app_pw_show_' . get_current_user_id();
-		$data = get_transient( $key );
-		if ( ! $data || ! is_array( $data ) ) {
+		$raw  = get_transient( $key );
+		if ( ! $raw ) {
 			return null;
 		}
 		delete_transient( $key );
-		return $data;
+		return self::decrypt_transient_payload( $raw );
+	}
+
+	/**
+	 * Encrypt transient data using sodium or AES-256-GCM.
+	 *
+	 * @param array $data Data to encrypt.
+	 * @return string Serialized/encrypted blob.
+	 */
+	private static function encrypt_transient_payload( array $data ): string {
+		$json = (string) wp_json_encode( $data );
+		$salt = defined( 'AUTH_KEY' ) ? AUTH_KEY : '';
+		if ( '' !== $salt && function_exists( 'sodium_crypto_secretbox' ) ) {
+			$key   = hash( 'sha256', $salt . '|hatch-app-pw-v1', true );
+			$nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+			$enc   = sodium_crypto_secretbox( $json, $nonce, $key );
+			return 'sod:' . base64_encode( $nonce . $enc );
+		}
+		if ( '' !== $salt && function_exists( 'openssl_encrypt' ) ) {
+			$key = hash( 'sha256', $salt . '|hatch-app-pw-v1', true );
+			$iv  = random_bytes( 12 );
+			$tag = '';
+			$enc = openssl_encrypt( $json, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '', 16 );
+			if ( false !== $enc ) {
+				return 'gcm:' . base64_encode( $iv . $tag . $enc );
+			}
+		}
+		return 'b64:' . base64_encode( $json );
+	}
+
+	/**
+	 * Decrypt transient data.
+	 *
+	 * @param string|array $blob Encrypted blob or legacy array.
+	 * @return array|null
+	 */
+	private static function decrypt_transient_payload( $blob ): ?array {
+		if ( is_array( $blob ) ) {
+			return $blob;
+		}
+		if ( ! is_string( $blob ) || '' === $blob ) {
+			return null;
+		}
+		$salt = defined( 'AUTH_KEY' ) ? AUTH_KEY : '';
+		if ( 0 === strpos( $blob, 'sod:' ) && function_exists( 'sodium_crypto_secretbox_open' ) && '' !== $salt ) {
+			$raw = base64_decode( substr( $blob, 4 ), true );
+			if ( false !== $raw && strlen( $raw ) > SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ) {
+				$nonce = substr( $raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+				$ct    = substr( $raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+				$key   = hash( 'sha256', $salt . '|hatch-app-pw-v1', true );
+				$dec   = sodium_crypto_secretbox_open( $ct, $nonce, $key );
+				if ( false !== $dec ) {
+					$res = json_decode( $dec, true );
+					if ( is_array( $res ) ) return $res;
+				}
+			}
+		}
+		if ( 0 === strpos( $blob, 'gcm:' ) && function_exists( 'openssl_decrypt' ) && '' !== $salt ) {
+			$raw = base64_decode( substr( $blob, 4 ), true );
+			if ( false !== $raw && strlen( $raw ) > 28 ) {
+				$iv  = substr( $raw, 0, 12 );
+				$tag = substr( $raw, 12, 16 );
+				$ct  = substr( $raw, 28 );
+				$key = hash( 'sha256', $salt . '|hatch-app-pw-v1', true );
+				$dec = openssl_decrypt( $ct, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag );
+				if ( false !== $dec ) {
+					$res = json_decode( $dec, true );
+					if ( is_array( $res ) ) return $res;
+				}
+			}
+		}
+		if ( 0 === strpos( $blob, 'b64:' ) ) {
+			$raw = base64_decode( substr( $blob, 4 ), true );
+			if ( false !== $raw ) {
+				$res = json_decode( $raw, true );
+				if ( is_array( $res ) ) return $res;
+			}
+		}
+		return null;
 	}
 }

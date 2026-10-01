@@ -263,6 +263,43 @@ The value starts `github_pat_…` and is shown once.
 Making the repo public also works, but publishes the whole plugin source — a
 product decision, not a deployment one.
 
+## Security hardening
+
+What the broker holds, and for how long:
+
+| Secret | Kept | Dropped |
+|---|---|---|
+| Cloudflare / Vercel API token | in memory, for the build | the moment the build ends |
+| WordPress Application Password (a **read-only** service user, `uichemy-deploy`) | in memory, for the build | the moment the build ends |
+| Webhook secret | in memory, for the build | the moment the build ends |
+
+Nothing sensitive reaches a log line, `/status`, or an error message (`makeRedactor` in `lib/security.js`). Build
+subprocesses get an allowlisted environment, not the broker's own (`buildEnv`), because `npm install` runs
+third-party lifecycle scripts.
+
+**When a build ends** the broker POSTs `{ ticket, status, provider, ts, sig }` to the site's
+`/wp-json/hatch/v1/deploy/finished`, where `sig = HMAC-SHA256(webhook_secret, "finished|<ticket>|<status>|<provider>|<ts>")`.
+The plugin keeps the credential on `success` (the deployed site uses it) and revokes it on `failed`, even if the
+visitor closed the tab. The secret itself is never sent, and WordPress refuses anything older than five minutes.
+
+**`/prepare` is validated.** HTTPS only; `wp_url` must resolve to a public address (the build fetches it, so
+anything else would be an SSRF); no control characters in any field (they would inject extra `.env` lines);
+`return_url` must be HTTPS and end in `/wp-admin/admin-post.php`; webhook secret 32+ characters; provider token
+`[A-Za-z0-9_.:-]` only. Rate limited to 20 per 10 minutes per client, with at most 500 live tickets. The build page
+sends `Referrer-Policy: no-referrer`, because the ticket id is in its URL.
+
+Extra environment variables for this:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `HATCH_TRUST_PROXY` | *(unset)* | set `1` behind nginx / RunCloud / a platform proxy so the `/prepare` rate limit keys on the real client IP instead of the proxy |
+| `HATCH_ALLOW_INSECURE` | *(unset)* | **local development only.** Allows `http://` and private addresses. Never set in production |
+| `HATCH_VERCEL_CLI_VERSION`, `HATCH_WRANGLER_VERSION` | `latest` | pin the CLIs fetched by `npx` on every deploy |
+
+In production also pin `HATCH_BRANCH` to a release tag. At boot the broker logs a warning for each of these that is
+missing. The broker cannot inspect the scope of a Cloudflare/Vercel token, so it cannot refuse an over-broad one; the
+setup wizard tells the visitor which minimal token to create.
+
 ## Sanity check
 
 ```bash

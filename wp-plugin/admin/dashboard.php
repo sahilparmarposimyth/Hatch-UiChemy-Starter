@@ -406,10 +406,19 @@ function hatch_react_boot_state(): array {
 			// v0.50.13 — read Turnstile from the authoritative source
 			// (`hatch_integrations`). The earlier `hatch_turnstile` key was a
 			// dispatcher artifact that no consumer read, so the UI showed
-			// "Keys missing" even after the user typed them in.
-			'turnstile'      => class_exists( 'Hatch_Integrations' )
-				? (array) ( Hatch_Integrations::get_all()['turnstile'] ?? array() )
-				: array( 'enabled' => false, 'site_key' => '', 'secret_key' => '' ),
+			'turnstile'      => (function() {
+				$t = class_exists( 'Hatch_Integrations' )
+					? (array) ( Hatch_Integrations::get_all()['turnstile'] ?? array() )
+					: array( 'enabled' => false, 'site_key' => '', 'secret_key' => '' );
+				if ( ! empty( $t['secret_key'] ) ) {
+					$t['has_secret'] = true;
+					$t['secret_key'] = '••••••••';
+				} else {
+					$t['has_secret'] = false;
+					$t['secret_key'] = '';
+				}
+				return $t;
+			})(),
 			'menus'          => hatch_react_menus_summary(),
 			'forms'          => hatch_react_forms_summary(),
 			'pluginBridge'   => hatch_react_plugin_bridge(),
@@ -947,11 +956,15 @@ function hatch_react_perf_state(): array {
  * @return array
  */
 function hatch_react_security_state(): array {
+	$def = static function( string $k ) {
+		return class_exists( 'Hatch_Security' ) ? Hatch_Security::default_for( $k ) : 0;
+	};
+
 	return array(
-		'block_rest'           => (bool) get_option( 'hatch_security_harden_rest', false ),
-		'disable_xmlrpc'       => (bool) get_option( 'hatch_security_disable_xmlrpc', false ),
-		'block_enum'           => (bool) get_option( 'hatch_security_block_user_enum', false ),
-		'noindex_cms'          => (bool) get_option( 'hatch_security_force_noindex', false ),
+		'block_rest'           => (bool) get_option( 'hatch_security_harden_rest', $def( 'hatch_security_harden_rest' ) ),
+		'disable_xmlrpc'       => (bool) get_option( 'hatch_security_disable_xmlrpc', $def( 'hatch_security_disable_xmlrpc' ) ),
+		'block_enum'           => (bool) get_option( 'hatch_security_block_user_enum', $def( 'hatch_security_block_user_enum' ) ),
+		'noindex_cms'          => (bool) get_option( 'hatch_security_force_noindex', $def( 'hatch_security_force_noindex' ) ),
 		'role_guard'           => (bool) get_option( 'hatch_login_role_guard_enabled', false ),
 		'allowed_roles'        => (string) get_option( 'hatch_login_allowed_roles', 'administrator, editor, author' ),
 		'login_slug'           => (string) get_option( 'hatch_login_slug', '' ),
@@ -961,8 +974,8 @@ function hatch_react_security_state(): array {
 		'bf_window'            => (int) get_option( 'hatch_brute_force_window', 60 ),
 		'remove_on_uninstall'  => (bool) get_option( 'hatch_uninstall_remove_all_data', false ),
 		// v0.50.11 — Fortress mode toggles (Hatch_Hardening class).
-		'disallow_file_edit'   => (bool) get_option( 'hatch_security_disallow_file_edit', false ),
-		'send_headers'         => (bool) get_option( 'hatch_security_send_headers', false ),
+		'disallow_file_edit'   => (bool) get_option( 'hatch_security_disallow_file_edit', $def( 'hatch_security_disallow_file_edit' ) ),
+		'send_headers'         => (bool) get_option( 'hatch_security_send_headers', $def( 'hatch_security_send_headers' ) ),
 		// v0.50.31 — Per-surface Turnstile gates.
 		'turnstile_login'      => (bool) get_option( 'hatch_security_turnstile_login', false ),
 		'turnstile_comments'   => (bool) get_option( 'hatch_security_turnstile_comments', false ),
@@ -1003,10 +1016,27 @@ function hatch_react_setup_state(): array {
 	}
 	$fresh = class_exists( 'Hatch_App_Password_Helper' ) ? Hatch_App_Password_Helper::pop_fresh_password() : null;
 	$pw    = ( $fresh && ! empty( $fresh['password'] ) ) ? (string) $fresh['password'] : '';
+	$wp_user_for_frontend = $user->user_login;
+	// H-5: never hand the frontend host / a shell one-liner the administrator's own
+	// Application Password. Swap the freshly minted admin credential for one on the
+	// read-only deploy service user and revoke the admin one.
+	if ( '' !== $pw && class_exists( 'Hatch_App_Password_Helper' ) ) {
+		$svc = Hatch_App_Password_Helper::create_service_credential( 'UiChemy Frontend (VPS install)' );
+		if ( $svc ) {
+			if ( ! empty( $fresh['uuid'] ) && class_exists( 'WP_Application_Passwords' ) ) {
+				WP_Application_Passwords::delete_application_password( get_current_user_id(), (string) $fresh['uuid'] );
+			}
+			$pw                   = $svc['password'];
+			$wp_user_for_frontend = $svc['username'];
+		} else {
+			// No safe credential available: show the placeholder, not the admin password.
+			$pw = '';
+		}
+	}
 	$wp_url_full = untrailingslashit( home_url() ) . '/wp-json/wp/v2';
 
 	$env_block  = 'WP_API_URL=' . $wp_url_full . "\n";
-	$env_block .= 'WP_API_USER=' . $user->user_login . "\n";
+	$env_block .= 'WP_API_USER=' . $wp_user_for_frontend ."\n";
 	$env_block .= 'WP_API_PASS=' . ( '' !== $pw ? $pw : '<get-from-Hatch-Connection-tab>' ) . "\n";
 	$env_block .= 'HATCH_WEBHOOK_SECRET=' . $secret . "\n";
 
@@ -1027,7 +1057,7 @@ function hatch_react_setup_state(): array {
 	$vps_one_liner =
 		'curl -fsSL ' . $vps_install_url . ' | sudo bash -s --' .
 		' --wp-url "' . untrailingslashit( home_url() ) . '"' .
-		' --wp-user "' . $user->user_login . '"' .
+		' --wp-user "' . $wp_user_for_frontend . '"' .
 		' --wp-pass "' . ( '' !== $pw ? $pw : '<get-from-connection-tab>' ) . '"' .
 		' --webhook-secret "' . $secret . '"';
 

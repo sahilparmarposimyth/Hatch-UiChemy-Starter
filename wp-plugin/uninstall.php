@@ -20,6 +20,25 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+// Always remove the deploy service account (H-5): it exists only to hold a
+// read-only credential for the deploy broker and must not outlive the plugin.
+// Runs regardless of the "remove all data" choice below.
+delete_option( 'uich_hatch_deploy_pending' );
+wp_clear_scheduled_hook( 'hatch_revoke_deploy_password' );
+$hatch_svc_user = get_user_by( 'login', 'uichemy-deploy' );
+if ( $hatch_svc_user ) {
+	if ( class_exists( 'WP_Application_Passwords' ) ) {
+		WP_Application_Passwords::delete_all_application_passwords( (int) $hatch_svc_user->ID );
+	}
+	if ( ! function_exists( 'wp_delete_user' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+	}
+	wp_delete_user( (int) $hatch_svc_user->ID );
+}
+if ( get_role( 'hatch_deployer' ) ) {
+	remove_role( 'hatch_deployer' );
+}
+
 // Default behaviour: preserve all settings + auth so a future re-install is
 // one-click. Only opt-in users get a full wipe.
 $remove_all = (int) get_option( 'hatch_uninstall_remove_all_data', 0 );

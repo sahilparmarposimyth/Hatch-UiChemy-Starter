@@ -27,8 +27,8 @@ class Hatch_Auth {
 
 	const COOKIE_NAME     = 'hatch_jwt';
 	const OPTION_SECRET   = 'hatch_jwt_secret';
-	const TOKEN_TTL       = 604800;   // 7 days.
-	const REFRESH_WINDOW  = 86400;    // Refresh within 24h of expiry.
+	const TOKEN_TTL       = 86400;    // 24 hours (was 7 days).
+	const REFRESH_WINDOW  = 7200;     // Refresh within 2h of expiry.
 	const RL_MAX_ATTEMPTS = 5;
 	const RL_WINDOW       = 300;      // 5 minutes.
 
@@ -47,13 +47,6 @@ class Hatch_Auth {
 			// nonce; JWT sidesteps that. Priority 20 keeps us after WP's
 			// own cookie check so we never override a valid session.
 			add_filter( 'determine_current_user', array( __CLASS__, 'authenticate_jwt' ), 20 );
-
-			// Suppress the REST cookie-nonce check for requests that already
-			// authenticated via JWT. Without this, WP returns
-			// rest_cookie_invalid_nonce whenever the browser sends both the
-			// wordpress_logged_in cookie (from wp_set_auth_cookie above) and
-			// no X-WP-Nonce header.
-			add_filter( 'rest_authentication_errors', array( __CLASS__, 'clear_cookie_nonce_error' ), 999 );
 		}
 		return self::$instance;
 	}
@@ -126,6 +119,16 @@ class Hatch_Auth {
 			return new WP_Error( 'hatch_auth_invalid', __( 'Invalid username or password.', 'hatch' ), array( 'status' => 401 ) );
 		}
 
+		// Security (C-3): Never issue frontend JWTs to administrators (manage_options).
+		// Admin tooling uses Application Passwords; frontend visitors do not need admin rights.
+		if ( user_can( $user, 'manage_options' ) ) {
+			return new WP_Error(
+				'hatch_auth_admin_forbidden',
+				__( 'Administrator login is forbidden via the frontend auth endpoint.', 'hatch' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		return self::success_response( $user );
 	}
 
@@ -177,6 +180,9 @@ class Hatch_Auth {
 			return new WP_Error( 'hatch_auth_create_failed', __( 'User creation failed.', 'hatch' ), array( 'status' => 500 ) );
 		}
 
+		// Security (L-2): Throttle registration successes too to prevent spam creation bursts.
+		self::bump_rate_limit( $ip );
+
 		return self::success_response( $user );
 	}
 
@@ -185,6 +191,13 @@ class Hatch_Auth {
 	 * --------------------------------------------------------------------- */
 
 	public static function route_logout( WP_REST_Request $req ) {
+		$payload = self::verify_incoming_token( $req );
+		if ( $payload && ! empty( $payload['sub'] ) && ! empty( $payload['session_token'] ) && class_exists( 'WP_Session_Tokens' ) ) {
+			WP_Session_Tokens::get_instance( (int) $payload['sub'] )->destroy( (string) $payload['session_token'] );
+		}
+		if ( $payload ) {
+			self::revoke_jti( $payload );
+		}
 		self::clear_cookie();
 		return new WP_REST_Response( array( 'ok' => true ), 200 );
 	}
@@ -226,6 +239,13 @@ class Hatch_Auth {
 		if ( ! $user ) {
 			return new WP_Error( 'hatch_auth_unauthorized', __( 'User no longer exists.', 'hatch' ), array( 'status' => 401 ) );
 		}
+		if ( user_can( $user, 'manage_options' ) ) {
+			return new WP_Error( 'hatch_auth_admin_forbidden', __( 'Administrator tokens cannot be refreshed.', 'hatch' ), array( 'status' => 403 ) );
+		}
+		// Rotation: the old token dies shortly after a new one is issued, so a stolen
+		// copy cannot keep refreshing. The 30 s grace lets the visitor's other tabs,
+		// which still hold the old cookie, finish their in-flight requests.
+		self::revoke_jti( $payload, 30 );
 		return self::success_response( $user );
 	}
 
@@ -250,12 +270,13 @@ class Hatch_Auth {
 		if ( is_user_logged_in() ) {
 			return $result;
 		}
-		$payload = self::verify_incoming_token( $request );
-		if ( $payload && ! empty( $payload['sub'] ) ) {
-			$uid = (int) $payload['sub'];
-			if ( get_user_by( 'id', $uid ) ) {
-				wp_set_current_user( $uid );
-			}
+		// Security (C-2/C-3): Bearer header only — a cookie-borne JWT would let a
+		// cross-site POST comment as the victim — and the same admin/session
+		// checks as authenticate_jwt().
+		$token = self::bearer_token_from_request( $request );
+		$uid   = '' !== $token ? self::user_id_from_payload( self::verify_token( $token ) ) : 0;
+		if ( $uid ) {
+			wp_set_current_user( $uid );
 		}
 		return $result;
 	}
@@ -267,76 +288,78 @@ class Hatch_Auth {
 	 * --------------------------------------------------------------------- */
 
 	public static function authenticate_jwt( $user_id ) {
+		// An explicit Bearer header beats an ambient WordPress login cookie. When a
+		// browser sends both, core's cookie auth runs first and then core DROPS the
+		// user for lacking a wp_rest nonce, which would silently ignore a perfectly
+		// valid Bearer token. Header auth carries its own proof of intent, so it
+		// does not need that nonce; tell core this request was not cookie-authed.
+		$bearer = self::bearer_from_server();
+		if ( '' !== $bearer ) {
+			$uid = self::user_id_from_payload( self::verify_token( $bearer ) );
+			if ( $uid ) {
+				$GLOBALS['wp_rest_auth_cookie'] = false;
+				return $uid;
+			}
+		}
 		if ( ! empty( $user_id ) ) {
 			return $user_id;
 		}
-		// Cookie first.
-		$token = '';
+		// Security (C-2): the hatch_jwt cookie is sent automatically by the browser
+		// and core enforces no wp_rest nonce for it, so it is honoured only for safe
+		// (read-only) methods. State-changing calls must use the Bearer header
+		// (above) or WordPress's own nonce-protected login cookie.
 		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-			$token = (string) $_COOKIE[ self::COOKIE_NAME ];
-		}
-		if ( '' === $token ) {
-			$auth = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['HTTP_AUTHORIZATION']
-				: ( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] : '' );
-			if ( $auth && stripos( $auth, 'Bearer ' ) === 0 ) {
-				$token = trim( substr( $auth, 7 ) );
-			}
-		}
-		if ( '' === $token ) {
-			return $user_id;
-		}
-		$payload = self::verify_token( $token );
-		if ( ! $payload || empty( $payload['sub'] ) ) {
-			return $user_id;
-		}
-		$uid = (int) $payload['sub'];
-		return get_user_by( 'id', $uid ) ? $uid : $user_id;
-	}
-
-	/**
-	 * If our JWT filter already populated the current user, drop any
-	 * cookie-nonce error WP would otherwise raise. Leaves other error
-	 * codes intact so a malformed Authorization header still fails.
-	 *
-	 * @param WP_Error|null|true $error
-	 * @return WP_Error|null|true
-	 */
-	public static function clear_cookie_nonce_error( $error ) {
-		// WP core `rest_cookie_check_errors` calls wp_set_current_user(0)
-		// whenever a request lacks a wp_rest nonce, even if the wordpress
-		// logged-in cookie was valid. Re-authenticate from the hatch_jwt
-		// (or Bearer) token so REST endpoints see the real user again.
-		// Also drops the rest_cookie_invalid_nonce error the same path
-		// raises when a nonce was sent but did not verify.
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
-			return $error;
-		}
-		$uid = 0;
-		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-			$p = self::verify_token( (string) $_COOKIE[ self::COOKIE_NAME ] );
-			if ( $p && ! empty( $p['sub'] ) ) {
-				$uid = (int) $p['sub'];
-			}
-		}
-		if ( 0 === $uid ) {
-			$auth = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['HTTP_AUTHORIZATION']
-				: ( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] : '' );
-			if ( $auth && stripos( $auth, 'Bearer ' ) === 0 ) {
-				$p = self::verify_token( trim( substr( $auth, 7 ) ) );
-				if ( $p && ! empty( $p['sub'] ) ) {
-					$uid = (int) $p['sub'];
+			$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) : 'GET';
+			if ( in_array( $method, array( 'GET', 'HEAD', 'OPTIONS' ), true ) ) {
+				$uid = self::user_id_from_payload( self::verify_token( (string) $_COOKIE[ self::COOKIE_NAME ] ) );
+				if ( $uid ) {
+					return $uid;
 				}
 			}
 		}
-		if ( $uid > 0 && get_user_by( 'id', $uid ) ) {
-			if ( get_current_user_id() !== $uid ) {
-				wp_set_current_user( $uid );
-			}
-			if ( is_wp_error( $error ) && 'rest_cookie_invalid_nonce' === $error->get_error_code() ) {
-				return null;
-			}
+		return $user_id;
+	}
+
+	/**
+	 * Bearer token from the raw server vars, or ''.
+	 */
+	private static function bearer_from_server(): string {
+		$auth = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['HTTP_AUTHORIZATION']
+			: ( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] : '' );
+		return ( $auth && 0 === stripos( $auth, 'Bearer ' ) ) ? trim( substr( $auth, 7 ) ) : '';
+	}
+
+	/**
+	 * Pull a Bearer token out of a REST request (header only).
+	 */
+	private static function bearer_token_from_request( WP_REST_Request $req ): string {
+		$auth = (string) $req->get_header( 'authorization' );
+		if ( $auth && stripos( $auth, 'Bearer ' ) === 0 ) {
+			return trim( substr( $auth, 7 ) );
 		}
-		return $error;
+		return '';
+	}
+
+	/**
+	 * Turn verified claims into a user id, or 0. Refuses administrators and
+	 * revoked sessions (C-3). Shared by every JWT-to-user path.
+	 */
+	private static function user_id_from_payload( ?array $payload ): int {
+		if ( ! $payload || empty( $payload['sub'] ) ) {
+			return 0;
+		}
+		$uid  = (int) $payload['sub'];
+		$user = get_user_by( 'id', $uid );
+		if ( ! $user || user_can( $user, 'manage_options' ) ) {
+			return 0;
+		}
+		if ( empty( $payload['session_token'] ) || ! class_exists( 'WP_Session_Tokens' ) ) {
+			return 0;
+		}
+		if ( ! WP_Session_Tokens::get_instance( $uid )->verify( (string) $payload['session_token'] ) ) {
+			return 0;
+		}
+		return $uid;
 	}
 
 	/* --------------------------------------------------------------------- *
@@ -346,13 +369,23 @@ class Hatch_Auth {
 	private static function success_response( WP_User $user ): WP_REST_Response {
 		$now   = time();
 		$exp   = $now + self::TOKEN_TTL;
-		$token = self::sign_token( array(
-			'iss'   => 'hatch',
-			'iat'   => $now,
-			'exp'   => $exp,
-			'sub'   => (int) $user->ID,
-			'roles' => array_values( (array) $user->roles ),
-		) );
+		$jti   = wp_generate_uuid4();
+
+		// Mint a WP session token so password resets and logouts revoke this JWT (C-3).
+		$session_token = '';
+		if ( class_exists( 'WP_Session_Tokens' ) ) {
+			$session_token = WP_Session_Tokens::get_instance( $user->ID )->create( $exp );
+		}
+
+		$claims = array(
+			'iss'           => 'hatch',
+			'iat'           => $now,
+			'exp'           => $exp,
+			'jti'           => $jti,
+			'sub'           => (int) $user->ID,
+			'session_token' => $session_token,
+		);
+		$token = self::sign_token( $claims );
 		self::set_cookie( $token, $exp );
 
 		// Also mint a real WordPress session cookie (wordpress_logged_in_*).
@@ -446,7 +479,37 @@ class Hatch_Auth {
 		if ( ! isset( $payload['iss'] ) || 'hatch' !== $payload['iss'] ) {
 			return null;
 		}
+		// Explicitly revoked (logout / refresh rotation).
+		if ( ! empty( $payload['jti'] ) ) {
+			$until = get_transient( self::jti_key( (string) $payload['jti'] ) );
+			if ( false !== $until && time() >= (int) $until ) {
+				return null;
+			}
+		}
 		return $payload;
+	}
+
+	private static function jti_key( string $jti ): string {
+		return 'hatch_jti_' . md5( $jti );
+	}
+
+	/**
+	 * Deny-list a token id until the token would have expired anyway.
+	 *
+	 * @param array $payload Verified claims.
+	 * @param int   $grace   Seconds the token stays usable after being revoked (0 = at once).
+	 */
+	private static function revoke_jti( array $payload, int $grace = 0 ): void {
+		if ( empty( $payload['jti'] ) || empty( $payload['exp'] ) ) {
+			return;
+		}
+		$ttl = (int) $payload['exp'] - time();
+		if ( $ttl > 0 ) {
+			// The stored value is the moment the token stops working. With a grace
+			// period a refresh does not sign out the visitor's other open tabs that
+			// are still holding the old token for the next few seconds.
+			set_transient( self::jti_key( (string) $payload['jti'] ), time() + max( 0, $grace ), $ttl );
+		}
 	}
 
 	private static function verify_incoming_token( WP_REST_Request $req ): ?array {
@@ -527,7 +590,7 @@ class Hatch_Auth {
 	 *
 	 * @return string
 	 */
-	private static function client_ip(): string {
+	public static function client_ip(): string {
 		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
 		$ip     = $remote;
 

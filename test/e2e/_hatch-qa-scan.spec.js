@@ -46,7 +46,7 @@ const SECRET = getSecret();
 
 function setTheme(t) {
   execSync(`docker exec qwp_wordpress php -r "require '/var/www/html/wp-load.php'; update_option('hatch_selected_theme', '${t}');"`, { stdio: 'pipe' });
-  if (SECRET) try { execSync(`curl -sf "http://localhost:4321/api/revalidate?secret=${encodeURIComponent(SECRET)}"`, { stdio: 'pipe' }); } catch {}
+  if (SECRET) try { execSync(`curl -sf -H "X-Hatch-Secret: ${SECRET}" "http://localhost:4321/api/revalidate"`, { stdio: 'pipe' }); } catch {}
 }
 
 test('Hatch QA Scan — all themes × all pages', async () => {

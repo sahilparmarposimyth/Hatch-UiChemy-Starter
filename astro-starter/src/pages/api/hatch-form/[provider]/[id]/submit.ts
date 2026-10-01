@@ -9,13 +9,14 @@
  * v0.8 — REST-only forms hydration.
  */
 import type { APIRoute } from 'astro';
+import { clientIpHeaders } from '@/lib/wp-auth';
 
 export const prerender = false;
 
 const WP_API = import.meta.env.WP_API_URL || '';
 const WP_ORIGIN = WP_API.replace(/\/wp-json\/wp\/v2\/?$/, '').replace(/\/+$/, '');
 
-export const POST: APIRoute = async ({ params, request }) => {
+export const POST: APIRoute = async ({ params, request, clientAddress }) => {
   const provider = String(params.provider || '').replace(/[^a-z0-9_-]/gi, '');
   const id = parseInt(String(params.id || '0'), 10);
   if (!provider || !id) {
@@ -35,9 +36,9 @@ export const POST: APIRoute = async ({ params, request }) => {
       headers: {
         'Content-Type': request.headers.get('content-type') || 'application/json',
         Accept: 'application/json',
-        // Forward client IP so plugin spam checks see the real submitter.
-        'X-Forwarded-For': request.headers.get('x-forwarded-for')
-          || request.headers.get('cf-connecting-ip') || '',
+        // The real submitter, taken from the adapter's own client address and not
+        // from a header the visitor could set themselves.
+        ...clientIpHeaders(clientAddress),
       },
       body,
     });

@@ -283,14 +283,12 @@ class Hatch_Revalidate {
 			'event' => isset( $payload['event'] ) ? (string) $payload['event'] : '',
 			'tag'   => isset( $payload['tag'] )   ? (string) $payload['tag']   : '',
 		);
-		$qs = wp_parse_url( $endpoint, PHP_URL_QUERY );
-		$url = add_query_arg(
-			array_merge( array( 'secret' => rawurlencode( $secret ) ), $payload_hint ),
-			$endpoint
-		);
+		$url = add_query_arg( $payload_hint, $endpoint );
 		// v0.50.31 — Record timestamp so Status tab can show
 		// "Last frontend revalidation: 2 minutes ago".
 		update_option( 'hatch_last_revalidate_at', time(), false );
+
+		$origin = untrailingslashit( (string) home_url() );
 
 		wp_remote_get(
 			$url,
@@ -300,6 +298,7 @@ class Hatch_Revalidate {
 				'headers'  => array(
 					'X-Hatch-Version' => HATCH_VERSION,
 					'X-Hatch-Secret'  => $secret,
+					'Origin'          => $origin,
 				),
 			)
 		);

@@ -473,6 +473,7 @@ function Step2Theme({ boot, onBack }) {
 function BrokerForm({ provider, tokenName, tokenUrl, tokenUrlLabel, tokenPagePrompt, adminPostUrl, deployNonce, mountMode = 'root', subPath = '/blog', domain = '' }) {
 	const [token, setToken] = useState('');
 	const [save, setSave]   = useState(true);
+	const [consent, setConsent] = useState(false);
 	const providerLabel = provider === 'cloudflare' ? 'Cloudflare' : 'Vercel';
 
 	const tempSuffix = provider === 'vercel' ? '.vercel.app' : '.workers.dev';
@@ -556,15 +557,29 @@ function BrokerForm({ provider, tokenName, tokenUrl, tokenUrlLabel, tokenPagePro
 					Save token (encrypted) so future redeploys are one-click.
 				</label>
 
+				<label className="hx-checkbox hx-help" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'var(--hx-fg)', cursor: 'pointer', lineHeight: 1.5 }}>
+					<input
+						type="checkbox"
+						name="hatch_deploy_consent"
+						value="1"
+						checked={consent}
+						onChange={(e) => setConsent(e.target.checked)}
+						style={{ marginTop: 3 }}
+					/>
+					<span>
+						I understand that <strong>headless.uichemy.com</strong> will receive my {providerLabel} API token, this site's URL, a temporary read-only Application Password for a dedicated service user, and the revalidation webhook secret. The Application Password is revoked automatically when the deploy finishes.
+					</span>
+				</label>
+
 				<div>
-					<HxBtn type="submit" disabled={!token.trim()}>
+					<HxBtn type="submit" disabled={!token.trim() || !consent}>
 						Build and deploy to {providerLabel}
 						<HxIcon size={13} color="currentColor"><path d="M5 12h14M12 5l7 7-7 7" /></HxIcon>
 					</HxBtn>
 				</div>
 
 				<p className="hx-help" style={{ color: 'var(--hx-subtle)', lineHeight: 1.5, margin: '4px 0 0' }}>
-					Build runs on <span className="hx-mono">hatch.adityaarsharma.com</span>. Tokens pass through in memory only, never written to disk. You'll be sent to a live build log, then back here when the deploy finishes.
+					Build runs on <span className="hx-mono">hatch.adityaarsharma.com</span>. The token is sent to that server to run the deploy. You'll be sent to a live build log, then back here when the deploy finishes.
 				</p>
 			</form>
 		</div>
@@ -965,7 +980,7 @@ function Step3Deploy({ boot, onBack }) {
 											tokenName="vercel_token"
 											tokenUrl={setup.vercelTokenUrl || '#'}
 											tokenUrlLabel="Open Vercel tokens page"
-											tokenPagePrompt="On the Vercel page, click Create Token, give it any name, scope to your personal account, then copy the value."
+											tokenPagePrompt="On the Vercel page, click Create Token. Scope it to the ONE account or team you are deploying to (never all teams) and set the shortest expiry that fits, for example 1 day. Then copy the value. Once the deploy finishes you can delete the token."
 											adminPostUrl={boot.adminPostUrl}
 											deployNonce={deployNonce}
 											mountMode={mountMode}

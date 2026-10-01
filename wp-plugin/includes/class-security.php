@@ -2,7 +2,7 @@
 /**
  * Security hardening for headless WordPress.
  *
- * Each measure is opt-out via wp-admin settings (defaults: ON).
+ * Every measure is opt-IN via wp-admin settings (defaults: OFF, see default_for()).
  *
  * @package Hatch
  */
@@ -32,10 +32,31 @@ class Hatch_Security {
 	}
 
 	/**
+	 * Canonical defaults for security settings.
+	 *
+	 * Defaults must be 0/false across the board so that activating the plugin
+	 * or runtime does not silently break public REST routes or de-index the site.
+	 *
+	 * @param string $key Option key.
+	 * @return int
+	 */
+	public static function default_for( string $key ): int {
+		static $defaults = array(
+			'hatch_security_harden_rest'        => 0,
+			'hatch_security_disable_xmlrpc'    => 0,
+			'hatch_security_block_user_enum'    => 0,
+			'hatch_security_force_noindex'      => 0,
+			'hatch_security_disallow_file_edit' => 0,
+			'hatch_security_send_headers'       => 0,
+		);
+		return isset( $defaults[ $key ] ) ? $defaults[ $key ] : 0;
+	}
+
+	/**
 	 * Wire up filters.
 	 */
 	private function __construct() {
-		if ( get_option( 'hatch_security_harden_rest', 1 ) ) {
+		if ( get_option( 'hatch_security_harden_rest', self::default_for( 'hatch_security_harden_rest' ) ) ) {
 			// v0.50.10 — switched from rest_authentication_errors (which fires
 			// BEFORE WP's lazy auth chain — the $current_user global gets
 			// cached as the empty user before our check even runs) to
@@ -44,19 +65,11 @@ class Hatch_Security {
 			add_filter( 'rest_pre_dispatch', array( $this, 'block_rest_unauthenticated_dispatch' ), 5, 3 );
 			add_filter( 'rest_endpoints', array( $this, 'block_users_endpoint' ) );
 			add_filter( 'rest_pre_dispatch', array( $this, 'block_users_list_for_anon' ), 10, 3 );
-			// v0.50.10 — WP refuses to validate Application Passwords on non-HTTPS
-			// sites by default. That's correct for unknown HTTP visitors but
-			// breaks every reverse-proxy / Docker / RunCloud setup where WP
-			// terminates as HTTP behind the proxy. Enable App Passwords for
-			// REST requests that carry a Basic auth header — the auth itself
-			// is the security control (random unauthenticated visitors are
-			// still blocked by is_user_logged_in() below).
-			add_filter( 'wp_is_application_passwords_available', array( $this, 'enable_app_passwords_for_rest_basic_auth' ), 99 );
 			remove_action( 'xmlrpc_rsd_apis', 'rest_output_rsd' );
 			remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 			remove_action( 'template_redirect', 'rest_output_link_header', 11 );
 		}
-		if ( get_option( 'hatch_security_disable_xmlrpc', 1 ) ) {
+		if ( get_option( 'hatch_security_disable_xmlrpc', self::default_for( 'hatch_security_disable_xmlrpc' ) ) ) {
 			add_filter( 'xmlrpc_enabled', '__return_false' );
 			add_filter( 'wp_headers', array( $this, 'remove_xmlrpc_pingback_header' ) );
 			// 403 the endpoint itself so scanners get a hard reject, matching the
@@ -64,14 +77,14 @@ class Hatch_Security {
 			// accepts the POST and responds with a method-list message.
 			add_action( 'init', array( $this, 'block_xmlrpc_endpoint' ), 1 );
 		}
-		if ( get_option( 'hatch_security_block_user_enum', 1 ) ) {
+		if ( get_option( 'hatch_security_block_user_enum', self::default_for( 'hatch_security_block_user_enum' ) ) ) {
 			add_action( 'init', array( $this, 'block_user_enumeration' ) );
 			// Also block the REST users endpoint independently so the claim holds
 			// even when the REST lock is off (the lock is a separate toggle).
 			add_filter( 'rest_endpoints', array( $this, 'remove_users_endpoint' ) );
 		}
-		// Force CMS subdomain to noindex/nofollow always (this is a headless backend, must never appear in search)
-		if ( get_option( 'hatch_security_force_noindex', 1 ) ) {
+		// Force CMS subdomain to noindex/nofollow (must be explicitly opted in)
+		if ( get_option( 'hatch_security_force_noindex', self::default_for( 'hatch_security_force_noindex' ) ) ) {
 			add_action( 'wp_head', array( $this, 'force_noindex_meta' ), 1 );
 			add_filter( 'wp_robots', array( $this, 'force_noindex_robots' ) );
 			// Emit `Disallow: /` in robots.txt so crawlers honor it before they
@@ -193,35 +206,6 @@ class Hatch_Security {
 	 *
 	 * @return bool
 	 */
-	/**
-	 * v0.50.10 — selective override for wp_is_application_passwords_available.
-	 *
-	 * Behaviour:
-	 *   - HTTPS already-true case: passthrough (no change).
-	 *   - REST request + Basic auth header present: return true so WP processes
-	 *     the credentials. The Basic auth itself is the security control —
-	 *     wrong credentials still fail, no auth still fails.
-	 *   - Everything else: passthrough.
-	 *
-	 * Why this is safe: enabling the check doesn't grant access. It just lets
-	 * WP TRY to validate. Invalid passwords still return WP_Error, which we
-	 * then 401 in block_rest_unauthenticated_dispatch.
-	 *
-	 * @param bool $is_available WP's default (false on non-HTTPS).
-	 * @return bool
-	 */
-	public function enable_app_passwords_for_rest_basic_auth( $is_available ): bool {
-		if ( $is_available ) {
-			return $is_available;
-		}
-		$is_rest = ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			|| ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( (string) $_SERVER['REQUEST_URI'], '/wp-json/' ) );
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$has_basic_auth = ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] );
-		return ( $is_rest && $has_basic_auth ) ? true : $is_available;
-	}
-
 	private function is_public_hatch_route(): bool {
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 		if ( '' === $uri ) {

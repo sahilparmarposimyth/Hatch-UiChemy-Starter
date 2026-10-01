@@ -9,13 +9,13 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import { getFeatures } from '@/lib/features';
 import { WP_API_URL } from 'astro:env/server';
+import { getSessionToken, sessionAuthHeaders } from '@/lib/wp-auth';
 
 export const prerender = false;
 
 const features = await getFeatures();
 const SITE = features.site.url || import.meta.env.PUBLIC_SITE_URL || '';
 const WP_BASE = (WP_API_URL || '').replace(/\/wp\/v2\/?$/, '').replace(/\/$/, '');
-const cookieHeader = Astro.request.headers.get('cookie') || '';
 
 interface HatchUser {
   id: number;
@@ -27,10 +27,10 @@ interface HatchUser {
 
 let user: HatchUser | null = null;
 
-if (WP_BASE && cookieHeader.includes('hatch_jwt=')) {
+if (WP_BASE && getSessionToken(Astro.request)) {
   try {
     const res = await fetch(`${WP_BASE}/hatch/v1/auth/me`, {
-      headers: { Accept: 'application/json', Cookie: cookieHeader },
+      headers: { Accept: 'application/json', ...sessionAuthHeaders(Astro.request) },
       signal: AbortSignal.timeout(10_000),
     });
     if (res.ok) {

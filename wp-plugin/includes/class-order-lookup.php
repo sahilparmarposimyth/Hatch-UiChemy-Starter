@@ -30,30 +30,13 @@ class Hatch_Order_Lookup {
 	}
 
 	/**
-	 * Best-effort client IP. Prefers CF-Connecting-IP (Cloudflare) then the
-	 * first entry of X-Forwarded-For, then REMOTE_ADDR. Returns 'unknown'
-	 * if nothing usable so we still rate-limit anonymous callers together
-	 * rather than opening a bypass.
+	 * Client IP resolved via trusted proxy configuration.
 	 */
 	protected static function client_ip(): string {
-		$candidates = array(
-			isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ? (string) $_SERVER['HTTP_CF_CONNECTING_IP'] : '',
-			isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? (string) $_SERVER['HTTP_X_FORWARDED_FOR'] : '',
-			isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '',
-		);
-		foreach ( $candidates as $raw ) {
-			$raw = trim( $raw );
-			if ( '' === $raw ) {
-				continue;
-			}
-			// XFF may be a comma chain "client, proxy1, proxy2"; take first.
-			$first = trim( strtok( $raw, ',' ) );
-			$ip    = filter_var( $first, FILTER_VALIDATE_IP );
-			if ( $ip ) {
-				return $ip;
-			}
+		if ( class_exists( 'Hatch_Auth' ) ) {
+			return Hatch_Auth::client_ip();
 		}
-		return 'unknown';
+		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
 	}
 
 	/**

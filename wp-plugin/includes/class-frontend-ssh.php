@@ -260,15 +260,18 @@ class Hatch_Frontend_SSH {
 		$pinned = (string) get_option( self::OPT_HOST_FP, '' );
 		if ( '' === $pinned ) {
 			// No pin recorded — force the operator to re-save credentials.
-			return false;
+			return new WP_Error( 'hatch_ssh_no_pin', __( 'No pinned SSH host fingerprint. Re-save credentials to record one.', 'hatch' ), array( 'status' => 409 ) );
 		}
 		$host = (string) get_option( self::OPT_HOST, '' );
 		$port = (int)    get_option( self::OPT_PORT, 22 );
 		$live = self::fetch_host_fingerprint( $host, $port );
 		if ( is_wp_error( $live ) ) {
-			return false;
+			return $live;
 		}
-		return hash_equals( $pinned, (string) $live );
+		if ( ! hash_equals( $pinned, (string) $live ) ) {
+			return new WP_Error( 'hatch_ssh_hostkey_mismatch', __( 'SSH host key changed since setup. Aborting to prevent MITM.', 'hatch' ), array( 'status' => 495, 'pinned' => $pinned, 'live' => (string) $live ) );
+		}
+		return true;
 	}
 
 	/* ----------------------------------------------------------------
@@ -446,8 +449,20 @@ class Hatch_Frontend_SSH {
 			}
 			file_put_contents( $tmp, $cred );
 			chmod( $tmp, 0600 );
-			$auth_ok = @ssh2_auth_pubkey_file( $conn, $user, $tmp . '.pub', $tmp );
+
+			// libssh2 wants the public half as a one-line OpenSSH key, not PEM.
+			$pub_content = self::openssh_public_from_private( $cred );
+			if ( '' === $pub_content ) {
+				@unlink( $tmp );
+				return new WP_Error( 'hatch_ssh_key_unsupported', __( 'This private key type is not supported by the PECL ssh2 backend (RSA only). Install phpseclib3, use a password, or use the UiChemy Agent.', 'hatch' ) );
+			}
+			$tmp_pub = $tmp . '.pub';
+			file_put_contents( $tmp_pub, $pub_content );
+			chmod( $tmp_pub, 0600 );
+
+			$auth_ok = @ssh2_auth_pubkey_file( $conn, $user, $tmp_pub, $tmp );
 			@unlink( $tmp );
+			@unlink( $tmp_pub );
 		} else {
 			$auth_ok = @ssh2_auth_password( $conn, $user, $cred );
 		}
@@ -469,6 +484,37 @@ class Hatch_Frontend_SSH {
 			'code'   => 0, // PECL ssh2 doesn't expose exit code reliably.
 			'ok'     => true,
 		);
+	}
+
+	/**
+	 * Derive an OpenSSH-format public key line ("ssh-rsa AAAA…") from a PEM
+	 * RSA private key. Returns '' for any other key type or on failure.
+	 *
+	 * @param string $pem Private key.
+	 * @return string
+	 */
+	private static function openssh_public_from_private( string $pem ): string {
+		if ( ! function_exists( 'openssl_pkey_get_private' ) || ! function_exists( 'openssl_pkey_get_details' ) ) {
+			return '';
+		}
+		$pk = @openssl_pkey_get_private( $pem );
+		if ( ! $pk ) {
+			return '';
+		}
+		$d = @openssl_pkey_get_details( $pk );
+		if ( empty( $d['rsa']['n'] ) || empty( $d['rsa']['e'] ) ) {
+			return '';
+		}
+		// SSH "mpint": big-endian, with a leading 0x00 if the high bit is set.
+		$mpint = static function ( string $bin ): string {
+			$bin = ltrim( $bin, "\0" );
+			if ( '' !== $bin && ord( $bin[0] ) > 0x7f ) {
+				$bin = "\0" . $bin;
+			}
+			return pack( 'N', strlen( $bin ) ) . $bin;
+		};
+		$blob = pack( 'N', 7 ) . 'ssh-rsa' . $mpint( $d['rsa']['e'] ) . $mpint( $d['rsa']['n'] );
+		return 'ssh-rsa ' . base64_encode( $blob ) . " hatch\n";
 	}
 
 	/**

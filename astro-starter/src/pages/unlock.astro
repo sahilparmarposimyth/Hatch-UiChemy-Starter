@@ -1,0 +1,74 @@
+---
+/**
+ * Password prompt for a protected post or page.
+ *
+ * Visitors land here from the content routes when WordPress says a post needs
+ * a password. The form posts to /api/unlock, which stores a per-post token in
+ * an HttpOnly cookie, then sends the visitor back to where they were going.
+ */
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getFeatures } from '@/lib/features';
+import { safeNextPath } from '@/lib/unlock';
+
+export const prerender = false;
+
+const features = await getFeatures();
+const SITE = features.site.url || import.meta.env.PUBLIC_SITE_URL || '';
+const url = new URL(Astro.request.url);
+const slug = (url.searchParams.get('slug') || '').slice(0, 200);
+const next = safeNextPath(url.searchParams.get('next'), '/');
+if (!slug) return Astro.redirect('/', 302);
+// A password prompt has no business in search results.
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+Astro.response.headers.set('Cache-Control', 'no-store');
+---
+
+<PageLayout title="Password required" description="This content is password protected." canonical={`${SITE}/unlock`}>
+  <main class="mx-auto px-5 sm:px-8 py-16 sm:py-20" style="max-width: 440px">
+    <header class="mb-8">
+      <h1 class="text-3xl font-semibold tracking-tight">Password required</h1>
+      <p class="mt-2 text-[14px] text-hatch-fg-muted">This content is protected. Enter the password to continue.</p>
+    </header>
+
+    <div id="hatch-unlock-error" role="alert" hidden
+      style="margin-bottom:1rem;padding:0.75rem 1rem;border-radius:6px;border:1px solid #f5c2c7;background:#fff5f6;color:#842029;font-size:13.5px;line-height:1.4;"></div>
+
+    <form id="hatch-unlock-form" class="flex flex-col gap-4" data-slug={slug} data-next={next}>
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[13px] font-medium">Password</span>
+        <input type="password" name="password" required autocomplete="off" autofocus
+          class="rounded-md border border-hatch-border bg-hatch-bg px-3 py-2 text-[14px]" />
+      </label>
+      <button type="submit" class="rounded-md bg-hatch-primary px-4 py-2 text-[14px] font-medium text-white">Unlock</button>
+    </form>
+
+    <script is:inline>
+      (function () {
+        var form = document.getElementById('hatch-unlock-form');
+        var errorBox = document.getElementById('hatch-unlock-error');
+        if (!form) return;
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          errorBox.hidden = true;
+          var btn = form.querySelector('button[type="submit"]');
+          if (btn) btn.disabled = true;
+          try {
+            var res = await fetch('/api/unlock', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ slug: form.dataset.slug, password: form.elements.password.value }),
+            });
+            var body = await res.json().catch(function () { return {}; });
+            if (!res.ok || !body.ok) throw new Error(body.message || 'Incorrect password.');
+            window.location.href = form.dataset.next || '/';
+          } catch (err) {
+            errorBox.textContent = (err && err.message) || 'Incorrect password.';
+            errorBox.hidden = false;
+            if (btn) btn.disabled = false;
+          }
+        });
+      })();
+    </script>
+  </main>
+</PageLayout>

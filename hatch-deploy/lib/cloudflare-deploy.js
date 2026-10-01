@@ -28,6 +28,7 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, mkdir, rm, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { buildEnv } from './security.js';
 import { imgAllowedHosts } from './img-hosts.js';
 
 /*
@@ -124,7 +125,9 @@ function runCmd(cmd, args, opts = {}) {
 		const proc = spawn(cmd, args, {
 			stdio: ['ignore', 'pipe', 'pipe'],
 			cwd: opts.cwd,
-			env: { ...process.env, ...(opts.env || {}) },
+			// Allowlisted environment, NOT the broker's own: npm install runs third-party
+			// lifecycle scripts, which must never see the broker's secrets (lib/security.js).
+			env: buildEnv(opts.env),
 		});
 		let stdout = '';
 		let stderr = '';
@@ -350,7 +353,7 @@ export async function deployToCloudflare({ ticket, cfToken, onProgress }) {
 
 		const deployRes = await runCmd('npx', [
 			'--yes',
-			'wrangler@latest',
+			`wrangler@${process.env.HATCH_WRANGLER_VERSION || 'latest'}`, // set HATCH_WRANGLER_VERSION to pin
 			'deploy',
 			'--name', projectName,
 		], {

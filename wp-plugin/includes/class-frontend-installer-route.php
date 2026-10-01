@@ -128,28 +128,20 @@ class Hatch_Frontend_Installer_Route {
 		$branch  = (string) get_option( Hatch_Frontend_Agent::OPT_GIT_BRANCH, 'main' );
 		$pm2name = (string) get_option( 'hatch_agent_pm2_name', 'hatch-frontend' );
 
+		// Every free-text value is base64-encoded: the template decodes it into a
+		// shell variable and validates it, so no value can be interpreted as shell
+		// syntax whatever it contains. (The port is cast to int.)
 		$replacements = array(
-			'{{HATCH_SECRET}}'    => self::escape_for_shell_double_quoted( $secret ),
-			'{{HATCH_PORT}}'      => (string) $port,
-			'{{HATCH_WORKDIR}}'   => self::escape_for_shell_double_quoted( $workdir ),
-			'{{HATCH_WP_URL}}'    => self::escape_for_shell_double_quoted( (string) home_url() ),
-			'{{HATCH_GIT_REPO}}'  => self::escape_for_shell_double_quoted( $repo ),
-			'{{HATCH_BRANCH}}'    => self::escape_for_shell_double_quoted( $branch ),
-			'{{HATCH_PM2_NAME}}'  => self::escape_for_shell_double_quoted( $pm2name ),
-			'{{AGENT_JS_BASE64}}' => base64_encode( $agent_js ),
+			'{{HATCH_SECRET_B64}}'   => base64_encode( $secret ),
+			'{{HATCH_PORT}}'         => (string) $port,
+			'{{HATCH_WORKDIR_B64}}'  => base64_encode( $workdir ),
+			'{{HATCH_WP_URL_B64}}'   => base64_encode( (string) home_url() ),
+			'{{HATCH_GIT_REPO_B64}}' => base64_encode( $repo ),
+			'{{HATCH_BRANCH_B64}}'   => base64_encode( $branch ),
+			'{{HATCH_PM2_NAME_B64}}' => base64_encode( $pm2name ),
+			'{{AGENT_JS_BASE64}}'    => base64_encode( $agent_js ),
 		);
 
 		return strtr( $template, $replacements );
-	}
-
-	/**
-	 * Defang for double-quoted shell context (template uses "{{X}}").
-	 *
-	 * @param string $v Value to escape.
-	 * @return string
-	 */
-	private static function escape_for_shell_double_quoted( string $v ): string {
-		// Forbid characters that could break out of a "..." context.
-		return str_replace( array( '"', '`', '$', '\\' ), array( '\"', '\`', '\$', '\\\\' ), $v );
 	}
 }

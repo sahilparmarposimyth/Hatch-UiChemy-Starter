@@ -32,6 +32,19 @@ class Hatch_Deploy_Broker {
 	const TICKET_TRANSIENT_PREFIX = 'hatch_pending_ticket_';
 	const NOTICE_TRANSIENT        = 'hatch_deploy_notice_';
 
+	/**
+	 * Name prefix of a deploy credential that has NOT been confirmed yet. Only
+	 * credentials still carrying it are ever revoked by the timeout / failure paths.
+	 */
+	const PENDING_PREFIX = 'Hatch (Deploy: ';
+
+	/**
+	 * Name prefix once a deploy succeeded. The deployed frontend keeps using this
+	 * read-only credential at runtime (menus, redirects, SEO), so a successful
+	 * deploy must KEEP it. It is renamed, never deleted.
+	 */
+	const ADOPTED_PREFIX = 'Hatch Frontend (';
+
 	private static $instance = null;
 
 	public static function instance(): Hatch_Deploy_Broker {
@@ -43,12 +56,26 @@ class Hatch_Deploy_Broker {
 
 	private function __construct() {
 		add_action( 'admin_post_hatch_start_deploy',    array( $this, 'handle_start_deploy' ) );
+		add_action( 'hatch_revoke_deploy_password',     array( __CLASS__, 'revoke_by_ids' ), 10, 2 );
 		add_action( 'admin_post_hatch_deploy_callback', array( $this, 'handle_deploy_callback' ) );
+		add_action( 'rest_api_init',                    array( $this, 'register_routes' ) );
 	}
 
 	/**
 	 * Base URL of the broker. Filterable so self-hosters can point at their
 	 * own deployment of hatch-deploy/.
+	 *
+	 * DATA FLOW (audit H-5) — a deploy sends this server, over HTTPS: the
+	 * Cloudflare/Vercel API token the user pasted, the site URL, a throw-away
+	 * read-only Application Password for the `uichemy-deploy` service user, and
+	 * the revalidation webhook secret. The default broker is operated by POSIMYTH
+	 * at headless.uichemy.com. To keep all of it on infrastructure you control,
+	 * run your own broker and set, in wp-config.php:
+	 *
+	 *     define( 'HATCH_DEPLOY_BROKER_URL', 'https://deploy.example.com' );
+	 *
+	 * (or use the `hatch/deploy_broker_base_url` filter). Prefer a deploy token
+	 * scoped to a single project/account resource over a full account token.
 	 */
 	public static function base_url(): string {
 		$base = defined( 'HATCH_DEPLOY_BROKER_URL' ) ? HATCH_DEPLOY_BROKER_URL : self::DEFAULT_BASE;
@@ -110,11 +137,18 @@ class Hatch_Deploy_Broker {
 			Hatch_Credential_Store::store( $provider, $token );
 		}
 
-		// Generate (or reuse) a fresh App Password for this deploy.
-		if ( class_exists( 'Hatch_App_Password_Helper' ) ) {
-			Hatch_App_Password_Helper::generate_and_stash( 'Hatch (Deploy: ' . $provider . ')' );
+		// H-5: the credentials leave this server, so require explicit consent that
+		// names what is sent and to whom (the wizard shows the same wording).
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_POST['hatch_deploy_consent'] ) || '1' !== (string) $_POST['hatch_deploy_consent'] ) {
+			wp_die( esc_html__( 'Please confirm what will be sent to the deploy server before continuing.', 'hatch' ), '', array( 'response' => 400 ) );
 		}
-		$fresh = class_exists( 'Hatch_App_Password_Helper' ) ? Hatch_App_Password_Helper::pop_fresh_password() : null;
+
+		// H-5: mint a throw-away Application Password on a read-only service user,
+		// never on the current administrator. Revoked when the deploy ends.
+		$fresh = class_exists( 'Hatch_App_Password_Helper' )
+			? Hatch_App_Password_Helper::create_service_credential( 'Hatch (Deploy: ' . $provider . ')' )
+			: null;
 		if ( ! $fresh || empty( $fresh['password'] ) ) {
 			wp_die( esc_html__( 'Could not generate Application Password. Check user permissions.', 'hatch' ), '', array( 'response' => 500 ) );
 		}
@@ -205,12 +239,23 @@ class Hatch_Deploy_Broker {
 			);
 		}
 
-		// Stash ticket for callback verification.
+		// Stash ticket and temporary app password metadata for callback verification & cleanup.
 		set_transient(
 			self::TICKET_TRANSIENT_PREFIX . get_current_user_id(),
-			(string) $data['ticket'],
+			array(
+				'ticket'  => (string) $data['ticket'],
+				'pw_uuid' => ( is_array( $fresh ) && isset( $fresh['uuid'] ) ) ? (string) $fresh['uuid'] : '',
+				'user_id' => ( is_array( $fresh ) && isset( $fresh['user_id'] ) ) ? (int) $fresh['user_id'] : 0,
+			),
 			15 * MINUTE_IN_SECONDS
 		);
+
+		// H-5: if the callback never arrives (closed tab, failed build), the
+		// password must not outlive the ticket. Revoke it shortly after expiry.
+		if ( is_array( $fresh ) && ! empty( $fresh['uuid'] ) && ! empty( $fresh['user_id'] ) ) {
+			update_option( 'uich_hatch_deploy_pending', 1, false ); // lets cron boot the runtime to run the revoke.
+			wp_schedule_single_event( time() + 16 * MINUTE_IN_SECONDS, 'hatch_revoke_deploy_password', array( (int) $fresh['user_id'], (string) $fresh['uuid'] ) );
+		}
 
 		// Send the browser to the broker's live-log page.
 		$start_url = self::base_url() . '/deploy/' . $provider . '/start?ticket=' . rawurlencode( (string) $data['ticket'] );
@@ -233,15 +278,23 @@ class Hatch_Deploy_Broker {
 		$result   = isset( $_GET['hatch_result'] )  ? sanitize_key( wp_unslash( (string) $_GET['hatch_result'] ) )   : '';
 		// phpcs:enable
 
+		$pending  = get_transient( self::TICKET_TRANSIENT_PREFIX . get_current_user_id() );
+		$expected = is_array( $pending ) ? ( $pending['ticket'] ?? '' ) : (string) $pending;
+
 		if ( 'success' !== $result || '' === $ticket || ! in_array( $provider, array( 'vercel', 'cloudflare' ), true ) ) {
+			self::revoke_deploy_password( $pending );
+			delete_transient( self::TICKET_TRANSIENT_PREFIX . get_current_user_id() );
 			$this->redirect_with_notice( 'error', __( 'Deploy callback was malformed.', 'hatch' ) );
 		}
 
 		// Verify ticket matches the one we issued.
-		$expected = (string) get_transient( self::TICKET_TRANSIENT_PREFIX . get_current_user_id() );
 		if ( '' === $expected || ! hash_equals( $expected, $ticket ) ) {
+			self::revoke_deploy_password( $pending );
+			delete_transient( self::TICKET_TRANSIENT_PREFIX . get_current_user_id() );
 			$this->redirect_with_notice( 'error', __( 'Deploy ticket did not match the pending request.', 'hatch' ) );
 		}
+		// Success: the deployed site now runs on this credential. Keep it.
+		self::adopt_deploy_password( $pending, $provider );
 		delete_transient( self::TICKET_TRANSIENT_PREFIX . get_current_user_id() );
 
 		// Ask broker for the final project URL via /status (ticket still alive
@@ -331,5 +384,130 @@ class Hatch_Deploy_Broker {
 		);
 		wp_safe_redirect( admin_url( 'admin.php?page=hatch#connection' ) );
 		exit;
+	}
+
+	/**
+	 * Cron target: revoke a deploy password by ids (timeout path).
+	 *
+	 * @param int    $user_id Service user.
+	 * @param string $uuid    Application Password uuid.
+	 * @return void
+	 */
+	public static function revoke_by_ids( $user_id, $uuid ): void {
+		if ( $user_id && '' !== (string) $uuid && class_exists( 'WP_Application_Passwords' ) ) {
+			// Revoke ONLY a credential that was never confirmed. If the deploy
+			// succeeded it was renamed to ADOPTED_PREFIX and a live site depends on it.
+			foreach ( (array) WP_Application_Passwords::get_user_application_passwords( (int) $user_id ) as $item ) {
+				if ( isset( $item['uuid'], $item['name'] ) && (string) $uuid === (string) $item['uuid'] && 0 === strpos( (string) $item['name'], self::PENDING_PREFIX ) ) {
+					WP_Application_Passwords::delete_application_password( (int) $user_id, (string) $uuid );
+				}
+			}
+		}
+		delete_option( 'uich_hatch_deploy_pending' );
+	}
+
+	/**
+	 * A deploy succeeded: keep the credential, but rename it so the timeout
+	 * revoke leaves it alone, and cancel that scheduled revoke.
+	 *
+	 * @param array|mixed $pending  Pending ticket data.
+	 * @param string      $provider vercel|cloudflare.
+	 * @return void
+	 */
+	private static function adopt_deploy_password( $pending, string $provider ): void {
+		if ( ! is_array( $pending ) || empty( $pending['pw_uuid'] ) || empty( $pending['user_id'] ) || ! class_exists( 'WP_Application_Passwords' ) ) {
+			return;
+		}
+		WP_Application_Passwords::update_application_password(
+			(int) $pending['user_id'],
+			(string) $pending['pw_uuid'],
+			array( 'name' => self::ADOPTED_PREFIX . $provider . ')' )
+		);
+		wp_clear_scheduled_hook( 'hatch_revoke_deploy_password', array( (int) $pending['user_id'], (string) $pending['pw_uuid'] ) );
+		delete_option( 'uich_hatch_deploy_pending' );
+	}
+
+	/**
+	 * REST: the broker tells this site, server to server, that a build ended.
+	 *
+	 * The browser callback above is the normal path, but a closed tab never
+	 * fires it. Without this, a SUCCESSFUL deploy would have its credential
+	 * revoked by the timeout (breaking the live site) and a FAILED one would
+	 * leave a live credential behind. Authenticated by an HMAC over the
+	 * ticket/status/provider/timestamp with the webhook secret that only this
+	 * site and the broker know; stale (> 5 min) or forged requests are refused.
+	 *
+	 * @return void
+	 */
+	public function register_routes(): void {
+		register_rest_route(
+			'hatch/v1',
+			'/deploy/finished',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'route_deploy_finished' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function route_deploy_finished( $request ) {
+		$ticket   = (string) $request->get_param( 'ticket' );
+		$status   = (string) $request->get_param( 'status' );
+		$provider = sanitize_key( (string) $request->get_param( 'provider' ) );
+		$ts       = (string) $request->get_param( 'ts' );
+		$sig      = (string) $request->get_param( 'sig' );
+		$secret   = (string) get_option( 'hatch_webhook_secret', '' );
+
+		$forbidden = new WP_Error( 'hatch_deploy_forbidden', __( 'Not allowed.', 'hatch' ), array( 'status' => 403 ) );
+		if ( '' === $secret || '' === $ticket || '' === $sig || ! ctype_digit( $ts ) || abs( time() - (int) $ts ) > 300 ) {
+			return $forbidden;
+		}
+		if ( ! in_array( $status, array( 'success', 'failed' ), true ) || ! in_array( $provider, array( 'vercel', 'cloudflare' ), true ) ) {
+			return $forbidden;
+		}
+		$expected = hash_hmac( 'sha256', 'finished|' . $ticket . '|' . $status . '|' . $provider . '|' . $ts, $secret );
+		if ( ! hash_equals( $expected, $sig ) ) {
+			return $forbidden;
+		}
+
+		$kept    = 0;
+		$revoked = 0;
+		$user    = class_exists( 'Hatch_App_Password_Helper' ) ? get_user_by( 'login', Hatch_App_Password_Helper::SERVICE_USER_LOGIN ) : false;
+		if ( $user && class_exists( 'WP_Application_Passwords' ) ) {
+			foreach ( (array) WP_Application_Passwords::get_user_application_passwords( (int) $user->ID ) as $item ) {
+				if ( empty( $item['uuid'] ) || empty( $item['name'] ) || 0 !== strpos( (string) $item['name'], self::PENDING_PREFIX ) ) {
+					continue;
+				}
+				wp_clear_scheduled_hook( 'hatch_revoke_deploy_password', array( (int) $user->ID, (string) $item['uuid'] ) );
+				if ( 'success' === $status ) {
+					WP_Application_Passwords::update_application_password( (int) $user->ID, (string) $item['uuid'], array( 'name' => self::ADOPTED_PREFIX . $provider . ')' ) );
+					$kept++;
+				} else {
+					WP_Application_Passwords::delete_application_password( (int) $user->ID, (string) $item['uuid'] );
+					$revoked++;
+				}
+			}
+		}
+		delete_option( 'uich_hatch_deploy_pending' );
+		return new WP_REST_Response( array( 'ok' => true, 'kept' => $kept, 'revoked' => $revoked ), 200 );
+	}
+
+	/**
+	 * Revoke the temporary application password created for the deploy.
+	 *
+	 * @param array|mixed $pending Pending ticket data.
+	 * @return void
+	 */
+	private static function revoke_deploy_password( $pending ): void {
+		if ( is_array( $pending ) && ! empty( $pending['pw_uuid'] ) && ! empty( $pending['user_id'] ) ) {
+			if ( class_exists( 'WP_Application_Passwords' ) ) {
+				WP_Application_Passwords::delete_application_password( (int) $pending['user_id'], (string) $pending['pw_uuid'] );
+			}
+		}
 	}
 }
